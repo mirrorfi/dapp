@@ -1,11 +1,54 @@
 "use client";
 
-import { Button } from "@/components/ui/button"
-import { StrategyExecutionDialog } from "@/components/strategy-execution-dialog"
-import Link from "next/link"
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui"
+import { Button } from "@/components/ui/button";
+import { StrategyExecutionDialog } from "@/components/strategy-execution-dialog";
+import Link from "next/link";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { TermsOfService } from "@/components/TermsOfService";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { useEffect, useState } from "react";
 
 export default function Home() {
+  const { connected, publicKey } = useWallet();
+  const [hasSignedTerms, setHasSignedTerms] = useState(false);
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    const checkLocalSignature = () => {
+      if (!publicKey) {
+        setChecking(false);
+        return;
+      }
+
+      const storedSignatures = localStorage.getItem("termsSignatures") || "{}";
+      const signatures = JSON.parse(storedSignatures);
+      setHasSignedTerms(!!signatures[publicKey.toBase58()]);
+      setChecking(false);
+    };
+
+    checkLocalSignature();
+  }, [publicKey]);
+
+  const handleTermsSigned = () => {
+    setHasSignedTerms(true);
+  };
+
+  if (checking) {
+    return (
+      <main className="flex min-h-screen flex-col items-center justify-center p-24 bg-gradient-to-br from-gray-900 via-black to-gray-800 text-foreground">
+        <div>Loading...</div>
+      </main>
+    );
+  }
+
+  if (connected && !hasSignedTerms) {
+    return (
+      <main className="flex min-h-screen flex-col items-center justify-center p-24 bg-gradient-to-br from-gray-900 via-black to-gray-800 text-foreground">
+        <TermsOfService onSign={handleTermsSigned} />
+      </main>
+    );
+  }
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-24 bg-gradient-to-br from-gray-900 via-black to-gray-800 text-foreground">
       <WalletMultiButton />
@@ -56,5 +99,5 @@ export default function Home() {
         </div>
       </div>
     </main>
-  )
+  );
 }
