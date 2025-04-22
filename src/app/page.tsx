@@ -1,10 +1,14 @@
+"use client";
+
 import { Button } from "@/components/ui/button"
 import { StrategyExecutionDialog } from "@/components/strategy-execution-dialog"
 import Link from "next/link"
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui"
 
 export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-24 bg-gradient-to-br from-gray-900 via-black to-gray-800 text-foreground">
+      <WalletMultiButton />
       <div className="max-w-3xl w-full text-center space-y-12">
         {/* Logo */}
         <img
