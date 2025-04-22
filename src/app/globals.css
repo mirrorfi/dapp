@@ -1,175 +1,305 @@
 @import "tailwindcss";
 @config "../../tailwind.config.ts";
 
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+:root {
+  --background: 230 35% 7%;
+  --foreground: 210 40% 98%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+  --card: 229 45% 10%;
+  --card-foreground: 210 40% 98%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
+  --popover: 229 45% 10%;
+  --popover-foreground: 210 40% 98%;
 
-    --primary: 267 100% 64%;
-    --primary-foreground: 0 0% 100%;
+  --primary: 217 91% 60%;
+  --primary-foreground: 210 40% 98%;
 
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
+  --secondary: 180 100% 50%;
+  --secondary-foreground: 210 40% 98%;
 
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
+  --muted: 217 33% 17%;
+  --muted-foreground: 215 20% 65%;
 
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
+  --accent: 263 70% 50%;
+  --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
+  --destructive: 0 62% 30%;
+  --destructive-foreground: 210 40% 98%;
 
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 267 100% 64%;
+  --border: 217 33% 17%;
+  --input: 217 33% 17%;
+  --ring: 224 76% 48%;
 
-    --radius: 1rem;
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: 230 35% 7%;
+  --foreground: 210 40% 98%;
+
+  --card: 229 45% 10%;
+  --card-foreground: 210 40% 98%;
+
+  --popover: 229 45% 10%;
+  --popover-foreground: 210 40% 98%;
+
+  --primary: 217 91% 60%;
+  --primary-foreground: 210 40% 98%;
+
+  --secondary: 180 100% 50%;
+  --secondary-foreground: 210 40% 98%;
+
+  --muted: 217 33% 17%;
+  --muted-foreground: 215 20% 65%;
+
+  --accent: 263 70% 50%;
+  --accent-foreground: 210 40% 98%;
+
+  --destructive: 0 62% 30%;
+  --destructive-foreground: 210 40% 98%;
+
+  --border: 217 33% 17%;
+  --input: 217 33% 17%;
+  --ring: 224 76% 48%;
+}
+
+/* Custom node styles for React Flow */
+.react-flow__node {
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(0, 200, 255, 0.4);
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+}
+
+.react-flow__node:hover {
+  box-shadow: 0 0 25px rgba(0, 200, 255, 0.7), 0 0 40px rgba(0, 200, 255, 0.3);
+  transform: translateY(-2px) scale(1.02);
+}
+
+.react-flow__node-default {
+  background: rgba(15, 23, 42, 0.8);
+  color: white;
+  border: 1px solid rgba(59, 130, 246, 0.5);
+  backdrop-filter: blur(10px);
+}
+
+.react-flow__node-input {
+  background: rgba(12, 45, 72, 0.8);
+  color: white;
+  border: 1px solid rgba(59, 130, 246, 0.5);
+}
+
+.react-flow__node-output {
+  background: rgba(15, 61, 86, 0.8);
+  color: white;
+  border: 1px solid rgba(59, 130, 246, 0.5);
+}
+
+.react-flow__edge-path {
+  stroke: rgba(0, 200, 255, 0.7);
+  stroke-dasharray: 5;
+  stroke-width: 2;
+  filter: drop-shadow(0 0 8px rgba(0, 200, 255, 0.5));
+}
+
+.react-flow__handle {
+  background: #00c8ff;
+  width: 8px;
+  height: 8px;
+  border: none;
+  box-shadow: 0 0 10px rgba(0, 200, 255, 0.7);
+}
+
+.react-flow__handle:hover {
+  background: #00eaff;
+  box-shadow: 0 0 15px rgba(0, 200, 255, 0.9);
+}
+
+.react-flow__attribution {
+  background: transparent;
+  color: #64748b;
+}
+
+.node-deposit {
+  background: linear-gradient(135deg, rgba(12, 45, 72, 0.9), rgba(10, 36, 57, 0.9));
+  border: 1px solid rgba(0, 200, 255, 0.5);
+  box-shadow: inset 0 0 20px rgba(0, 200, 255, 0.2);
+}
+
+.node-stake {
+  background: linear-gradient(135deg, rgba(15, 61, 86, 0.9), rgba(12, 45, 72, 0.9));
+  border: 1px solid rgba(0, 255, 200, 0.5);
+  box-shadow: inset 0 0 20px rgba(0, 255, 200, 0.2);
+}
+
+.node-swap {
+  background: linear-gradient(135deg, rgba(15, 61, 86, 0.9), rgba(12, 45, 72, 0.9));
+  border: 1px solid rgba(0, 255, 200, 0.5);
+  box-shadow: inset 0 0 20px rgba(0, 255, 200, 0.2);
+}
+
+.node-apr {
+  background: linear-gradient(135deg, rgba(45, 27, 78, 0.9), rgba(31, 18, 53, 0.9));
+  border: 1px solid rgba(139, 92, 246, 0.5);
+  box-shadow: inset 0 0 20px rgba(139, 92, 246, 0.2);
+}
+
+.node-yield {
+  background: linear-gradient(135deg, rgba(15, 61, 86, 0.9), rgba(12, 45, 72, 0.9));
+  border: 1px solid rgba(59, 130, 246, 0.5);
+  box-shadow: inset 0 0 20px rgba(59, 130, 246, 0.2);
+}
+
+.custom-node {
+  padding: 16px;
+  border-radius: 12px;
+  min-width: 180px;
+  position: relative;
+  overflow: hidden;
+}
+
+.custom-node::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(0, 200, 255, 0.8), transparent);
+  animation: scanline 2s linear infinite;
+}
+
+@keyframes scanline {
+  0% {
+    transform: translateX(-100%);
   }
-
-  .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-
-    --primary: 267 100% 64%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 267 100% 64%;
+  100% {
+    transform: translateX(100%);
   }
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-
-  body {
-    @apply bg-background text-foreground;
-    font-family: "Geist", sans-serif;
-  }
-
-  /* Smooth scrolling */
-  html {
-    scroll-behavior: smooth;
-  }
-
-  /* Better focus outlines */
-  :focus-visible {
-    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
-  }
+.custom-node-header {
+  font-weight: bold;
+  margin-bottom: 10px;
+  font-size: 1.1rem;
+  text-shadow: 0 0 10px rgba(0, 200, 255, 0.5);
+  letter-spacing: 0.5px;
 }
 
-/* Custom utility classes */
-@layer utilities {
-  .glass {
-    @apply bg-white/70 dark:bg-black/70 backdrop-blur-lg border border-white/20 dark:border-black/20;
-  }
-
-  .text-balance {
-    text-wrap: balance;
-  }
+.custom-node-content {
+  font-size: 0.85rem;
+  opacity: 0.9;
+  letter-spacing: 0.3px;
 }
 
-/* Animations */
-.animate-in {
-  animation-duration: 350ms;
-  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+body {
+  font-family: 'Inter', 'Roboto', 'SF Pro Display', Arial, sans-serif;
+  background-image: 
+    radial-gradient(circle at 10% 20%, rgba(0, 100, 255, 0.03) 0%, transparent 20%),
+    radial-gradient(circle at 90% 80%, rgba(100, 0, 255, 0.03) 0%, transparent 20%);
+  position: relative;
+  overflow-x: hidden;
 }
 
-.fade-in {
-  animation-name: fade-in;
+/* Futuristic UI Elements */
+button, 
+.btn,
+[class*="button"] {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
 }
 
-.slide-in-from-bottom {
-  animation-name: slide-in-from-bottom;
+button::after,
+.btn::after,
+[class*="button"]::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--secondary), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.5s ease;
 }
 
-@keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+button:hover::after,
+.btn:hover::after,
+[class*="button"]:hover::after {
+  transform: translateX(100%);
 }
 
-@keyframes slide-in-from-bottom {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* Card hover effects */
+.card,
+[class*="card"] {
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
 }
 
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+.card::before,
+[class*="card"]::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(0, 200, 255, 0.1), transparent 80%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.card:hover::before,
+[class*="card"]:hover::before {
+  opacity: 1;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* Glowing text */
+h1, h2, h3 {
+  position: relative;
+  text-shadow: 0 0 10px rgba(0, 200, 255, 0.3);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+/* Animated border for important elements */
+.animated-border {
+  position: relative;
 }
 
-.card {
-  padding: 2em;
+.animated-border::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid transparent;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent), var(--primary)) border-box;
+  -webkit-mask: 
+    linear-gradient(#fff 0 0) padding-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  background-size: 300% 100%;
+  animation: borderAnimation 4s linear infinite;
 }
 
-.read-the-docs {
-  color: #888;
+@keyframes borderAnimation {
+  0% { background-position: 0% 0; }
+  100% { background-position: 300% 0; }
 }
+
+/* Futuristic scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.6);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, var(--primary), var(--secondary));
+  border-radius: 4px;
+}
+
