@@ -153,9 +153,8 @@
 .custom-node {
   padding: 16px;
   border-radius: 12px;
-  min-width: 180px;
+  min-width: 200px;
   position: relative;
-  overflow: hidden;
 }
 
 .custom-node::before {
@@ -166,7 +165,6 @@
   right: 0;
   height: 2px;
   background: linear-gradient(90deg, transparent, rgba(0, 200, 255, 0.8), transparent);
-  animation: scanline 2s linear infinite;
 }
 
 @keyframes scanline {

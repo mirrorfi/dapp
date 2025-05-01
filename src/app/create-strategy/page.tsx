@@ -16,6 +16,7 @@ import ReactFlow, {
 } from "reactflow"
 import "reactflow/dist/style.css"
 
+import Image from "next/image"
 import { CreateNodeDialog } from "@/components/create-node-dialog"
 import { CustomNode } from "@/components/custom-node"
 
@@ -135,8 +136,8 @@ const CreateStrategyPage = () => {
     <div className="flex flex-col h-screen bg-background text-foreground">
       <header className="flex items-center justify-between p-6 bg-card border-b border-border">
         <div className="flex items-center space-x-4">
-          <img src="/SVG/MirrorFi-Logo-Blue.svg" alt="MirrorFi Logo" className="h-8 w-auto" />
-          <h1 className="text-xl font-semibold">Create Yield Strategy</h1>
+        <Image src="/SVG/MirrorFi-Logo-Blue.svg" alt="MirrorFi Logo" width={32} height={32} className="h-8 w-auto" />
+        <h1 className="text-xl font-semibold">Create Yield Strategy</h1>
         </div>
       </header>
 
