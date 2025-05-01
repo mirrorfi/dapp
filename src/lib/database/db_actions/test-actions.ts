@@ -1,21 +1,35 @@
-"use server"
+"use server";
 
-import { connectToDatabase } from "../index"
-import Test from "../models/test-model";
-import { handleError } from "../../utils";
+import {connectToDatabase} from "@/lib/database/index";
+import Strategy from "@/lib/database/models/strategy";
 import { revalidatePath } from "next/cache";
 
-export const getAllTest = async () => {
-    try {
-      await connectToDatabase();
-  
-      const contacts = await Test.find();
+export async function getStrategies() {
+  await connectToDatabase();
+  const strategies = await Strategy.find({}).sort({ createdAt: -1 });
+  return JSON.parse(JSON.stringify(strategies));
+}
 
-      console.log("Test fetch")
-  
-      return JSON.parse(JSON.stringify(contacts));
-    } catch (error) {
-      console.error("Error fetching Test:", error);
-      handleError(error);
-    }
+export async function getStrategy(id: string) {
+  await connectToDatabase();
+  const strategy = await Strategy.findById(id);
+
+  if (!strategy) {
+    throw new Error("Strategy not found");
+  }
+
+  return JSON.parse(JSON.stringify(strategy));
+}
+
+export async function createStrategy(strategyData: any) {
+  await connectToDatabase();
+
+  // Validate required fields
+  if (!strategyData.nodes || !strategyData.edges) {
+    throw new Error("Missing required fields: nodes and edges");
+  }
+
+  const strategy = await Strategy.create(strategyData);
+  revalidatePath("/strategy-dashboard");
+  return JSON.parse(JSON.stringify(strategy));
 }

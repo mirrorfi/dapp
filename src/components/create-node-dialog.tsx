@@ -108,8 +108,11 @@ export function CreateNodeDialog({ onCreateNode, isOpen, onClose }: CreateNodeDi
               {tokenOptions.map((token) => (
                 <Button
                   key={token}
-                  variant={selectedOption === token ? "default" : "outline"}
-                  onClick={() => setSelectedOption(token)}
+                  variant={"outline"}
+                  className={selectedOption === token ? "bg-accent text-accent-foreground" : ""}
+                  onClick={() =>
+                  setSelectedOption((prev) => (prev === token ? null : token))
+                  }
                 >
                   {token}
                 </Button>
@@ -119,7 +122,7 @@ export function CreateNodeDialog({ onCreateNode, isOpen, onClose }: CreateNodeDi
         </div>
         {nodeType && selectedOption && (
           <DialogFooter>
-            <Button onClick={handleConfirm}>Confirm</Button>
+            <Button onClick={handleConfirm} variant={"outline"}>Confirm</Button>
           </DialogFooter>
         )}
       </DialogContent>

@@ -6,7 +6,6 @@ import ReactFlow, {
   addEdge,
   useNodesState,
   useEdgesState,
-  Controls,
   Background,
   type Node,
   type Edge,
@@ -17,8 +16,13 @@ import ReactFlow, {
 import "reactflow/dist/style.css"
 
 import Image from "next/image"
+
+import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuLink } from "@/components/ui/navigation-menu";
 import { CreateNodeDialog } from "@/components/create-node-dialog"
 import { CustomNode } from "@/components/custom-node"
+import { Button } from "@/components/ui/button"
+import { Save } from "lucide-react"
+import { createStrategy } from "@/lib/database/db_actions/test-actions"
 
 // Define node types
 const nodeTypes = {
@@ -26,7 +30,7 @@ const nodeTypes = {
 }
 
 // Initial nodes with custom styling
-const initialNodes: Node[] = [
+let initialNodes: Node[] = [
   {
     id: "1",
     type: "customNode",
@@ -44,9 +48,16 @@ const initialNodes: Node[] = [
 ]
 
 // Initial edges with custom styling
-const initialEdges: Edge[] = []
+let initialEdges: Edge[] = []
 
-const CreateStrategyPage = () => {
+const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
+  console.log("Node List:", nodeList)
+  console.log("Edge List:", edgeList)
+  // Initialize state for nodes and edges
+  initialNodes = nodeList.length > 0 ? nodeList : initialNodes
+  initialEdges = edgeList.length > 0 ? edgeList : initialEdges
+
+
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
   const [open, setOpen] = useState(false)
@@ -132,12 +143,56 @@ const CreateStrategyPage = () => {
     [],
   )
 
+  const handleSaveStrategy = () => {
+    // Ensure all nodes have a description (default to an empty string if missing)
+    console.log("Nodes before sanitization:", nodes)
+    console.log("Edges before sanitization:", edges)
+    const sanitizedNodes = nodes.map((node) => ({
+      ...node,
+      data: {
+        ...node.data,
+        description: node.data.description || "Description", // Provide a default value for description
+      },
+    }));
+
+    console.log("Nodes after sanitization:", sanitizedNodes)
+
+
+    // Save the strategy to the database
+    const strategy = {
+      nodes: sanitizedNodes,
+      edges: edges,
+    };
+
+    createStrategy(strategy)
+      .then((response) => {
+        console.log("Strategy saved successfully:", response);
+        // Optionally, redirect or show a success message
+        window.location.href = "/strategy-dashboard"; // Redirect to the strategy dashboard
+      })
+      .catch((error) => {
+        console.error("Error saving strategy:", error);
+      });
+  };
+
   return (
     <div className="flex flex-col h-screen bg-background text-foreground">
-      <header className="flex items-center justify-between p-6 bg-card border-b border-border">
-        <div className="flex items-center space-x-4">
-        <Image src="/SVG/MirrorFi-Logo-Blue.svg" alt="MirrorFi Logo" width={32} height={32} className="h-8 w-auto" />
-        <h1 className="text-xl font-semibold">Create Yield Strategy</h1>
+      <header className="p-6 bg-card border-b border-border">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Image src="/SVG/MirrorFi-Logo-Blue.svg" alt="MirrorFi Logo" width={32} height={32} className="h-8 w-auto" />
+            <h1 className="text-xl font-semibold">Create Yield Strategy</h1>
+          </div>
+          <NavigationMenu>
+            <NavigationMenuList>
+              <NavigationMenuItem>
+                <NavigationMenuLink href="/strategy-dashboard" className="text-sm font-medium text-foreground hover:text-primary">
+                  Strategy Dashboard
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+              {/* Add more NavigationMenuItems here if needed */}
+            </NavigationMenuList>
+          </NavigationMenu>
         </div>
       </header>
 
@@ -151,6 +206,7 @@ const CreateStrategyPage = () => {
           onConnect={onConnect}
           onNodeClick={onNodeClick}
           nodeTypes={nodeTypes}
+          proOptions={{ hideAttribution: true }}
           defaultViewport={{
             zoom: 0.7,
             x: initialNodes[0]?.position.x*2 || 0,
@@ -158,10 +214,16 @@ const CreateStrategyPage = () => {
           }} // Align viewport with the initial nodes
           className="bg-background"
         >
-          <Controls className="bg-card border border-border text-foreground" />
+          {/* <Controls className="bg-card border border-border text-foreground" /> */}
           <Background color="#3b82f6" gap={16} size={1} />
         </ReactFlow>
+        <div className="absolute bottom-4 right-4 flex space-x-2">
+          <Button variant="ghost" onClick={handleSaveStrategy}>
+            <Save/>Save Strategy
+          </Button>
+        </div>
       </main>
+      
     </div>
   )
 }
