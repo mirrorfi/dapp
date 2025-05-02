@@ -175,6 +175,13 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
       });
   };
 
+  const handleRunAgentKit = () => {
+    // Logic to run AgentKit with the current strategy
+    console.log("Running AgentKit with the current strategy...")
+    // Implement your logic here
+    
+  }
+
   return (
     <div className="flex flex-col h-screen bg-background text-foreground">
       <header className="p-6 bg-card border-b border-border">
@@ -220,6 +227,10 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
         <div className="absolute bottom-4 right-4 flex space-x-2">
           <Button variant="ghost" onClick={handleSaveStrategy}>
             <Save/>Save Strategy
+          </Button>
+          
+          <Button variant="ghost" onClick={handleRunAgentKit}>
+            <Save/>Run AgentKit
           </Button>
         </div>
       </main>
