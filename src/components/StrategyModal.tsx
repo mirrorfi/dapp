@@ -3,7 +3,6 @@ import type { FC } from "react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { getTokenBalances } from "@/lib/solana";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -131,54 +130,97 @@ const StrategyModal: FC<StrategyModalProps> = ({
           </div>
 
           {/* Right side: Strategy details */}
-          <div className="flex flex-col space-y-4 col-span-1">
-            <div className="border rounded-lg p-4 bg-muted/30">
-              <h3 className="text-xl font-semibold mb-2">{strategy.name}</h3>
-              <p className="text-sm text-muted-foreground">APY: {apy} (?)</p>
+          <div className="flex flex-col justify-between">
+            <div>
+              <h3 className="text-xl font-bold mb-1">{strategy.name}</h3>
+              <p className="text-muted-foreground mb-3">APY: {apy} (?)</p>
             </div>
 
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label>Select Token</Label>
-                <Select
-                  value={selectedTokenMint}
-                  onValueChange={handleTokenSelect}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a token" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="SOL">
-                      SOL ({tokenBalances.sol.toFixed(4)})
-                    </SelectItem>
-                    {tokenBalances.tokens.map((token) => (
-                      <SelectItem key={token.mint} value={token.mint}>
-                        {token.mint.slice(0, 4)}... ({token.balance.toFixed(4)})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+            <div className="flex flex-col space-y-4">
+              {/* Clean card UI similar to Jupiter */}
+              <div className="border rounded-lg bg-slate-900 overflow-hidden">
+                <div className="p-4">
+                  <div className="flex justify-end space-x-2 items-center mb-2">
+                    <p className="font-medium text-sm text-gray-500">
+                      {selectedTokenMint === "SOL"
+                        ? tokenBalances.sol.toFixed(4)
+                        : tokenBalances.tokens
+                            .find((t) => t.mint === selectedTokenMint)
+                            ?.balance.toFixed(4) || "0"}{" "}
+                      {selectedTokenMint === "SOL"
+                        ? "SOL"
+                        : selectedTokenMint.slice(0, 4)}
+                    </p>
+                    <div className="flex space-x-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 px-2 py-0 text-xs font-medium bg-gray-700 text-gray-400"
+                        onClick={() =>
+                          setTokenAmount((getMaxAmount() / 2).toString())
+                        }
+                      >
+                        HALF
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 px-2 py-0 text-xs font-medium bg-gray-700 text-gray-400"
+                        onClick={handleMaxAmount}
+                      >
+                        MAX
+                      </Button>
+                    </div>
+                  </div>
 
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <Label>Amount</Label>
-                  <button
-                    onClick={handleMaxAmount}
-                    className="text-sm text-muted-foreground hover:text-primary"
-                  >
-                    Max: {getMaxAmount().toFixed(4)}
-                  </button>
+                  <div className="flex justify-between items-center p-1 rounded-lg mb-2">
+                    <div className="flex items-center">
+                      <Select
+                        value={selectedTokenMint}
+                        onValueChange={handleTokenSelect}
+                      >
+                        <SelectTrigger className="border-0 bg-slate-800 py-2 px-3 h-auto">
+                          <div className="flex items-center gap-2">
+                            <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white">
+                              $
+                            </div>
+                            <SelectValue
+                              className="font-medium"
+                              placeholder="Select a token"
+                            />
+                          </div>
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem className="py-3" value="SOL">
+                            SOL
+                          </SelectItem>
+                          {tokenBalances.tokens.map((token) => (
+                            <SelectItem
+                              className="py-3"
+                              key={token.mint}
+                              value={token.mint}
+                            >
+                              {token.mint.slice(0, 4)}...
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="flex flex-col items-end">
+                      <Input
+                        type="number"
+                        value={tokenAmount}
+                        onChange={(e) => setTokenAmount(e.target.value)}
+                        placeholder="0.00"
+                        className="text-right border-0 bg-transparent p-0 h-auto text-3xl font-medium w-40 focus-visible:ring-0 focus-visible:ring-offset-0"
+                      />
+                      <span className="text-xs text-gray-400 font-medium mt-2">
+                        ${0}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <Input
-                  type="number"
-                  value={tokenAmount}
-                  onChange={(e) => setTokenAmount(e.target.value)}
-                  placeholder="Enter amount"
-                  min="0"
-                  max={getMaxAmount()}
-                  step="0.000001"
-                />
               </div>
 
               <Button

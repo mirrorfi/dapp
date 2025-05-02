@@ -20,7 +20,7 @@
   --muted: 217 33% 17%;
   --muted-foreground: 215 20% 65%;
 
-  --accent: 191 100% 50%;;
+  --accent: 191 100% 50%;
   --accent-foreground: 210 40% 98%;
 
   --destructive: 0 62% 30%;
@@ -52,7 +52,7 @@
   --muted: 217 33% 17%;
   --muted-foreground: 215 20% 65%;
 
-  --accent: 191 100% 50%;;
+  --accent: 191 100% 50%;
   --accent-foreground: 210 40% 98%;
 
   --destructive: 0 62% 30%;
@@ -121,31 +121,51 @@
 }
 
 .node-deposit {
-  background: linear-gradient(135deg, rgba(12, 45, 72, 0.9), rgba(10, 36, 57, 0.9));
+  background: linear-gradient(
+    135deg,
+    rgba(12, 45, 72, 0.9),
+    rgba(10, 36, 57, 0.9)
+  );
   border: 1px solid rgba(0, 200, 255, 0.5);
   box-shadow: inset 0 0 20px rgba(0, 200, 255, 0.2);
 }
 
 .node-stake {
-  background: linear-gradient(135deg, rgba(15, 61, 86, 0.9), rgba(12, 45, 72, 0.9));
+  background: linear-gradient(
+    135deg,
+    rgba(15, 61, 86, 0.9),
+    rgba(12, 45, 72, 0.9)
+  );
   border: 1px solid rgba(0, 255, 200, 0.5);
   box-shadow: inset 0 0 20px rgba(0, 255, 200, 0.2);
 }
 
 .node-swap {
-  background: linear-gradient(135deg, rgba(15, 61, 86, 0.9), rgba(12, 45, 72, 0.9));
+  background: linear-gradient(
+    135deg,
+    rgba(15, 61, 86, 0.9),
+    rgba(12, 45, 72, 0.9)
+  );
   border: 1px solid rgba(0, 255, 200, 0.5);
   box-shadow: inset 0 0 20px rgba(0, 255, 200, 0.2);
 }
 
 .node-apr {
-  background: linear-gradient(135deg, rgba(45, 27, 78, 0.9), rgba(31, 18, 53, 0.9));
+  background: linear-gradient(
+    135deg,
+    rgba(45, 27, 78, 0.9),
+    rgba(31, 18, 53, 0.9)
+  );
   border: 1px solid rgba(139, 92, 246, 0.5);
   box-shadow: inset 0 0 20px rgba(139, 92, 246, 0.2);
 }
 
 .node-yield {
-  background: linear-gradient(135deg, rgba(15, 61, 86, 0.9), rgba(12, 45, 72, 0.9));
+  background: linear-gradient(
+    135deg,
+    rgba(15, 61, 86, 0.9),
+    rgba(12, 45, 72, 0.9)
+  );
   border: 1px solid rgba(59, 130, 246, 0.5);
   box-shadow: inset 0 0 20px rgba(59, 130, 246, 0.2);
 }
@@ -158,13 +178,18 @@
 }
 
 .custom-node::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(0, 200, 255, 0.8), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(0, 200, 255, 0.8),
+    transparent
+  );
 }
 
 @keyframes scanline {
@@ -191,16 +216,23 @@
 }
 
 body {
-  font-family: 'Inter', 'Roboto', 'SF Pro Display', Arial, sans-serif;
-  background-image: 
-    radial-gradient(circle at 10% 20%, rgba(0, 100, 255, 0.03) 0%, transparent 20%),
-    radial-gradient(circle at 90% 80%, rgba(100, 0, 255, 0.03) 0%, transparent 20%);
+  font-family: "Inter", "Roboto", "SF Pro Display", Arial, sans-serif;
+  background-image: radial-gradient(
+      circle at 10% 20%,
+      rgba(0, 100, 255, 0.03) 0%,
+      transparent 20%
+    ),
+    radial-gradient(
+      circle at 90% 80%,
+      rgba(100, 0, 255, 0.03) 0%,
+      transparent 20%
+    );
   position: relative;
   overflow-x: hidden;
 }
 
 /* Futuristic UI Elements */
-button, 
+button,
 .btn,
 [class*="button"] {
   position: relative;
@@ -211,13 +243,18 @@ button,
 button::after,
 .btn::after,
 [class*="button"]::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
   height: 2px;
-  background: linear-gradient(90deg, transparent, var(--secondary), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--secondary),
+    transparent
+  );
   transform: translateX(-100%);
   transition: transform 0.5s ease;
 }
@@ -238,7 +275,7 @@ button:hover::after,
 
 .card::before,
 [class*="card"]::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -255,7 +292,9 @@ button:hover::after,
 }
 
 /* Glowing text */
-h1, h2, h3 {
+h1,
+h2,
+h3 {
   position: relative;
   text-shadow: 0 0 10px rgba(0, 200, 255, 0.3);
 }
@@ -266,15 +305,20 @@ h1, h2, h3 {
 }
 
 .animated-border::after {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   border: 1px solid transparent;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent), var(--primary)) border-box;
-  -webkit-mask: 
-    linear-gradient(#fff 0 0) padding-box,
-    linear-gradient(#fff 0 0);
+  background: linear-gradient(
+      90deg,
+      var(--primary),
+      var(--secondary),
+      var(--accent),
+      var(--primary)
+    )
+    border-box;
+  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   background-size: 300% 100%;
@@ -282,8 +326,12 @@ h1, h2, h3 {
 }
 
 @keyframes borderAnimation {
-  0% { background-position: 0% 0; }
-  100% { background-position: 300% 0; }
+  0% {
+    background-position: 0% 0;
+  }
+  100% {
+    background-position: 300% 0;
+  }
 }
 
 /* Futuristic scrollbar */
@@ -301,3 +349,14 @@ h1, h2, h3 {
   border-radius: 4px;
 }
 
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
