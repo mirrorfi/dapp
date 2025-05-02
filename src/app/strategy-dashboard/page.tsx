@@ -1,5 +1,6 @@
 "use client";
 
+import SimplifiedFlow from "@/components/simplified-flow";
 import {
   NavigationMenu,
   NavigationMenuList,
@@ -25,6 +26,7 @@ import {
 import Image from "next/image";
 import { MoreHorizontal } from "lucide-react";
 import { useEffect, useState } from "react";
+import StrategyModal from "@/components/StrategyModal";
 
 interface Node {
   id: string;
@@ -52,6 +54,10 @@ const StrategyDashboardPage = () => {
   const [strategies, setStrategies] = useState<Strategy[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedStrategy, setSelectedStrategy] = useState<Strategy | null>(
+    null
+  );
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchStrategies = async () => {
@@ -73,6 +79,16 @@ const StrategyDashboardPage = () => {
 
     fetchStrategies();
   }, []);
+
+  const handleCardClick = (strategy: Strategy) => {
+    setSelectedStrategy(strategy);
+    setModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setSelectedStrategy(null);
+  };
 
   if (loading) {
     return (
@@ -138,15 +154,21 @@ const StrategyDashboardPage = () => {
           {strategies.map((strategy: Strategy) => (
             <Card
               key={strategy._id}
-              className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border-none backdrop-blur-sm"
+              className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border-none backdrop-blur-sm relative min-h-[200px] cursor-pointer"
+              onClick={() => handleCardClick(strategy)}
             >
-              <CardHeader className="flex flex-row items-center justify-between space-y-0">
+              <SimplifiedFlow nodes={strategy.nodes} edges={strategy.edges} />
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 relative z-10">
                 <CardTitle className="text-lg font-bold">
                   {strategy.name}
                 </CardTitle>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="h-8 w-8 p-0">
+                    <Button
+                      variant="ghost"
+                      className="h-8 w-8 p-0"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -158,25 +180,18 @@ const StrategyDashboardPage = () => {
                   </DropdownMenuContent>
                 </DropdownMenu>
               </CardHeader>
-              <CardContent>
-                <div className="mt-2 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary">
-                      {strategy.nodes.length} Nodes
-                    </Badge>
-                    <Badge variant="secondary">
-                      {strategy.edges.length} Connections
-                    </Badge>
-                  </div>
-                  <CardDescription className="mt-2 text-sm">
-                    Strategy ID: {strategy._id}
-                  </CardDescription>
-                </div>
-              </CardContent>
             </Card>
           ))}
         </div>
       </main>
+
+      {selectedStrategy && (
+        <StrategyModal
+          strategy={selectedStrategy}
+          isOpen={modalOpen}
+          onClose={closeModal}
+        />
+      )}
     </div>
   );
 };
