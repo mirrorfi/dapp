@@ -26,6 +26,7 @@ import {
 import Image from "next/image";
 import { MoreHorizontal } from "lucide-react";
 import { useEffect, useState } from "react";
+import StrategyModal from "@/components/StrategyModal";
 
 interface Node {
   id: string;
@@ -53,6 +54,10 @@ const StrategyDashboardPage = () => {
   const [strategies, setStrategies] = useState<Strategy[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedStrategy, setSelectedStrategy] = useState<Strategy | null>(
+    null
+  );
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchStrategies = async () => {
@@ -74,6 +79,16 @@ const StrategyDashboardPage = () => {
 
     fetchStrategies();
   }, []);
+
+  const handleCardClick = (strategy: Strategy) => {
+    setSelectedStrategy(strategy);
+    setModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setSelectedStrategy(null);
+  };
 
   if (loading) {
     return (
@@ -139,7 +154,8 @@ const StrategyDashboardPage = () => {
           {strategies.map((strategy: Strategy) => (
             <Card
               key={strategy._id}
-              className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border-none backdrop-blur-sm relative min-h-[200px]"
+              className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border-none backdrop-blur-sm relative min-h-[200px] cursor-pointer"
+              onClick={() => handleCardClick(strategy)}
             >
               <SimplifiedFlow nodes={strategy.nodes} edges={strategy.edges} />
               <CardHeader className="flex flex-row items-center justify-between space-y-0 relative z-10">
@@ -148,7 +164,11 @@ const StrategyDashboardPage = () => {
                 </CardTitle>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="h-8 w-8 p-0">
+                    <Button
+                      variant="ghost"
+                      className="h-8 w-8 p-0"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -164,6 +184,14 @@ const StrategyDashboardPage = () => {
           ))}
         </div>
       </main>
+
+      {selectedStrategy && (
+        <StrategyModal
+          strategy={selectedStrategy}
+          isOpen={modalOpen}
+          onClose={closeModal}
+        />
+      )}
     </div>
   );
 };
