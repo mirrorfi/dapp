@@ -1,5 +1,6 @@
 "use client";
 
+import SimplifiedFlow from "@/components/simplified-flow";
 import {
   NavigationMenu,
   NavigationMenuList,
@@ -138,9 +139,10 @@ const StrategyDashboardPage = () => {
           {strategies.map((strategy: Strategy) => (
             <Card
               key={strategy._id}
-              className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border-none backdrop-blur-sm"
+              className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border-none backdrop-blur-sm relative min-h-[200px]"
             >
-              <CardHeader className="flex flex-row items-center justify-between space-y-0">
+              <SimplifiedFlow nodes={strategy.nodes} edges={strategy.edges} />
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 relative z-10">
                 <CardTitle className="text-lg font-bold">
                   {strategy.name}
                 </CardTitle>
@@ -158,21 +160,6 @@ const StrategyDashboardPage = () => {
                   </DropdownMenuContent>
                 </DropdownMenu>
               </CardHeader>
-              <CardContent>
-                <div className="mt-2 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary">
-                      {strategy.nodes.length} Nodes
-                    </Badge>
-                    <Badge variant="secondary">
-                      {strategy.edges.length} Connections
-                    </Badge>
-                  </div>
-                  <CardDescription className="mt-2 text-sm">
-                    Strategy ID: {strategy._id}
-                  </CardDescription>
-                </div>
-              </CardContent>
             </Card>
           ))}
         </div>
