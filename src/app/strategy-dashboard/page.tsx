@@ -1,3 +1,5 @@
+"use client";
+
 import {
   NavigationMenu,
   NavigationMenuList,
@@ -22,8 +24,7 @@ import {
 
 import Image from "next/image";
 import { MoreHorizontal } from "lucide-react";
-import { connectToDatabase } from "@/lib/database";
-import { getStrategies } from "@/lib/database/db_actions/test-actions";
+import { useEffect, useState } from "react";
 
 interface Node {
   id: string;
@@ -47,9 +48,47 @@ interface Strategy {
   __v: number;
 }
 
-const StrategyDashboardPage = async () => {
-  await connectToDatabase();
-  const strategies = await getStrategies();
+const StrategyDashboardPage = () => {
+  const [strategies, setStrategies] = useState<Strategy[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchStrategies = async () => {
+      try {
+        const response = await fetch("/api/get-strategies");
+        if (!response.ok) {
+          throw new Error("Failed to fetch strategies");
+        }
+        const data = await response.json();
+        setStrategies(data);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to load strategies"
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStrategies();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p>Loading strategies...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-destructive">Error: {error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
@@ -75,7 +114,6 @@ const StrategyDashboardPage = async () => {
                   Create Strategy
                 </NavigationMenuLink>
               </NavigationMenuItem>
-              {/* Add more NavigationMenuItems here if needed */}
             </NavigationMenuList>
           </NavigationMenu>
         </div>
@@ -86,7 +124,7 @@ const StrategyDashboardPage = async () => {
           {strategies.map((strategy: Strategy) => (
             <Card
               key={strategy._id}
-              className="overflow-hidden shadow-lg transition-shadow duration-300 border-none backdrop-blur-sm"
+              className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border-none backdrop-blur-sm"
             >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-lg font-bold">
