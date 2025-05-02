@@ -23,6 +23,7 @@ import { CustomNode } from "@/components/custom-node"
 import { Button } from "@/components/ui/button"
 import { Save } from "lucide-react"
 import { createStrategy } from "@/lib/database/db_actions/test-actions"
+import { SaveStrategyDialog } from "@/components/save-strategy-dialog"
 
 // Define node types
 const nodeTypes = {
@@ -61,6 +62,7 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
   const [open, setOpen] = useState(false)
+  const [saveOpen, setSaveOpen] = useState(false)
   const [nodeToConnect, setNodeToConnect] = useState<Node | null>(null)
 
   const onConnect = useCallback(
@@ -197,6 +199,7 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
       </header>
 
       <main className="flex-1">
+        <SaveStrategyDialog nodeList={nodes} edgeList={edges} isOpen={saveOpen} onClose={() => setSaveOpen(false)}/>
         <CreateNodeDialog onCreateNode={handleCreateNode} isOpen={open} onClose={() => setOpen(false)} />
         <ReactFlow
           nodes={nodes}
@@ -218,7 +221,7 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
           <Background color="#3b82f6" gap={16} size={1} />
         </ReactFlow>
         <div className="absolute bottom-4 right-4 flex space-x-2">
-          <Button variant="ghost" onClick={handleSaveStrategy}>
+          <Button variant="ghost" onClick={() => {setSaveOpen(true)}}>
             <Save/>Save Strategy
           </Button>
         </div>
