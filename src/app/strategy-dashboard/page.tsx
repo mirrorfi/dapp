@@ -102,15 +102,29 @@ const StrategyDashboardPage = () => {
               height={32}
               className="h-8 w-auto"
             />
-            <h1 className="text-xl font-semibold">Strategy Dashboard</h1>
+            <h1 className="text-xl font-semibold">MirrorFi</h1>
           </div>
           <NavigationMenu>
             <NavigationMenuList>
               <NavigationMenuItem>
                 <NavigationMenuLink
                   href="/create-strategy?nodeList=[]&edgeList=[]"
-                  className="text-sm font-medium text-foreground hover:text-primary"
+                  className="inline-flex items-center rounded-md px-4 py-2 text-sm font-medium transition-colors bg-primary hover:bg-primary hover:text-primary-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                 >
+                  <svg
+                    className="mr-2 h-4 w-4"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
                   Create Strategy
                 </NavigationMenuLink>
               </NavigationMenuItem>
@@ -126,7 +140,7 @@ const StrategyDashboardPage = () => {
               key={strategy._id}
               className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border-none backdrop-blur-sm"
             >
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0">
                 <CardTitle className="text-lg font-bold">
                   {strategy.name}
                 </CardTitle>
