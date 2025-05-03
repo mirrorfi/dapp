@@ -113,8 +113,9 @@ export default function Home() {
     <main className="flex min-h-screen h-screen items-center justify-between p-12 bg-gradient-to-br from-gray-900 via-black to-gray-800 text-foreground">
 
       {!loading ? 
+      <>
       <div className="w-[47.5%] min-h-[90%] h-full p-12 pb-24 flex flex-col gap-6 items-center rounded-xl overflow-y-auto
-      bg-[#0F1218] rounded-xl border border-[#2D3748]/20">
+      bg-[#0F1218] border border-[#2D3748]/20">
         <h1 className="text-xl font-semibold text-gray-200">Portfolio</h1>
         <div className="w-full h-full flex flex-col gap-6">
           {tokens.map ((token, index) => {
@@ -123,12 +124,16 @@ export default function Home() {
             </div>
           })}
         </div>
-      </div> : 
+      </div> 
+      
+      <div className="w-[47.5%] min-h-[90%] h-full p-12 pb-24 flex flex-col gap-6 items-center rounded-xl overflow-y-auto
+      bg-[#0F1218] border border-[#2D3748]/20">
+        <h1 className="text-xl font-semibold text-gray-200">Recommended Strategies</h1>
+      </div> 
+      </>
+      : 
       <div></div> 
       }
-
-      <WalletMultiButton />
-
     </main>
   );
 }

@@ -144,8 +144,8 @@ const StrategyDashboardPage = () => {
               className="w-full sm:w-[300px] lg:w-[400px]"
             >
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="all">All Strategies</TabsTrigger>
-                <TabsTrigger value="mine">My Strategies</TabsTrigger>
+                <TabsTrigger className="cursor-pointer" value="all">All Strategies</TabsTrigger>
+                <TabsTrigger className="cursor-pointer" value="mine">My Strategies</TabsTrigger>
               </TabsList>
             </Tabs>
           </div>

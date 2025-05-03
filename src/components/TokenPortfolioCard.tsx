@@ -110,11 +110,11 @@ export function TokenPortfolioCard({
             }`}
             >
             {apiResponse != null ? 
-            (Math.abs(apiResponse.usdPrice24hrUsdChange) < 0.01 ? 
-              (apiResponse.usdPrice24hrUsdChange > 0 ? "+<$0.01" : "-<$0.01") : 
-              (apiResponse.usdPrice24hrUsdChange > 0 ? 
-              "+$" + (Math.round(apiResponse.usdPrice24hrUsdChange * 100) / 100) : 
-              "-$" + Math.abs(Math.round(apiResponse.usdPrice24hrUsdChange * 100) / 100)
+            (Math.abs(Number(tokenData.amount) * apiResponse.usdPrice24hrUsdChange) < 0.01 ? 
+              (Number(tokenData.amount) * apiResponse.usdPrice24hrUsdChange > 0 ? "+<$0.01" : "-<$0.01") : 
+              (Number(tokenData.amount) * apiResponse.usdPrice24hrUsdChange > 0 ? 
+              "+$" + (Math.round(Number(tokenData.amount) * apiResponse.usdPrice24hrUsdChange * 100) / 100) : 
+              "-$" + Math.abs(Math.round(Number(tokenData.amount) * apiResponse.usdPrice24hrUsdChange * 100) / 100)
               )
             ) : 
             "Loading..."}
