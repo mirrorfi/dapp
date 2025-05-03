@@ -4,26 +4,24 @@ import ReactFlow, { Node, Edge, ReactFlowProvider } from "reactflow";
 import "reactflow/dist/style.css";
 import { CustomNode } from "./custom-node";
 
-interface SimplifiedFlowProps {
+interface InteractiveFlowProps {
   nodes: Node[];
   edges: Edge[];
   className?: string;
 }
 
-export default function SimplifiedFlow({
+export default function InteractiveFlow({
   nodes,
   edges,
   className = "",
-}: SimplifiedFlowProps) {
+}: InteractiveFlowProps) {
   const nodeTypes = {
     customNode: CustomNode,
   };
 
   return (
     <ReactFlowProvider>
-      <div
-        className={`${className} absolute inset-0 opacity-20 pointer-events-none`}
-      >
+      <div className={`${className} absolute inset-0`}>
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -32,9 +30,9 @@ export default function SimplifiedFlow({
           nodesDraggable={false}
           nodesConnectable={false}
           elementsSelectable={false}
-          panOnDrag={false}
-          zoomOnScroll={false}
-          zoomOnPinch={false}
+          panOnDrag={true}
+          zoomOnScroll={true}
+          zoomOnPinch={true}
           zoomOnDoubleClick={false}
           proOptions={{ hideAttribution: true }}
         />

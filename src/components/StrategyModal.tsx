@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import SimplifiedFlow from "@/components/simplified-flow";
+import InteractiveFlow from "@/components/interactive-flow";
 import type { Node, Edge } from "reactflow";
 
 interface TokenBalance {
@@ -112,7 +112,7 @@ const StrategyModal: FC<StrategyModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-6xl">
+      <DialogContent className="sm:max-w-6xl border-0 border-none">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">
             Mirror Strategy
@@ -121,8 +121,8 @@ const StrategyModal: FC<StrategyModalProps> = ({
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Left side: Strategy flow visualization */}
-          <div className="border rounded-lg p-6 min-h-[400px] h-[500px] col-span-2 relative">
-            <SimplifiedFlow
+          <div className="rounded-lg p-6 min-h-[400px] h-[500px] col-span-2 relative">
+            <InteractiveFlow
               nodes={strategy.nodes}
               edges={strategy.edges}
               className="absolute inset-6"
@@ -137,9 +137,8 @@ const StrategyModal: FC<StrategyModalProps> = ({
             </div>
 
             <div className="flex flex-col space-y-4">
-              {/* Clean card UI similar to Jupiter */}
-              <div className="border rounded-lg bg-slate-900 overflow-hidden">
-                <div className="p-4">
+              <div className="rounded-lg bg-slate-900 overflow-hidden">
+                <div className="p-4 pb-1">
                   <div className="flex justify-end space-x-2 items-center mb-2">
                     <p className="font-medium text-sm text-gray-500">
                       {selectedTokenMint === "SOL"
@@ -179,9 +178,9 @@ const StrategyModal: FC<StrategyModalProps> = ({
                         value={selectedTokenMint}
                         onValueChange={handleTokenSelect}
                       >
-                        <SelectTrigger className="border-0 bg-slate-800 py-2 px-3 h-auto">
+                        <SelectTrigger className="border-0 bg-slate-800 py-2 px-4 h-auto">
                           <div className="flex items-center gap-2">
-                            <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white">
+                            <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white">
                               $
                             </div>
                             <SelectValue
@@ -190,7 +189,7 @@ const StrategyModal: FC<StrategyModalProps> = ({
                             />
                           </div>
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="border-0">
                           <SelectItem className="py-3" value="SOL">
                             SOL
                           </SelectItem>
@@ -225,12 +224,16 @@ const StrategyModal: FC<StrategyModalProps> = ({
 
               <Button
                 onClick={handleConfirm}
-                className="w-full bg-blue-700 hover:bg-blue-800 text-white"
+                className="w-full bg-blue-700 hover:bg-blue-800 text-white cursor-pointer"
                 disabled={!selectedTokenMint || !tokenAmount || loading}
               >
                 Confirm Mirror
               </Button>
-              <Button onClick={handleExit} variant="outline" className="w-full">
+              <Button
+                onClick={handleExit}
+                variant="ghost"
+                className="w-full cursor-pointer"
+              >
                 Exit Strategy
               </Button>
             </div>

@@ -1,6 +1,6 @@
-"use client"
-import { useState, useCallback } from "react"
-import type React from "react"
+"use client";
+import { useState, useCallback, useEffect } from "react";
+import type React from "react";
 
 import ReactFlow, {
   addEdge,
@@ -12,10 +12,10 @@ import ReactFlow, {
   type Connection,
   MarkerType,
   Position,
-} from "reactflow"
-import "reactflow/dist/style.css"
+} from "reactflow";
+import "reactflow/dist/style.css";
 
-import Image from "next/image"
+import Image from "next/image";
 
 import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuLink } from "@/components/ui/navigation-menu";
 import { CreateNodeDialog } from "@/components/create-node-dialog"
@@ -28,7 +28,7 @@ import { SaveStrategyDialog } from "@/components/save-strategy-dialog"
 // Define node types
 const nodeTypes = {
   customNode: CustomNode,
-}
+};
 
 // Initial nodes with custom styling
 let initialNodes: Node[] = [
@@ -44,20 +44,19 @@ let initialNodes: Node[] = [
     position: { x: 50, y: 150 },
     sourcePosition: Position.Right,
     targetPosition: undefined,
-    draggable: false
+    draggable: false,
   },
-]
+];
 
 // Initial edges with custom styling
-let initialEdges: Edge[] = []
+let initialEdges: Edge[] = [];
 
 const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
-  console.log("Node List:", nodeList)
-  console.log("Edge List:", edgeList)
+  console.log("Node List:", nodeList);
+  console.log("Edge List:", edgeList);
   // Initialize state for nodes and edges
-  initialNodes = nodeList.length > 0 ? nodeList : initialNodes
-  initialEdges = edgeList.length > 0 ? edgeList : initialEdges
-
+  initialNodes = nodeList.length > 0 ? nodeList : initialNodes;
+  initialEdges = edgeList.length > 0 ? edgeList : initialEdges;
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
@@ -77,46 +76,52 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
               type: MarkerType.ArrowClosed,
             },
           },
-          eds,
-        ),
+          eds
+        )
       ),
-    [setEdges],
-  )
+    [setEdges]
+  );
 
   const handleCreateNode = useCallback(
     (nodeData: {
-      label: string
-      description: string
-      nodeType: "protocol" | "token"
+      label: string;
+      description: string;
+      nodeType: "protocol" | "token";
     }) => {
-        let connectionCount = nodeToConnect ? nodeToConnect.data.connectionCount : 0;
+      let connectionCount = nodeToConnect
+        ? nodeToConnect.data.connectionCount
+        : 0;
       //Find which handle was clicked
-      
+
       const newNode: Node = {
         id: `${nodes.length + 1}-${Date.now()}`,
         type: "customNode",
         data: nodeData,
         position: {
-          x: nodeToConnect ? nodeToConnect.position.x + 400 : Math.random() * 300 + 200,
-          y: nodeToConnect ? nodeToConnect.position.y + ((-1)**connectionCount)*200*(Math.ceil(connectionCount/2)): Math.random() * 300 + 50,
+          x: nodeToConnect
+            ? nodeToConnect.position.x + 400
+            : Math.random() * 300 + 200,
+          y: nodeToConnect
+            ? nodeToConnect.position.y +
+              (-1) ** connectionCount * 200 * Math.ceil(connectionCount / 2)
+            : Math.random() * 300 + 50,
         },
-      }
+      };
 
-      
       // Update connection count for the node being connected to
       connectionCount += 1;
       if (nodeToConnect) {
-      setNodes((nds) =>
-        nds.map((n) => {
-          if (n.id === nodeToConnect.id) {
-            return { ...n, data: { ...n.data, connectionCount } }
-          }
-          return n
-        }),
-      )
-    }
+        setNodes((nds) =>
+          nds.map((n) => {
+            if (n.id === nodeToConnect.id) {
+              return { ...n, data: { ...n.data, connectionCount } };
+            }
+            return n;
+          })
+        );
+      }
 
-      setNodes((nds) => [...nds, newNode])
+      setNodes((nds) => [...nds, newNode]);
 
       if (nodeToConnect) {
         const newEdge: Edge = {
@@ -128,27 +133,24 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
           markerEnd: {
             type: MarkerType.ArrowClosed,
           },
-        }
-        setEdges((eds) => [...eds, newEdge])
+        };
+        setEdges((eds) => [...eds, newEdge]);
       }
 
-      setNodeToConnect(null)
+      setNodeToConnect(null);
     },
-    [nodes, setNodes, nodeToConnect, setEdges],
-  )
+    [nodes, setNodes, nodeToConnect, setEdges]
+  );
 
-  const onNodeClick = useCallback(
-    (event: React.MouseEvent, node: Node) => {
-      setNodeToConnect(node)
-      setOpen(true)
-    },
-    [],
-  )
+  const onNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
+    setNodeToConnect(node);
+    setOpen(true);
+  }, []);
 
   const handleSaveStrategy = () => {
     // Ensure all nodes have a description (default to an empty string if missing)
-    console.log("Nodes before sanitization:", nodes)
-    console.log("Edges before sanitization:", edges)
+    console.log("Nodes before sanitization:", nodes);
+    console.log("Edges before sanitization:", edges);
     const sanitizedNodes = nodes.map((node) => ({
       ...node,
       data: {
@@ -157,8 +159,7 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
       },
     }));
 
-    console.log("Nodes after sanitization:", sanitizedNodes)
-
+    console.log("Nodes after sanitization:", sanitizedNodes);
 
     // Save the strategy to the database
     const strategy = {
@@ -177,18 +178,48 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
       });
   };
 
+  // const walletContext = useWallet();
+
+  async function handleAgentKitTest() {
+    // Implement your logic here
+    const rpc_url =
+      process.env.NEXT_PUBLIC_RPC_URL || "https://api.mainnet-beta.solana.com";
+    const walletContext = null;
+    console.log("RUNNING AGENT KIT TEST");
+    testAgentKit(rpc_url, walletContext);
+  }
+
+  // useEffect(() => {
+  //   handleAgentKitTest()
+  //     .then(() => {
+  //       console.log("AgentKit test completed successfully.");
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error during AgentKit test:", error);
+  //     });
+  // }, []);
+
   return (
     <div className="flex flex-col h-screen bg-background text-foreground">
       <header className="p-6 bg-card border-b border-border">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <Image src="/SVG/MirrorFi-Logo-Blue.svg" alt="MirrorFi Logo" width={32} height={32} className="h-8 w-auto" />
+            <Image
+              src="/SVG/MirrorFi-Logo-Blue.svg"
+              alt="MirrorFi Logo"
+              width={32}
+              height={32}
+              className="h-8 w-auto"
+            />
             <h1 className="text-xl font-semibold">Create Yield Strategy</h1>
           </div>
           <NavigationMenu>
             <NavigationMenuList>
               <NavigationMenuItem>
-                <NavigationMenuLink href="/strategy-dashboard" className="text-sm font-medium text-foreground hover:text-primary">
+                <NavigationMenuLink
+                  href="/strategy-dashboard"
+                  className="text-sm font-medium text-foreground hover:text-primary"
+                >
                   Strategy Dashboard
                 </NavigationMenuLink>
               </NavigationMenuItem>
@@ -212,8 +243,8 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
           proOptions={{ hideAttribution: true }}
           defaultViewport={{
             zoom: 0.7,
-            x: initialNodes[0]?.position.x*2 || 0,
-            y: initialNodes[0]?.position.y*1.5 || 0,
+            x: initialNodes[0]?.position.x * 2 || 0,
+            y: initialNodes[0]?.position.y * 1.5 || 0,
           }} // Align viewport with the initial nodes
           className="bg-background"
         >
@@ -226,9 +257,8 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
           </Button>
         </div>
       </main>
-      
     </div>
-  )
-}
+  );
+};
 
-export default CreateStrategyPage
+export default CreateStrategyPage;
