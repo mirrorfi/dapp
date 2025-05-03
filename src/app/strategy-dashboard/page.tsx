@@ -1,5 +1,6 @@
 "use client";
 
+import { useWallet } from "@solana/wallet-adapter-react";
 import SimplifiedFlow from "@/components/simplified-flow";
 import {
   NavigationMenu,
@@ -9,6 +10,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -40,6 +42,7 @@ interface Strategy {
   nodes: Node[];
   edges: Edge[];
   name: string;
+  user: string;
   __v: number;
 }
 
@@ -51,6 +54,8 @@ const StrategyDashboardPage = () => {
     null
   );
   const [modalOpen, setModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("all");
+  const { connected, publicKey } = useWallet();
 
   useEffect(() => {
     const fetchStrategies = async () => {
@@ -61,6 +66,7 @@ const StrategyDashboardPage = () => {
         }
         const data = await response.json();
         setStrategies(data);
+        console.log("Fetched strategies:", data);
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "Failed to load strategies"
@@ -143,40 +149,63 @@ const StrategyDashboardPage = () => {
       </header>
 
       <main className="p-6">
+        <div className="mb-8">
+          <Tabs
+            defaultValue="all"
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="w-full"
+          >
+            <TabsList className="grid w-[400px] grid-cols-2 mb-2">
+              <TabsTrigger value="all">All Strategies</TabsTrigger>
+              <TabsTrigger value="mine">My Strategies</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {strategies.map((strategy: Strategy) => (
-            <Card
-              key={strategy._id}
-              className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border-none backdrop-blur-sm relative min-h-[300px] cursor-pointer"
-              onClick={() => handleCardClick(strategy)}
-            >
-              <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                <CardTitle className="text-lg font-bold">
-                  {strategy.name}
-                </CardTitle>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className="h-8 w-8 p-0"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem>Edit</DropdownMenuItem>
-                    <DropdownMenuItem className="text-destructive">
-                      Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </CardHeader>
-              <div className="absolute inset-x-0 top-[60px] bottom-0">
-                <SimplifiedFlow nodes={strategy.nodes} edges={strategy.edges} />
-              </div>
-            </Card>
-          ))}
+          {strategies
+            .filter((strategy) => {
+              if (activeTab === "all") return true;
+              return (
+                connected && publicKey && strategy.user === publicKey.toBase58()
+              );
+            })
+            .map((strategy: Strategy) => (
+              <Card
+                key={strategy._id}
+                className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border-none backdrop-blur-sm relative min-h-[300px] cursor-pointer"
+                onClick={() => handleCardClick(strategy)}
+              >
+                <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                  <CardTitle className="text-lg font-bold">
+                    {strategy.name}
+                  </CardTitle>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        className="h-8 w-8 p-0"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem>Edit</DropdownMenuItem>
+                      <DropdownMenuItem className="text-destructive">
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </CardHeader>
+                <div className="absolute inset-x-0 top-[60px] bottom-0">
+                  <SimplifiedFlow
+                    nodes={strategy.nodes}
+                    edges={strategy.edges}
+                  />
+                </div>
+              </Card>
+            ))}
         </div>
       </main>
 
