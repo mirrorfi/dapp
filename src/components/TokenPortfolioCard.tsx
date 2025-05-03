@@ -1,5 +1,10 @@
+"use client"
+
 import Image from "next/image"
 import { Card } from "@/components/ui/card"
+import Moralis from "moralis"
+import { useEffect, useState } from "react"
+import { token } from "@coral-xyz/anchor/dist/cjs/utils"
 
 interface TokenData {
   amount: string
@@ -7,6 +12,7 @@ interface TokenData {
   symbol: string
   name: string
   decimals: number
+  mint: string
 }
 
 export function TokenPortfolioCard({
@@ -16,14 +22,38 @@ export function TokenPortfolioCard({
     symbol: "USDT",
     name: "USDT",
     decimals: 6,
+    mint: "12ryb6isCqHKK67LyKsJFLZtCR1sqLK8myMZtnHzEahf",
   },
 }: {
   tokenData?: TokenData
 }) {
+  const [tokenPrice, setTokenPrice] = useState<number | null>(null)
   // Format the amount with commas for thousands
   const formattedAmount = Number(tokenData.amount).toLocaleString(undefined, {
     maximumFractionDigits: 6,
   })
+
+  const fetchData = async () => {
+    try {
+      console.log("in fetch data")
+
+      const response = await Moralis.SolApi.token.getTokenPrice({
+        "network": "mainnet",
+        "address": tokenData.mint,
+      });
+    
+      console.log("the response for get token price", response.raw);
+      setTokenPrice(response.raw.usdPrice ?? null)
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  useEffect(() => {
+    // Fetch data when the component mounts
+    console.log("Fetching data...")
+    fetchData()
+  }, [])
 
   return (
     <Card className="w-full border-0 bg-[#171923] hover:bg-[#1A202C] transition-all duration-200 overflow-hidden mb-3">
@@ -61,7 +91,14 @@ export function TokenPortfolioCard({
         </div>
 
         <div className="text-right">
-          <p className="font-semibold text-base text-white tracking-wide">{formattedAmount}</p>
+          <p className="font-semibold text-base text-white tracking-wide">
+            {tokenPrice !== null ? 
+              (Number(tokenData.amount) * tokenPrice < 0.01 ? 
+              "<$0.01" : 
+              "$" + (Math.round((Number(tokenData.amount) * tokenPrice) * 100) / 100)
+              ) : 
+              "Loading..."}
+          </p>
           <p className="text-xs text-gray-400 font-medium">
             {formattedAmount} {tokenData.symbol}
           </p>

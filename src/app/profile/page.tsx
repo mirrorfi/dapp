@@ -14,9 +14,7 @@ export default function Home() {
 
     const [address, setAddress] = useState<string>("");
     const [balance, setBalance] = useState<number | null>(null);
-    const [transactions, setTransactions] = useState<any[]>([]);
     const [tokens, setTokens] = useState<any[]>([]);
-    const [historicalData, setHistoricalData] = useState<any[]>([]); // State for historical balance data
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [connection, setConnection] = useState<Connection | null>(null);
@@ -127,7 +125,7 @@ export default function Home() {
     <main className="flex min-h-screen h-screen items-center justify-between p-12 bg-gradient-to-br from-gray-900 via-black to-gray-800 text-foreground">
 
       {!loading ? 
-      <div className="w-[47.5%] min-h-[90%] h-full p-12 flex flex-col gap-6 items-center rounded-xl overflow-y-auto
+      <div className="w-[47.5%] min-h-[90%] h-full p-12 pb-24 flex flex-col gap-6 items-center rounded-xl overflow-y-auto
       bg-[#0F1218] rounded-xl border border-[#2D3748]/20">
         <h1 className="text-xl font-semibold text-gray-200">Portfolio</h1>
         <div className="w-full h-full flex flex-col gap-6">
