@@ -1,4 +1,5 @@
 import { Handle, Position, type NodeProps } from "reactflow"
+import Image from "next/image"
 
 type NodeData = {
   label: string
@@ -13,13 +14,21 @@ export function CustomNode({ data, isConnectable }: NodeProps<NodeData>) {
 
   return (
     <div className={nodeClass}>
-      <div className="custom-node-header">{data.label}</div>
+      <div className="custom-node-header" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+      <Image
+        src={data.label === "SOL Wallet" ? `/PNG/sol-logo.png` : `/PNG/${data.label.toLowerCase()}-logo.png`}
+        alt={`${data.label} logo`}
+        width={24}
+        height={24}
+      />
+      {data.label}
+      </div>
       {data.description && <div className="custom-node-content">{data.description}</div>}
       {data.percentage && <div className="custom-node-content">{data.percentage}</div>}
       <Handle type="source" position={Position.Right} isConnectable={isConnectable} />
       {/* Render handle only if label of node isn't "SOL Wallet" */}
       {data.label !== "SOL Wallet" && (
-        <Handle type="target" position={Position.Left} isConnectable={isConnectable} />
+      <Handle type="target" position={Position.Left} isConnectable={isConnectable} />
       )}
     </div>
   )

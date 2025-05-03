@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
 import {
   Dialog,
   DialogContent,
@@ -78,49 +79,51 @@ export function CreateNodeDialog({ onCreateNode, isOpen, onClose }: CreateNodeDi
           <DialogDescription>Select the type of node you want to create.</DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          {!nodeType && (
-            <div className="flex flex-col space-y-4">
-              <Button variant="outline" onClick={() => setNodeType("protocol")}>
-                Create Protocol Node
-              </Button>
-              <Button variant="outline" onClick={() => setNodeType("token")}>
-                Create Token Node
-              </Button>
-            </div>
-          )}
-
-          {nodeType === "protocol" && (
-            <div className="grid grid-cols-2 gap-4">
+          {/* Protocol Options */}
+          <div>
+            <h3 className="text-sm font-medium text-muted-foreground mb-2">Protocols</h3>
+            <div className="max-h-48 overflow-y-auto grid grid-cols-2 gap-4">
               {protocolOptions.map((protocol) => (
                 <Button
                   key={protocol}
                   variant={selectedOption === protocol ? "default" : "outline"}
-                  onClick={() => setSelectedOption(protocol)}
+                  onClick={() => {
+                    setSelectedOption(protocol);
+                    setNodeType("protocol");
+                  }}
                 >
-                  {protocol}
+                    <Image src={`/PNG/${protocol.toLowerCase()}-logo.png`} alt={`${protocol} logo`} width={24} height={24} />{protocol}
                 </Button>
               ))}
             </div>
-          )}
+          </div>
 
-          {nodeType === "token" && (
-            <div className="grid grid-cols-2 gap-4">
+          {/* Divider */}
+          <div className="border-t border-border my-4"></div>
+
+          {/* Token Options */}
+          <div>
+            <h3 className="text-sm font-medium text-muted-foreground mb-2">Tokens</h3>
+            <div className="max-h-48 overflow-y-auto grid grid-cols-2 gap-4">
               {tokenOptions.map((token) => (
                 <Button
                   key={token}
                   variant={"outline"}
                   className={selectedOption === token ? "bg-accent text-accent-foreground" : ""}
-                  onClick={() =>
-                  setSelectedOption((prev) => (prev === token ? null : token))
-                  }
+                  onClick={() => {
+                    setSelectedOption((prev) => (prev === token ? null : token));
+                    setNodeType("token");
+                  }}
                 >
-                  {token}
+                  <div className="flex items-center gap-2">
+                  <Image src={`/PNG/${token.toLowerCase()}-logo.png`} alt={`${token} logo`} width={24} height={24} />{token}
+                  </div>
                 </Button>
               ))}
             </div>
-          )}
+          </div>
         </div>
-        {nodeType && selectedOption && (
+        {selectedOption && (
           <DialogFooter>
             <Button onClick={handleConfirm} variant={"outline"}>Confirm</Button>
           </DialogFooter>
