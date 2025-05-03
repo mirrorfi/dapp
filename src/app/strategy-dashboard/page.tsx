@@ -12,6 +12,8 @@ import { Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import StrategyModal from "@/components/StrategyModal";
 
+import {getAgent} from "@/lib/agentKitUtils";
+
 interface Node {
   id: string;
   type: string;
@@ -49,6 +51,9 @@ const StrategyDashboardPage = () => {
 
   useEffect(() => {
     const fetchStrategies = async () => {
+      console.log("Fetching agent...");
+      const agent = await getAgent();
+      console.log("Agent fetched:", agent);
       try {
         const response = await fetch("/api/get-strategies");
         if (!response.ok) {
