@@ -1,5 +1,5 @@
 "use client";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import type React from "react";
 
 import ReactFlow, {
@@ -17,13 +17,18 @@ import "reactflow/dist/style.css";
 
 import Image from "next/image";
 
-import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuLink } from "@/components/ui/navigation-menu";
-import { CreateNodeDialog } from "@/components/create-node-dialog"
-import { CustomNode } from "@/components/custom-node"
-import { Button } from "@/components/ui/button"
-import { Save } from "lucide-react"
-import { createStrategy } from "@/lib/database/db_actions/test-actions"
-import { SaveStrategyDialog } from "@/components/save-strategy-dialog"
+import {
+  NavigationMenu,
+  NavigationMenuList,
+  NavigationMenuItem,
+  NavigationMenuLink,
+} from "@/components/ui/navigation-menu";
+import { CreateNodeDialog } from "@/components/create-node-dialog";
+import { CustomNode } from "@/components/custom-node";
+import { Button } from "@/components/ui/button";
+import { Save } from "lucide-react";
+import { createStrategy } from "@/lib/database/db_actions/test-actions";
+import { SaveStrategyDialog } from "@/components/save-strategy-dialog";
 import { useWallet } from "@solana/wallet-adapter-react";
 // import { testAgentKit } from "@/lib/agentKitUtils";
 
@@ -62,11 +67,11 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
 
   const { connected, publicKey } = useWallet();
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
-  const [open, setOpen] = useState(false)
-  const [saveOpen, setSaveOpen] = useState(false)
-  const [nodeToConnect, setNodeToConnect] = useState<Node | null>(null)
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const [open, setOpen] = useState(false);
+  const [saveOpen, setSaveOpen] = useState(false);
+  const [nodeToConnect, setNodeToConnect] = useState<Node | null>(null);
 
   const onConnect = useCallback(
     (params: Connection) =>
@@ -204,76 +209,100 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
   // }, []);
 
   return (
-    (connected && publicKey &&(
-    <div className="flex flex-col h-screen bg-background text-foreground">
-      <header className="p-6 bg-card border-b border-border">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Image
-              src="/SVG/MirrorFi-Logo-Blue.svg"
-              alt="MirrorFi Logo"
-              width={32}
-              height={32}
-              className="h-8 w-auto"
-            />
-            <h1 className="text-xl font-semibold">Create Yield Strategy</h1>
+    (connected && publicKey && (
+      <div className="flex flex-col h-screen bg-background text-foreground">
+        <header className="p-6 bg-card border-b border-border">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <Image
+                src="/SVG/MirrorFi-Logo-Blue.svg"
+                alt="MirrorFi Logo"
+                width={32}
+                height={32}
+                className="h-8 w-auto"
+              />
+              <h1 className="text-xl font-semibold">Create Yield Strategy</h1>
+            </div>
+            <NavigationMenu>
+              <NavigationMenuList>
+                <NavigationMenuItem>
+                  <NavigationMenuLink
+                    href="/strategy-dashboard"
+                    className="text-sm font-medium text-foreground hover:text-primary"
+                  >
+                    Strategy Dashboard
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+                {/* Add more NavigationMenuItems here if needed */}
+              </NavigationMenuList>
+            </NavigationMenu>
           </div>
-          <NavigationMenu>
-            <NavigationMenuList>
-              <NavigationMenuItem>
-                <NavigationMenuLink
-                  href="/strategy-dashboard"
-                  className="text-sm font-medium text-foreground hover:text-primary"
-                >
-                  Strategy Dashboard
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-              {/* Add more NavigationMenuItems here if needed */}
-            </NavigationMenuList>
-          </NavigationMenu>
-        </div>
-      </header>
+        </header>
 
-      <main className="flex-1">
-        <SaveStrategyDialog nodeList={nodes} edgeList={edges} isOpen={saveOpen} onClose={() => setSaveOpen(false)} userAddress={publicKey?.toBase58() || ""}/>
-        <CreateNodeDialog onCreateNode={handleCreateNode} isOpen={open} onClose={() => setOpen(false)} />
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onConnect={onConnect}
-          onNodeClick={onNodeClick}
-          nodeTypes={nodeTypes}
-          proOptions={{ hideAttribution: true }}
-          defaultViewport={{
-            zoom: 0.7,
-            x: initialNodes[0]?.position.x * 2 || 0,
-            y: initialNodes[0]?.position.y * 1.5 || 0,
-          }} // Align viewport with the initial nodes
-          className="bg-background"
+        <main className="flex-1">
+          <SaveStrategyDialog
+            nodeList={nodes}
+            edgeList={edges}
+            isOpen={saveOpen}
+            onClose={() => setSaveOpen(false)}
+            userAddress={publicKey?.toBase58() || ""}
+          />
+          <CreateNodeDialog
+            onCreateNode={handleCreateNode}
+            isOpen={open}
+            onClose={() => setOpen(false)}
+          />
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            onNodeClick={onNodeClick}
+            nodeTypes={nodeTypes}
+            proOptions={{ hideAttribution: true }}
+            defaultViewport={{
+              zoom: 0.7,
+              x: initialNodes[0]?.position.x * 2 || 0,
+              y: initialNodes[0]?.position.y * 1.5 || 0,
+            }} // Align viewport with the initial nodes
+            className="bg-background"
+          >
+            {/* <Controls className="bg-card border border-border text-foreground" /> */}
+            <Background color="#3b82f6" gap={16} size={1} />
+          </ReactFlow>
+          <div className="absolute bottom-4 right-4 flex space-x-2">
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setSaveOpen(true);
+              }}
+            >
+              <Save />
+              Save Strategy
+            </Button>
+          </div>
+        </main>
+      </div>
+    )) ||
+    (!connected && (
+      <div className="flex flex-col items-center justify-center h-screen bg-background text-foreground">
+        <h1 className="text-2xl font-semibold">
+          Connect your wallet to create a strategy
+        </h1>
+        <p className="mt-4 text-sm text-muted-foreground">
+          Please connect your wallet to access this feature.
+        </p>
+        <Button
+          variant="outline"
+          className="mt-4"
+          onClick={() => (window.location.href = "/")}
         >
-          {/* <Controls className="bg-card border border-border text-foreground" /> */}
-          <Background color="#3b82f6" gap={16} size={1} />
-        </ReactFlow>
-        <div className="absolute bottom-4 right-4 flex space-x-2">
-          <Button variant="ghost" onClick={() => {setSaveOpen(true)}}>
-            <Save/>Save Strategy
-          </Button>
-        </div>
-      </main>
-    </div>
-  )))
-  
-  || ( !connected && (
-    <div className="flex flex-col items-center justify-center h-screen bg-background text-foreground">
-      <h1 className="text-2xl font-semibold">Connect your wallet to create a strategy</h1>
-      <p className="mt-4 text-sm text-muted-foreground">Please connect your wallet to access this feature.</p>
-      <Button variant="outline" className="mt-4" onClick={() => window.location.href = "/"}>
-        Connect Wallet
+          Connect Wallet
         </Button>
-        </div>
-      ));
+      </div>
+    ))
+  );
 };
 
 export default CreateStrategyPage;
