@@ -55,11 +55,5 @@
     "eslint-config-next": "15.2.3",
     "tailwindcss": "^4",
     "typescript": "^5"
-  },
-  "overrides": {
-    "rpc-websockets": {
-      "rpc-websockets/dist/lib/client": "7.11.0",
-      "@solana-developers/helpers": "2.8.0"
-    }
   }
 }
