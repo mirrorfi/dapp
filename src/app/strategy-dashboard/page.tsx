@@ -7,15 +7,8 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-
 import Image from "next/image";
-import { MoreHorizontal } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import StrategyModal from "@/components/StrategyModal";
 
@@ -183,23 +176,21 @@ const StrategyDashboardPage = () => {
                   <CardTitle className="text-lg font-bold">
                     {strategy.name}
                   </CardTitle>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
+                  {connected &&
+                    publicKey &&
+                    strategy.user === publicKey.toBase58() && (
                       <Button
                         variant="ghost"
-                        className="h-8 w-8 p-0"
-                        onClick={(e) => e.stopPropagation()}
+                        size="icon"
+                        className="h-8 w-8 p-0 hover:text-destructive cursor-pointer"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // TODO: Implement delete functionality
+                        }}
                       >
-                        <MoreHorizontal className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4" />
                       </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem>Edit</DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive">
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                    )}
                 </CardHeader>
                 <div className="absolute inset-x-0 top-[60px] bottom-0">
                   <SimplifiedFlow
