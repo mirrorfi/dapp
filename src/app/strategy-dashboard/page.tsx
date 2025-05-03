@@ -2,12 +2,7 @@
 
 import { useWallet } from "@solana/wallet-adapter-react";
 import SimplifiedFlow from "@/components/simplified-flow";
-import {
-  NavigationMenu,
-  NavigationMenuList,
-  NavigationMenuItem,
-  NavigationMenuLink,
-} from "@/components/ui/navigation-menu";
+import { InteractiveHoverButton } from "@/components/magicui/interactive-hover-button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -126,39 +121,24 @@ const StrategyDashboardPage = () => {
 
       <main className="p-6">
         <div className="mb-8 flex flex-col sm:flex-row items-center justify-between gap-4 sm:space-x-2">
-          <NavigationMenu>
-            <NavigationMenuList>
-              <NavigationMenuItem>
-                <NavigationMenuLink
-                  href="/create-strategy?nodeList=[]&edgeList=[]"
-                  className="inline-flex items-center rounded-md px-4 py-1.5 text-sm font-medium transition-colors bg-primary hover:bg-primary hover:text-primary-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-                >
-                  <svg
-                    className="mr-2 h-4 w-4"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 4v16m8-8H4"
-                    />
-                  </svg>
-                  Create Strategy
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-            </NavigationMenuList>
-          </NavigationMenu>
-          <div className="flex space-x-2">
-            <Input
-              placeholder="Search strategies..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full sm:w-[400px] lg:w-[500px]"
-            />
+          <div className="flex-1/3">
+            <InteractiveHoverButton
+              onClick={() =>
+                (window.location.href =
+                  "/create-strategy?nodeList=[]&edgeList=[]")
+              }
+              className="text-sm border-gray-700"
+            >
+              Create Strategy
+            </InteractiveHoverButton>
+          </div>
+          <Input
+            placeholder="Search strategies..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full sm:w-[400px] lg:w-[500px] rounded-full flex-1/3"
+          />
+          <div className="flex-1/3 flex justify-end">
             <Tabs
               defaultValue="all"
               value={activeTab}
