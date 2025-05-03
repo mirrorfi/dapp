@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   DropdownMenu,
@@ -55,6 +56,7 @@ const StrategyDashboardPage = () => {
   );
   const [modalOpen, setModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const { connected, publicKey } = useWallet();
 
   useEffect(() => {
@@ -119,12 +121,17 @@ const StrategyDashboardPage = () => {
             />
             <h1 className="text-xl font-semibold">MirrorFi</h1>
           </div>
+        </div>
+      </header>
+
+      <main className="p-6">
+        <div className="mb-8 flex flex-col sm:flex-row items-center justify-between gap-4 sm:space-x-2">
           <NavigationMenu>
             <NavigationMenuList>
               <NavigationMenuItem>
                 <NavigationMenuLink
                   href="/create-strategy?nodeList=[]&edgeList=[]"
-                  className="inline-flex items-center rounded-md px-4 py-2 text-sm font-medium transition-colors bg-primary hover:bg-primary hover:text-primary-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                  className="inline-flex items-center rounded-md px-4 py-1.5 text-sm font-medium transition-colors bg-primary hover:bg-primary hover:text-primary-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                 >
                   <svg
                     className="mr-2 h-4 w-4"
@@ -145,30 +152,46 @@ const StrategyDashboardPage = () => {
               </NavigationMenuItem>
             </NavigationMenuList>
           </NavigationMenu>
-        </div>
-      </header>
-
-      <main className="p-6">
-        <div className="mb-8">
-          <Tabs
-            defaultValue="all"
-            value={activeTab}
-            onValueChange={setActiveTab}
-            className="w-full"
-          >
-            <TabsList className="grid w-[400px] grid-cols-2 mb-2">
-              <TabsTrigger value="all">All Strategies</TabsTrigger>
-              <TabsTrigger value="mine">My Strategies</TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <div className="flex space-x-2">
+            <Input
+              placeholder="Search strategies..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full sm:w-[400px] lg:w-[500px]"
+            />
+            <Tabs
+              defaultValue="all"
+              value={activeTab}
+              onValueChange={setActiveTab}
+              className="w-full sm:w-[300px] lg:w-[400px]"
+            >
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="all">All Strategies</TabsTrigger>
+                <TabsTrigger value="mine">My Strategies</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {strategies
             .filter((strategy) => {
-              if (activeTab === "all") return true;
-              return (
-                connected && publicKey && strategy.user === publicKey.toBase58()
-              );
+              // First filter by tab
+              const tabFilter =
+                activeTab === "all"
+                  ? true
+                  : connected &&
+                    publicKey &&
+                    strategy.user === publicKey.toBase58();
+
+              // Then filter by search query
+              const searchFilter =
+                searchQuery.trim() === ""
+                  ? true
+                  : strategy.name
+                      .toLowerCase()
+                      .includes(searchQuery.toLowerCase());
+
+              return tabFilter && searchFilter;
             })
             .map((strategy: Strategy) => (
               <Card
