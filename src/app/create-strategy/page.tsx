@@ -24,6 +24,8 @@ import { Button } from "@/components/ui/button"
 import { Save } from "lucide-react"
 import { createStrategy } from "@/lib/database/db_actions/test-actions"
 import { SaveStrategyDialog } from "@/components/save-strategy-dialog"
+import { useWallet } from "@solana/wallet-adapter-react";
+import { testAgentKit } from "@/lib/agentKitUtils";
 
 // Define node types
 const nodeTypes = {
@@ -57,6 +59,8 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
   // Initialize state for nodes and edges
   initialNodes = nodeList.length > 0 ? nodeList : initialNodes;
   initialEdges = edgeList.length > 0 ? edgeList : initialEdges;
+
+  const { connected, publicKey } = useWallet();
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
@@ -200,6 +204,7 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
   // }, []);
 
   return (
+    (connected && publicKey &&(
     <div className="flex flex-col h-screen bg-background text-foreground">
       <header className="p-6 bg-card border-b border-border">
         <div className="flex items-center justify-between">
@@ -230,7 +235,7 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
       </header>
 
       <main className="flex-1">
-        <SaveStrategyDialog nodeList={nodes} edgeList={edges} isOpen={saveOpen} onClose={() => setSaveOpen(false)}/>
+        <SaveStrategyDialog nodeList={nodes} edgeList={edges} isOpen={saveOpen} onClose={() => setSaveOpen(false)} user={publicKey?.toBase58() || ""}/>
         <CreateNodeDialog onCreateNode={handleCreateNode} isOpen={open} onClose={() => setOpen(false)} />
         <ReactFlow
           nodes={nodes}
@@ -258,7 +263,17 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
         </div>
       </main>
     </div>
-  );
+  )))
+  
+  || ( !connected && (
+    <div className="flex flex-col items-center justify-center h-screen bg-background text-foreground">
+      <h1 className="text-2xl font-semibold">Connect your wallet to create a strategy</h1>
+      <p className="mt-4 text-sm text-muted-foreground">Please connect your wallet to access this feature.</p>
+      <Button variant="outline" className="mt-4" onClick={() => window.location.href = "/"}>
+        Connect Wallet
+        </Button>
+        </div>
+      ));
 };
 
 export default CreateStrategyPage;
