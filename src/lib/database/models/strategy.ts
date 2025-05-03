@@ -31,6 +31,7 @@ export interface IEdge {
 export interface IStrategy {
   nodes: INode[];
   edges: IEdge[];
+  name: string;
 }
 
 const NodeSchema = new Schema<INode>({
@@ -64,6 +65,7 @@ const EdgeSchema = new Schema<IEdge>({
 const StrategySchema = new Schema<IStrategy>({
   nodes: { type: [NodeSchema], required: true },
   edges: { type: [EdgeSchema], required: true },
+  name: { type: String, required: true },
 });
 
 const Strategy = models.Strategy || model<IStrategy>('Strategy', StrategySchema);

@@ -17,20 +17,13 @@ import "reactflow/dist/style.css";
 
 import Image from "next/image";
 
-import {
-  NavigationMenu,
-  NavigationMenuList,
-  NavigationMenuItem,
-  NavigationMenuLink,
-} from "@/components/ui/navigation-menu";
-import { CreateNodeDialog } from "@/components/create-node-dialog";
-import { CustomNode } from "@/components/custom-node";
-import { Button } from "@/components/ui/button";
-import { Save } from "lucide-react";
-import { createStrategy } from "@/lib/database/db_actions/test-actions";
-import { testAgentKit } from "@/lib/agentKitUtils";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { text } from "stream/consumers";
+import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuLink } from "@/components/ui/navigation-menu";
+import { CreateNodeDialog } from "@/components/create-node-dialog"
+import { CustomNode } from "@/components/custom-node"
+import { Button } from "@/components/ui/button"
+import { Save } from "lucide-react"
+import { createStrategy } from "@/lib/database/db_actions/test-actions"
+import { SaveStrategyDialog } from "@/components/save-strategy-dialog"
 
 // Define node types
 const nodeTypes = {
@@ -65,10 +58,11 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
   initialNodes = nodeList.length > 0 ? nodeList : initialNodes;
   initialEdges = edgeList.length > 0 ? edgeList : initialEdges;
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-  const [open, setOpen] = useState(false);
-  const [nodeToConnect, setNodeToConnect] = useState<Node | null>(null);
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
+  const [open, setOpen] = useState(false)
+  const [saveOpen, setSaveOpen] = useState(false)
+  const [nodeToConnect, setNodeToConnect] = useState<Node | null>(null)
 
   const onConnect = useCallback(
     (params: Connection) =>
@@ -236,11 +230,8 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
       </header>
 
       <main className="flex-1">
-        <CreateNodeDialog
-          onCreateNode={handleCreateNode}
-          isOpen={open}
-          onClose={() => setOpen(false)}
-        />
+        <SaveStrategyDialog nodeList={nodes} edgeList={edges} isOpen={saveOpen} onClose={() => setSaveOpen(false)}/>
+        <CreateNodeDialog onCreateNode={handleCreateNode} isOpen={open} onClose={() => setOpen(false)} />
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -261,14 +252,8 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
           <Background color="#3b82f6" gap={16} size={1} />
         </ReactFlow>
         <div className="absolute bottom-4 right-4 flex space-x-2">
-          <Button variant="ghost" onClick={handleSaveStrategy}>
-            <Save />
-            Save Strategy
-          </Button>
-
-          <Button variant="ghost" onClick={() => handleAgentKitTest()}>
-            <Save />
-            Run AgentKit
+          <Button variant="ghost" onClick={() => {setSaveOpen(true)}}>
+            <Save/>Save Strategy
           </Button>
         </div>
       </main>

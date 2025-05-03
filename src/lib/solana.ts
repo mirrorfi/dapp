@@ -5,6 +5,7 @@ import {
   SystemProgram,
   Transaction,
 } from "@solana/web3.js";
+import { TOKEN_PROGRAM_ID, getMint } from "@solana/spl-token";
 
 // Custom error types for better error handling
 export class SolanaError extends Error {
@@ -89,6 +90,48 @@ export const checkForWallets = (): boolean => {
 };
 
 // Create a SOL transfer transaction
+// Fetch token balances for a wallet
+export const getTokenBalances = async (
+  connection: Connection,
+  walletPublicKey: PublicKey
+) => {
+  try {
+    const tokenAccounts = await connection.getParsedTokenAccountsByOwner(
+      walletPublicKey,
+      { programId: TOKEN_PROGRAM_ID }
+    );
+
+    const balances = await Promise.all(
+      tokenAccounts.value.map(async (tokenAccount) => {
+        const parsedInfo = tokenAccount.account.data.parsed.info;
+        const mintAddress = parsedInfo.mint;
+        const amount = parsedInfo.tokenAmount.uiAmount;
+
+        // Get mint info for decimals and symbol
+        const mintInfo = await getMint(connection, new PublicKey(mintAddress));
+
+        return {
+          mint: mintAddress,
+          balance: amount,
+          decimals: mintInfo.decimals,
+        };
+      })
+    );
+
+    // Also get SOL balance
+    const solBalance = await connection.getBalance(walletPublicKey);
+
+    return {
+      tokens: balances,
+      sol: solBalance / LAMPORTS_PER_SOL,
+    };
+  } catch (error: unknown) {
+    throw new SolanaError(
+      error instanceof Error ? error.message : "Failed to fetch token balances"
+    );
+  }
+};
+
 export const createTransferTransaction = async (
   connection: Connection,
   fromPubkey: PublicKey,
@@ -100,8 +143,10 @@ export const createTransferTransaction = async (
     let toPubkey: PublicKey;
     try {
       toPubkey = new PublicKey(toPubkeyStr);
-    } catch (error) {
-      throw new TransactionError("Invalid recipient address");
+    } catch (error: unknown) {
+      throw new TransactionError(
+        error instanceof Error ? error.message : "Invalid recipient address"
+      );
     }
 
     // Validate amount
