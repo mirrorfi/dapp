@@ -7,15 +7,8 @@ import {
   NavigationMenuItem,
   NavigationMenuLink,
 } from "@/components/ui/navigation-menu";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -154,11 +147,10 @@ const StrategyDashboardPage = () => {
           {strategies.map((strategy: Strategy) => (
             <Card
               key={strategy._id}
-              className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border-none backdrop-blur-sm relative min-h-[200px] cursor-pointer"
+              className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border-none backdrop-blur-sm relative min-h-[300px] cursor-pointer"
               onClick={() => handleCardClick(strategy)}
             >
-              <SimplifiedFlow nodes={strategy.nodes} edges={strategy.edges} />
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 relative z-10">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0">
                 <CardTitle className="text-lg font-bold">
                   {strategy.name}
                 </CardTitle>
@@ -180,6 +172,9 @@ const StrategyDashboardPage = () => {
                   </DropdownMenuContent>
                 </DropdownMenu>
               </CardHeader>
+              <div className="absolute inset-x-0 top-[60px] bottom-0">
+                <SimplifiedFlow nodes={strategy.nodes} edges={strategy.edges} />
+              </div>
             </Card>
           ))}
         </div>
