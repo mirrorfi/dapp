@@ -2,6 +2,7 @@
 
 import ReactFlow, { Node, Edge, ReactFlowProvider } from "reactflow";
 import "reactflow/dist/style.css";
+import { CustomNode } from "./custom-node";
 
 interface SimplifiedFlowProps {
   nodes: Node[];
@@ -14,6 +15,10 @@ export default function SimplifiedFlow({
   edges,
   className = "",
 }: SimplifiedFlowProps) {
+  const nodeTypes = {
+    customNode: CustomNode,
+  };
+
   return (
     <ReactFlowProvider>
       <div
@@ -22,6 +27,7 @@ export default function SimplifiedFlow({
         <ReactFlow
           nodes={nodes}
           edges={edges}
+          nodeTypes={nodeTypes}
           fitView
           nodesDraggable={false}
           nodesConnectable={false}
