@@ -13,7 +13,7 @@ export const testAgentKit = async (rpcUrl: string, walletContext: any) => {
 
   // const wallet = new CustomKeypairWallet(rpcUrl, walletContext)
   console.log("Initializing keypair")
-  const keyPair = Keypair.fromSecretKey(bs58.decode("3JNLWxD72DrwfqmVHuPqFLDkFuM8aRbZ242niCufo61pjTiegK3MoWPxL4ZQwTEm1ctZQFjtRg9LhP4Wp9GVXuwf"))
+  const keyPair = Keypair.generate(); // Generate a new keypair
   const wallet = new KeypairWallet(keyPair)
   
   
@@ -38,3 +38,11 @@ export const testAgentKit = async (rpcUrl: string, walletContext: any) => {
   
   console.log("Price of SOL/USD:", price);
 }
+
+testAgentKit("https://api.mainnet-beta.solana.com", null)
+  .then(() => {
+    console.log("AgentKit test completed successfully.");
+})
+.catch((error) => {
+  console.error("Error during AgentKit test:", error);
+});
