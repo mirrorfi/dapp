@@ -18,7 +18,7 @@ import { Edge, Node } from "reactflow"
 interface StrategyProps {
     nodeList: Node[]
     edgeList: Edge[]
-    user: string
+    userAddress: string
 
     isOpen: boolean
     onClose: () => void
@@ -26,6 +26,7 @@ interface StrategyProps {
 
 
 export function SaveStrategyDialog({ nodeList, edgeList, userAddress, isOpen, onClose}: StrategyProps) {
+    console.log("User Address:", userAddress)
     const [strategyName, setStrategyName] = useState("")
 
     const handleClose = () => {

@@ -25,7 +25,7 @@ import { Save } from "lucide-react"
 import { createStrategy } from "@/lib/database/db_actions/test-actions"
 import { SaveStrategyDialog } from "@/components/save-strategy-dialog"
 import { useWallet } from "@solana/wallet-adapter-react";
-import { testAgentKit } from "@/lib/agentKitUtils";
+// import { testAgentKit } from "@/lib/agentKitUtils";
 
 // Define node types
 const nodeTypes = {
@@ -151,47 +151,47 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
     setOpen(true);
   }, []);
 
-  const handleSaveStrategy = () => {
-    // Ensure all nodes have a description (default to an empty string if missing)
-    console.log("Nodes before sanitization:", nodes);
-    console.log("Edges before sanitization:", edges);
-    const sanitizedNodes = nodes.map((node) => ({
-      ...node,
-      data: {
-        ...node.data,
-        description: node.data.description || "Description", // Provide a default value for description
-      },
-    }));
+  // const handleSaveStrategy = () => {
+  //   // Ensure all nodes have a description (default to an empty string if missing)
+  //   console.log("Nodes before sanitization:", nodes);
+  //   console.log("Edges before sanitization:", edges);
+  //   const sanitizedNodes = nodes.map((node) => ({
+  //     ...node,
+  //     data: {
+  //       ...node.data,
+  //       description: node.data.description || "Description", // Provide a default value for description
+  //     },
+  //   }));
 
-    console.log("Nodes after sanitization:", sanitizedNodes);
+  //   console.log("Nodes after sanitization:", sanitizedNodes);
 
-    // Save the strategy to the database
-    const strategy = {
-      nodes: sanitizedNodes,
-      edges: edges,
-    };
+  //   // Save the strategy to the database
+  //   const strategy = {
+  //     nodes: sanitizedNodes,
+  //     edges: edges,
+  //   };
 
-    createStrategy(strategy)
-      .then((response) => {
-        console.log("Strategy saved successfully:", response);
-        // Optionally, redirect or show a success message
-        window.location.href = "/strategy-dashboard"; // Redirect to the strategy dashboard
-      })
-      .catch((error) => {
-        console.error("Error saving strategy:", error);
-      });
-  };
+  //   createStrategy(strategy)
+  //     .then((response) => {
+  //       console.log("Strategy saved successfully:", response);
+  //       // Optionally, redirect or show a success message
+  //       window.location.href = "/strategy-dashboard"; // Redirect to the strategy dashboard
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error saving strategy:", error);
+  //     });
+  // };
 
   // const walletContext = useWallet();
 
-  async function handleAgentKitTest() {
-    // Implement your logic here
-    const rpc_url =
-      process.env.NEXT_PUBLIC_RPC_URL || "https://api.mainnet-beta.solana.com";
-    const walletContext = null;
-    console.log("RUNNING AGENT KIT TEST");
-    testAgentKit(rpc_url, walletContext);
-  }
+  // async function handleAgentKitTest() {
+  //   // Implement your logic here
+  //   const rpc_url =
+  //     process.env.NEXT_PUBLIC_RPC_URL || "https://api.mainnet-beta.solana.com";
+  //   const walletContext = null;
+  //   console.log("RUNNING AGENT KIT TEST");
+  //   testAgentKit(rpc_url, walletContext);
+  // }
 
   // useEffect(() => {
   //   handleAgentKitTest()
@@ -235,7 +235,7 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
       </header>
 
       <main className="flex-1">
-        <SaveStrategyDialog nodeList={nodes} edgeList={edges} isOpen={saveOpen} onClose={() => setSaveOpen(false)} user={publicKey?.toBase58() || ""}/>
+        <SaveStrategyDialog nodeList={nodes} edgeList={edges} isOpen={saveOpen} onClose={() => setSaveOpen(false)} userAddress={publicKey?.toBase58() || ""}/>
         <CreateNodeDialog onCreateNode={handleCreateNode} isOpen={open} onClose={() => setOpen(false)} />
         <ReactFlow
           nodes={nodes}
