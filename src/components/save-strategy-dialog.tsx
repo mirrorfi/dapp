@@ -18,13 +18,14 @@ import { Edge, Node } from "reactflow"
 interface StrategyProps {
     nodeList: Node[]
     edgeList: Edge[]
+    user: string
 
     isOpen: boolean
     onClose: () => void
 }
 
 
-export function SaveStrategyDialog({ nodeList, edgeList, isOpen, onClose}: StrategyProps) {
+export function SaveStrategyDialog({ nodeList, edgeList, userAddress, isOpen, onClose}: StrategyProps) {
     const [strategyName, setStrategyName] = useState("")
 
     const handleClose = () => {
@@ -48,6 +49,7 @@ export function SaveStrategyDialog({ nodeList, edgeList, isOpen, onClose}: Strat
             nodes: sanitizedNodes,
             edges: edgeList,
             name: strategyName,
+            user: userAddress, // Use the user address passed as a prop
 
             };
 
