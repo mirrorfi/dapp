@@ -28,12 +28,21 @@ interface StrategyProps {
 export function SaveStrategyDialog({ nodeList, edgeList, userAddress, isOpen, onClose}: StrategyProps) {
     console.log("User Address:", userAddress)
     const [strategyName, setStrategyName] = useState("")
+    const [description, setDescription] = useState("")
 
     const handleClose = () => {
         onClose()
     }
 
     const handleSave = () => {
+        if (!strategyName) {
+            alert("Please enter a strategy name")
+            return
+        }
+        if (!description) {
+            alert("Please enter a description")
+            return
+        }
             // Save the strategy to the database or perform any other action
             console.log("Saving strategy:", strategyName, nodeList, edgeList)
             connectToDatabase()
@@ -51,6 +60,7 @@ export function SaveStrategyDialog({ nodeList, edgeList, userAddress, isOpen, on
             edges: edgeList,
             name: strategyName,
             user: userAddress, // Use the user address passed as a prop
+            description: description, // Use the description from the input field
 
             };
 
@@ -84,7 +94,10 @@ export function SaveStrategyDialog({ nodeList, edgeList, userAddress, isOpen, on
             </DialogHeader>
 
             {/* Add input field to ask user for name of the strategy */}
-            <DialogDescription className="py-4">
+            <DialogDescription>
+                <p className="text-sm text-gray-500">Enter a name for your strategy:</p>
+            </DialogDescription>
+            <DialogDescription className="mb-4">
                 <Input
                     type="text"
                     placeholder="Enter strategy name"
@@ -94,7 +107,22 @@ export function SaveStrategyDialog({ nodeList, edgeList, userAddress, isOpen, on
                 />
             </DialogDescription>
 
+            <DialogDescription>
+                <p className="text-sm text-gray-500">Enter a description for your strategy:</p>
+            </DialogDescription>
+            <DialogDescription className="mb-4">
+                <Input
+                    type="text"
+                    placeholder="Enter description"
+                    className="border border-gray-300 rounded-md p-2 w-full"
+                    onChange={(e) => setDescription(e.target.value)}
+                    value={description}
+                />
+            </DialogDescription>
             <DialogFooter>
+            <DialogDescription className="">
+                <p className="text-sm text-gray-500">This strategy will be saved to your account.</p>
+            </DialogDescription>
                 <Button onClick={handleSave} variant={"outline"}>Confirm</Button>
             </DialogFooter>
         </DialogContent>

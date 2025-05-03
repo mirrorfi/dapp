@@ -15,21 +15,15 @@ import ReactFlow, {
 } from "reactflow";
 import "reactflow/dist/style.css";
 
-import Image from "next/image";
-
-import {
-  NavigationMenu,
-  NavigationMenuList,
-  NavigationMenuItem,
-  NavigationMenuLink,
-} from "@/components/ui/navigation-menu";
 import { CreateNodeDialog } from "@/components/create-node-dialog";
 import { CustomNode } from "@/components/custom-node";
 import { Button } from "@/components/ui/button";
 import { Save } from "lucide-react";
-import { createStrategy } from "@/lib/database/db_actions/test-actions";
+
 import { SaveStrategyDialog } from "@/components/save-strategy-dialog";
 import { useWallet } from "@solana/wallet-adapter-react";
+import { Navbar } from "@/components/navbar";
+import { NodeModal } from "@/components/node-modal";
 // import { testAgentKit } from "@/lib/agentKitUtils";
 
 // Define node types
@@ -71,6 +65,7 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [open, setOpen] = useState(false);
   const [saveOpen, setSaveOpen] = useState(false);
+  const [nodeOpen, setNodeOpen] = useState(false);
   const [nodeToConnect, setNodeToConnect] = useState<Node | null>(null);
 
   const onConnect = useCallback(
@@ -153,7 +148,7 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
 
   const onNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
     setNodeToConnect(node);
-    setOpen(true);
+    setNodeOpen(true);
   }, []);
 
   // const handleSaveStrategy = () => {
@@ -211,8 +206,9 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
   return (
     (connected && publicKey && (
       <div className="flex flex-col h-screen bg-background text-foreground">
-        <header className="p-6 bg-card border-b border-border">
-          <div className="flex items-center justify-between">
+        <header className="">
+          <Navbar />
+          {/* <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <Image
                 src="/SVG/MirrorFi-Logo-Blue.svg"
@@ -233,10 +229,10 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
                     Strategy Dashboard
                   </NavigationMenuLink>
                 </NavigationMenuItem>
-                {/* Add more NavigationMenuItems here if needed */}
+                {/* Add more NavigationMenuItems here if needed 
               </NavigationMenuList>
             </NavigationMenu>
-          </div>
+          </div> */}
         </header>
 
         <main className="flex-1">
@@ -252,6 +248,7 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
             isOpen={open}
             onClose={() => setOpen(false)}
           />
+          <NodeModal node={nodeToConnect} isOpen={nodeOpen} onClose={() => setNodeOpen(false) } onCreateHook={() => {setNodeOpen(false); setOpen(true)} }          />
           <ReactFlow
             nodes={nodes}
             edges={edges}
