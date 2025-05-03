@@ -21,9 +21,7 @@ export default function SimplifiedFlow({
 
   return (
     <ReactFlowProvider>
-      <div
-        className={`${className} absolute inset-0 opacity-20 pointer-events-none`}
-      >
+      <div className={`${className} absolute inset-0 pointer-events-none`}>
         <ReactFlow
           nodes={nodes}
           edges={edges}
