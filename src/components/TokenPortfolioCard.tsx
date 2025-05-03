@@ -4,7 +4,6 @@ import Image from "next/image"
 import { Card } from "@/components/ui/card"
 import Moralis from "moralis"
 import { useEffect, useState } from "react"
-import { token } from "@coral-xyz/anchor/dist/cjs/utils"
 
 interface TokenData {
   amount: string
@@ -28,14 +27,17 @@ export function TokenPortfolioCard({
   tokenData?: TokenData
 }) {
   const [tokenPrice, setTokenPrice] = useState<number | null>(null)
+  const [token24hrPrice, setToken24hrPrice] = useState<number | null>(null)
+  const [tokenPricePercentageChange, setTokenPricePercentageChange] = useState<number | null>(null)
+  const [apiResponse, setApiResponse] = useState<any>(null)
+
   // Format the amount with commas for thousands
   const formattedAmount = Number(tokenData.amount).toLocaleString(undefined, {
     maximumFractionDigits: 6,
   })
 
-  const fetchData = async () => {
+  const fetchTokenprice = async () => {
     try {
-      console.log("in fetch data")
 
       const response = await Moralis.SolApi.token.getTokenPrice({
         "network": "mainnet",
@@ -43,7 +45,8 @@ export function TokenPortfolioCard({
       });
     
       console.log("the response for get token price", response.raw);
-      setTokenPrice(response.raw.usdPrice ?? null)
+      setTokenPrice(response.raw.usdPrice ?? null);
+      setApiResponse(response.raw);
     } catch (e) {
       console.error(e);
     }
@@ -52,7 +55,7 @@ export function TokenPortfolioCard({
   useEffect(() => {
     // Fetch data when the component mounts
     console.log("Fetching data...")
-    fetchData()
+    fetchTokenprice()
   }, [])
 
   return (
@@ -85,13 +88,13 @@ export function TokenPortfolioCard({
           </div>
 
           <div className="flex flex-col">
-            <h3 className="font-bold text-base text-white tracking-wide">{tokenData.symbol}</h3>
-            <p className="text-xs text-gray-400 font-medium">{tokenData.name}</p>
+            <h3 className="font-bold text-base text-white tracking-wide">{tokenData.name}</h3>
+            <p className="text-xs text-gray-400 font-medium">{formattedAmount} {tokenData.symbol}</p>
           </div>
         </div>
 
         <div className="text-right">
-          <p className="font-semibold text-base text-white tracking-wide">
+          <p className="font-semibold text-base text-white tracking-wide font">
             {tokenPrice !== null ? 
               (Number(tokenData.amount) * tokenPrice < 0.01 ? 
               "<$0.01" : 
@@ -99,9 +102,23 @@ export function TokenPortfolioCard({
               ) : 
               "Loading..."}
           </p>
-          <p className="text-xs text-gray-400 font-medium">
-            {formattedAmount} {tokenData.symbol}
-          </p>
+            <p
+            className={`text-base font-medium ${
+              apiResponse?.usdPrice24hrUsdChange > 0
+              ? "text-green-500"
+              : "text-red-500"
+            }`}
+            >
+            {apiResponse != null ? 
+            (Math.abs(apiResponse.usdPrice24hrUsdChange) < 0.01 ? 
+              (apiResponse.usdPrice24hrUsdChange > 0 ? "+<$0.01" : "-<$0.01") : 
+              (apiResponse.usdPrice24hrUsdChange > 0 ? 
+              "+$" + (Math.round(apiResponse.usdPrice24hrUsdChange * 100) / 100) : 
+              "-$" + Math.abs(Math.round(apiResponse.usdPrice24hrUsdChange * 100) / 100)
+              )
+            ) : 
+            "Loading..."}
+            </p>
         </div>
       </div>
     </Card>

@@ -101,22 +101,10 @@ export default function Home() {
     checkLocalSignature();
   }, [publicKey]);  
 
-  const handleTermsSigned = () => {
-    setHasSignedTerms(true);
-  };
-
   if (checking) {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center p-24 bg-gradient-to-br from-gray-900 via-black to-gray-800 text-foreground">
         <div>Loading...</div>
-      </main>
-    );
-  }
-
-  if (connected && !hasSignedTerms) {
-    return (
-      <main className="flex min-h-screen flex-col items-center justify-center p-24 bg-gradient-to-br from-gray-900 via-black to-gray-800 text-foreground">
-        <TermsOfService onSign={handleTermsSigned} />
       </main>
     );
   }
@@ -140,17 +128,6 @@ export default function Home() {
       }
 
       <WalletMultiButton />
-
-    
-
-      {/* <div className="w-[47.5%] min-h-[90%] h-full p-6 flex flex-col gap-6 bg-[#1a1a1a] dark items-center">
-        <h1 className="text-xl font-semibold text-gray-200">Chat Interface</h1>
-        <div className="w-[70%] h-full flex flex-col gap-6">
-          <Card className="w-full h-1/2 p-4 bg-[#2a2a2a] border-[#3a3a3a] flex flex-col">
-            <h2 className="text-xl font-semibold text-gray-200">Dashboard</h2>
-          </Card>
-        </div>
-      </div> */}
 
     </main>
   );
