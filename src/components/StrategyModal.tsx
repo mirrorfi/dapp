@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import SimplifiedFlow from "@/components/simplified-flow";
+import InteractiveFlow from "@/components/interactive-flow";
 import type { Node, Edge } from "reactflow";
 
 interface TokenBalance {
@@ -122,7 +122,7 @@ const StrategyModal: FC<StrategyModalProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Left side: Strategy flow visualization */}
           <div className="rounded-lg p-6 min-h-[400px] h-[500px] col-span-2 relative">
-            <SimplifiedFlow
+            <InteractiveFlow
               nodes={strategy.nodes}
               edges={strategy.edges}
               className="absolute inset-6"
