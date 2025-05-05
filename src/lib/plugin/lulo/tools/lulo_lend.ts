@@ -14,6 +14,9 @@ export async function luloLend(
   amount: number,
 ) {
   try {
+    if (!agent.config?.FLEXLEND_API_KEY) {
+      throw new Error("Lulo API key not found in agent configuration");
+    }
     const response = await fetch(
       "https://api.flexlend.fi/generate/account/deposit?priorityFee=50000",
       {
@@ -21,7 +24,7 @@ export async function luloLend(
         headers: {
           "Content-Type": "application/json",
           "x-wallet-pubkey": agent.wallet.publicKey.toBase58(),
-          "x-api-key": process.env.FLEXLEND_API_KEY!,
+          "x-api-key": agent.config?.FLEXLEND_API_KEY,
         },
         body: JSON.stringify({
           owner: agent.wallet.publicKey.toBase58(),

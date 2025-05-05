@@ -9,6 +9,9 @@ import { type SolanaAgentKit, signOrSendTX } from "solana-agent-kit";
  */
 export async function lendAsset(agent: SolanaAgentKit, amount: number) {
   try {
+    console.log("User:",agent.wallet.publicKey.toBase58());
+    console.log("Agent:", agent);
+    console.log("Amount:",amount);
     const response = await fetch(
       `https://blink.lulo.fi/actions?amount=${amount}&symbol=USDC`,
       {
@@ -33,7 +36,8 @@ export async function lendAsset(agent: SolanaAgentKit, amount: number) {
     const { blockhash } = await agent.connection.getLatestBlockhash();
     luloTxn.message.recentBlockhash = blockhash;
 
-    return signOrSendTX(agent, luloTxn);
+    // return signOrSendTX(agent, luloTxn);
+    return luloTxn
   } catch (error: any) {
     throw new Error(`Lending failed: ${error.message}`);
   }

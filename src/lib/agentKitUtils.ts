@@ -5,7 +5,7 @@ import { Keypair } from "@solana/web3.js";
 // import OrcaPlugin from "@/lib/plugin/orca"
 import LuloPlugin from "@/lib/plugin/lulo";
 
-const RPC_LINK = process.env.NEXT_PUBLIC_RPC_URL || "https://api.mainnet-beta.solana.com";
+const RPC_LINK = process.env.NEXT_PUBLIC_RPC_LINK || "https://api.mainnet-beta.solana.com";
 
 export const getAgent = async () => {
 
@@ -25,6 +25,8 @@ export const getAgent = async () => {
     .use(TokenPlugin)
     .use(LuloPlugin);
   console.log("Agent initialized")
+
+  return agent;
   
   
 

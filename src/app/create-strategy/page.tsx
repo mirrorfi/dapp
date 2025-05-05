@@ -209,7 +209,7 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
   // }, []);
 
   return (
-    (connected && publicKey && (
+    //(connected && publicKey && (
       <div className="flex flex-col h-screen bg-background text-foreground">
         <header className="p-6 bg-card border-b border-border">
           <div className="flex items-center justify-between">
@@ -284,7 +284,7 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
           </div>
         </main>
       </div>
-    )) ||
+    /*))
     (!connected && (
       <div className="flex flex-col items-center justify-center h-screen bg-background text-foreground">
         <h1 className="text-2xl font-semibold">
@@ -301,7 +301,7 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
           Connect Wallet
         </Button>
       </div>
-    ))
+    ))*/
   );
 };
 
