@@ -33,6 +33,7 @@ export interface IStrategy {
   edges: IEdge[];
   name: string;
   user: string;
+  description?: string; // Make description optional
 }
 
 const NodeSchema = new Schema<INode>({
@@ -68,6 +69,7 @@ const StrategySchema = new Schema<IStrategy>({
   edges: { type: [EdgeSchema], required: true },
   name: { type: String, required: true },
   user: { type: String, required: true }, // Add user field to the schema
+  description: { type: String, required: true }, // Add description field to the schema
 });
 
 const Strategy = models.Strategy || model<IStrategy>('Strategy', StrategySchema);
