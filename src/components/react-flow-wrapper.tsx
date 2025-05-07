@@ -24,7 +24,16 @@ const suppressResizeObserverErrors = () => {
   }
 }
 
-export function ReactFlowWrapper({ initialNodes, initialEdges, onNodeClick, nodeTypes }) {
+import { Node, Edge, NodeTypes } from "reactflow"
+
+interface ReactFlowWrapperProps {
+  initialNodes: Node[];
+  initialEdges: Edge[];
+  onNodeClick?: (node: Node) => void;
+  nodeTypes: NodeTypes;
+}
+
+export function ReactFlowWrapper({ initialNodes, initialEdges, onNodeClick, nodeTypes }: ReactFlowWrapperProps) {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
   const [isReady, setIsReady] = useState(false)

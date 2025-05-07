@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { WalletProviderWrapper } from "@/components/WalletProviderWrapper";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { Navbar } from "@/components/navbar";
 
 export const metadata: Metadata = {
   title: "Solana dApp Template",
@@ -19,6 +20,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+        <WalletProviderWrapper>
+      <header className="">
+      <Navbar />
+      </header>
       <body>
         <ThemeProvider
           attribute="class"
@@ -26,14 +31,13 @@ export default function RootLayout({
           enableSystem={false}
           disableTransitionOnChange={false}
         >
-          <WalletProviderWrapper>
             <TooltipProvider>
               {children}
               <Toaster richColors />
             </TooltipProvider>
-          </WalletProviderWrapper>
         </ThemeProvider>
       </body>
+          </WalletProviderWrapper>
     </html>
   );
 }
