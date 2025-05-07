@@ -1,4 +1,4 @@
-import { tokenMintAddresses, protocolOptions } from "../constants/nodeOptions";
+import { tokenMintAddresses, LSTMintAddresses, protocolOptions } from "../constants/nodeOptions";
 import { getNodeTxn } from "./getNodeTxn";
 import { quoteAndBuildSwapInstructions } from "./jupiterSwapWithInstructions";
 import { Connection } from "@solana/web3.js";
@@ -250,13 +250,13 @@ const handleSanctumProtocols = async (agent: any, currentNode: TreeNode, signTra
   console.log("Protocol parameters:", {
     "Public Key": agent.wallet.publicKey.toString(),
     "Input Token": tokenMintAddresses[currentNode?.inputToken],
-    "Output Token": tokenMintAddresses[currentNode?.token],
+    "Output Token": LSTMintAddresses[currentNode?.token],
     "Input Amount": currentNode.inputAmount,
   })
 
   const quote = await agent.methods.sanctumGetLSTPrice(
     [
-      tokenMintAddresses[currentNode.token],
+      LSTMintAddresses[currentNode.token],
     ],
   )
   
@@ -276,7 +276,7 @@ const handleSanctumProtocols = async (agent: any, currentNode: TreeNode, signTra
     // "1100000000",
     // 5000
     // agent,
-      tokenMintAddresses[currentNode?.token],
+      LSTMintAddresses[currentNode?.token],
       (currentNode.inputAmount).toString(),
       (currentNode.inputAmount / lstPrice).toString(), // amount in terms of xandSOL
       500, // 5%

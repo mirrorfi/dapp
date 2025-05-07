@@ -18,7 +18,6 @@ import "reactflow/dist/style.css";
 import { CreateNodeDialog } from "@/components/create-node-dialog";
 import { CustomNode } from "@/components/custom-node";
 import { Button } from "@/components/ui/button";
-<<<<<<< HEAD
 import { Save, Bot } from "lucide-react";
 import { createStrategy } from "@/lib/database/db_actions/test-actions";
 import { SaveStrategyDialog } from "@/components/save-strategy-dialog";
@@ -28,14 +27,8 @@ import { VersionedTransaction } from "@solana/web3.js";
 
 import { createSolanaAgent } from "@/lib/agent";
 import { executeTree, nodeSamples } from "@/lib/treeUtils";
-=======
-import { Save } from "lucide-react";
 
-import { SaveStrategyDialog } from "@/components/save-strategy-dialog";
-import { useWallet } from "@solana/wallet-adapter-react";
 import { NodeModal } from "@/components/node-dialog";
-// import { testAgentKit } from "@/lib/agentKitUtils";
->>>>>>> b903d6e7e83d9aefb239ce4898386aa985c71622
 
 // Define node types
 const nodeTypes = {
