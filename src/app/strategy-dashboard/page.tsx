@@ -97,33 +97,9 @@ const StrategyDashboardPage = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-background via-background/95 to-blue-950/20 text-foreground">
-      <header className="p-6 bg-background/50 backdrop-blur-sm">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Image
-              src="/SVG/MirrorFi-Logo-Blue.svg"
-              alt="MirrorFi Logo"
-              width={32}
-              height={32}
-              className="h-8 w-auto"
-            />
-            <h1 className="text-xl font-semibold">MirrorFi</h1>
-          </div>
-        </div>
-      </header>
-
       <main className="p-6">
         <div className="mb-8 flex flex-col sm:flex-row items-center justify-between gap-4 sm:space-x-2">
           <div className="flex-1/3">
-            <InteractiveHoverButton
-              onClick={() =>
-                (window.location.href =
-                  "/create-strategy?nodeList=[]&edgeList=[]")
-              }
-              className="text-sm border-gray-700"
-            >
-              Create Strategy
-            </InteractiveHoverButton>
           </div>
           <Input
             placeholder="Search strategies..."

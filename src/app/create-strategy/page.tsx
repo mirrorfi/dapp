@@ -22,8 +22,7 @@ import { Save } from "lucide-react";
 
 import { SaveStrategyDialog } from "@/components/save-strategy-dialog";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { Navbar } from "@/components/navbar";
-import { NodeModal } from "@/components/node-modal";
+import { NodeModal } from "@/components/node-dialog";
 // import { testAgentKit } from "@/lib/agentKitUtils";
 
 // Define node types
@@ -206,8 +205,7 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
   return (
     (connected && publicKey && (
       <div className="flex flex-col h-screen bg-background text-foreground">
-        <header className="">
-          <Navbar />
+        
           {/* <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <Image
@@ -233,7 +231,6 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
               </NavigationMenuList>
             </NavigationMenu>
           </div> */}
-        </header>
 
         <main className="flex-1">
           <SaveStrategyDialog

@@ -27,16 +27,18 @@ interface CreateNodeDialogProps {
 const protocolOptions = ["Raydium", "Orca", "Kamino", "Drift"]
 const tokenOptions = [
   "SOL",
-  "JupSOL",
-  "JitoSOL",
-  "BNSOL",
-  "mSOL",
-  "bbSOL",
   "USDC",
   "USDT",
   "PYUSD",
   "FDUSD",
   "USDS",
+]
+const LSToptions = [
+  "JupSOL",
+  "JitoSOL",
+  "BNSOL",
+  "mSOL",
+  "bbSOL"
 ]
 
 export function CreateNodeDialog({ onCreateNode, isOpen, onClose }: CreateNodeDialogProps) {
@@ -98,6 +100,30 @@ export function CreateNodeDialog({ onCreateNode, isOpen, onClose }: CreateNodeDi
             </div>
           </div>
 
+          {/* Divider */}
+          <div className="border-t border-border my-4"></div>
+
+          {/* Token Options */}
+          <div>
+            <h3 className="text-sm font-medium text-muted-foreground mb-2">LSTs</h3>
+            <div className="max-h-48 overflow-y-auto grid grid-cols-2 gap-4">
+              {LSToptions.map((token) => (
+                <Button
+                  key={token}
+                  variant={"outline"}
+                  className={selectedOption === token ? "bg-accent text-accent-foreground" : ""}
+                  onClick={() => {
+                    setSelectedOption((prev) => (prev === token ? null : token));
+                    setNodeType("token");
+                  }}
+                >
+                  <div className="flex items-center gap-2">
+                  <Image src={`/PNG/${token.toLowerCase()}-logo.png`} alt={`${token} logo`} width={24} height={24} />{token}
+                  </div>
+                </Button>
+              ))}
+            </div>
+          </div>
           {/* Divider */}
           <div className="border-t border-border my-4"></div>
 
