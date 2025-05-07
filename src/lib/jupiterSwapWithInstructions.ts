@@ -18,8 +18,10 @@ interface QuoteParams {
 
 interface QuoteResponse {
   inputMint: string;
+  inAmount: string;
   outputMint: string;
   outAmount: string;
+  slippageBps: number;
 }
 
 interface InstructionAccount {
@@ -131,7 +133,7 @@ export async function quoteAndBuildSwapInstructions(
 //   const quoteParams: QuoteParams = {
 //     inputMint: "So11111111111111111111111111111111111111112", // SOL
 //     outputMint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", // USDC
-//     amount: 10000, // 0.00001 SOL
+//     amount: 10000000, // 0.01 SOL
 //     slippageBps: 500, // 5%
 //   };
 
@@ -145,22 +147,19 @@ export async function quoteAndBuildSwapInstructions(
   try {
     const quote = await client.getQuote(quoteParams);
     console.log("Quote Response:");
-    console.log(JSON.stringify(quote, null, 2));
+    console.log(JSON.stringify({
+      inputMint: quote.inputMint,
+      inAmount: quote.inAmount,
+      outputMint: quote.outputMint,
+      outAmout: quote.outAmount,
+      slippageBps: quote.slippageBps,
+    }, null, 2));
 
     if (!quote.outAmount) {
       throw new Error("No outAmount found in quote response");
     }
 
-    // const PRIVATE_KEY = "YOUR_PRIVATE_KEY";
-    // if (!PRIVATE_KEY) {
-    //   throw new Error(
-    //     "Please provide your private key in the PRIVATE_KEY variable"
-    //   );
-    // }
-
-    // const secretKey = bs58.decode(PRIVATE_KEY);
-    // const wallet = Keypair.fromSecretKey(secretKey);
-
+    const outputAmount: number = parseFloat(quote.outAmount);
 
     console.log("Using wallet public key:", walletPublicKey.toBase58());
 
@@ -173,14 +172,12 @@ export async function quoteAndBuildSwapInstructions(
     );
 
     console.log(
-      "Swap instructions received successfully:",
-      JSON.stringify(swapInstructions, null, 2)
+      "Swap instructions received successfully",
+      // JSON.stringify(swapInstructions, null, 2)
     );
 
     const connection = new Connection(
-      // `https://mainnet.helius-rpc.com/?api-key=${process.env.HELIUS_API_KEY}`,
-      "https://mainnet.helius-rpc.com/?api-key=0769d5f6-ea80-4826-acb9-a5566874e083",
-      // "https://api.mainnet-beta.solana.com",
+      process.env.NEXT_PUBLIC_RPC_LINK || "https://api.mainnet-beta.solana.com",
       "confirmed"
     );
 
@@ -290,7 +287,10 @@ export async function quoteAndBuildSwapInstructions(
     const transaction = new VersionedTransaction(messageV0);
 
 
-    return transaction; // Return the transaction for further processing
+    return {
+      transaction: transaction, 
+      outputAmount: outputAmount
+    };
 
 
 
@@ -311,66 +311,66 @@ export async function quoteAndBuildSwapInstructions(
 
 
     
-    // 10. Sign the transaction with the wallet
-    transaction.sign([wallet]);
+    // // 10. Sign the transaction with the wallet
+    // transaction.sign([wallet]);
 
-    // 11.Serialize the transaction back to binary format
-    const signedTransactionBinary = transaction.serialize();
+    // // 11.Serialize the transaction back to binary format
+    // const signedTransactionBinary = transaction.serialize();
 
-    // 12. Simulate the transaction first to check for errors
-    console.log("Simulating transaction...");
-    try {
-      const simulationResult = await connection.simulateTransaction(
-        transaction
-      );
-      if (simulationResult.value.err) {
-        console.error(
-          "Transaction simulation failed:",
-          simulationResult.value.err
-        );
-        console.error("Logs:", simulationResult.value.logs);
-        throw new Error(
-          `Simulation failed: ${JSON.stringify(simulationResult.value.err)}`
-        );
-      } else {
-        console.log("Transaction simulation successful");
-        console.log("Simulation logs:", simulationResult.value.logs);
-      }
-    } catch (error) {
-      console.error("Error during transaction simulation:", error);
-    }
+    // // 12. Simulate the transaction first to check for errors
+    // console.log("Simulating transaction...");
+    // try {
+    //   const simulationResult = await connection.simulateTransaction(
+    //     transaction
+    //   );
+    //   if (simulationResult.value.err) {
+    //     console.error(
+    //       "Transaction simulation failed:",
+    //       simulationResult.value.err
+    //     );
+    //     console.error("Logs:", simulationResult.value.logs);
+    //     throw new Error(
+    //       `Simulation failed: ${JSON.stringify(simulationResult.value.err)}`
+    //     );
+    //   } else {
+    //     console.log("Transaction simulation successful");
+    //     console.log("Simulation logs:", simulationResult.value.logs);
+    //   }
+    // } catch (error) {
+    //   console.error("Error during transaction simulation:", error);
+    // }
 
-    // 13. Send the transaction to the Solana network with optimized parameters
-    console.log("Sending transaction to Solana network...");
-    const signature = await connection.sendRawTransaction(
-      signedTransactionBinary,
-      {
-        maxRetries: 2, // Increase retries for better chance of landing
-        skipPreflight: false, // Enable preflight checks to catch errors
-      }
-    );
+    // // 13. Send the transaction to the Solana network with optimized parameters
+    // console.log("Sending transaction to Solana network...");
+    // const signature = await connection.sendRawTransaction(
+    //   signedTransactionBinary,
+    //   {
+    //     maxRetries: 2, // Increase retries for better chance of landing
+    //     skipPreflight: false, // Enable preflight checks to catch errors
+    //   }
+    // );
 
-    // 14. Confirm the transaction with appropriate commitment level
-    console.log(`Transaction sent with signature: ${signature}`);
-    console.log(
-      `Check transaction status at: https://solscan.io/tx/${signature}/`
-    );
+    // // 14. Confirm the transaction with appropriate commitment level
+    // console.log(`Transaction sent with signature: ${signature}`);
+    // console.log(
+    //   `Check transaction status at: https://solscan.io/tx/${signature}/`
+    // );
 
-    // Check transaction confirmation
-    const confirmation = await connection.confirmTransaction(
-      signature,
-      "processed" // Use "processed" instead of "confirmed" for faster initial confirmation
-    );
+    // // Check transaction confirmation
+    // const confirmation = await connection.confirmTransaction(
+    //   signature,
+    //   "processed" // Use "processed" instead of "confirmed" for faster initial confirmation
+    // );
 
-    if (confirmation.value.err) {
-      console.error(
-        `Transaction failed: ${JSON.stringify(confirmation.value.err)}`
-      );
-    } else {
-      console.log(
-        `Transaction successful: https://solscan.io/tx/${signature}/`
-      );
-    }
+    // if (confirmation.value.err) {
+    //   console.error(
+    //     `Transaction failed: ${JSON.stringify(confirmation.value.err)}`
+    //   );
+    // } else {
+    //   console.log(
+    //     `Transaction successful: https://solscan.io/tx/${signature}/`
+    //   );
+    // }
   } catch (error) {
     console.error("Failed to process quote and swap:", error);
   }

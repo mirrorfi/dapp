@@ -26,11 +26,15 @@ import {
 import { CreateNodeDialog } from "@/components/create-node-dialog";
 import { CustomNode } from "@/components/custom-node";
 import { Button } from "@/components/ui/button";
-import { Save } from "lucide-react";
+import { Save, Bot } from "lucide-react";
 import { createStrategy } from "@/lib/database/db_actions/test-actions";
 import { SaveStrategyDialog } from "@/components/save-strategy-dialog";
 import { useWallet } from "@solana/wallet-adapter-react";
-// import { testAgentKit } from "@/lib/agentKitUtils";
+import bs58 from "bs58";
+import { VersionedTransaction } from "@solana/web3.js";
+
+import { createSolanaAgent } from "@/lib/agent";
+import { executeTree, nodeSamples } from "@/lib/treeUtils";
 
 // Define node types
 const nodeTypes = {
@@ -65,7 +69,7 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
   initialNodes = nodeList.length > 0 ? nodeList : initialNodes;
   initialEdges = edgeList.length > 0 ? edgeList : initialEdges;
 
-  const { connected, publicKey } = useWallet();
+  const { connected, publicKey, signTransaction } = useWallet();
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
@@ -187,26 +191,47 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
   //     });
   // };
 
-  // const walletContext = useWallet();
+  const handleTestClick = () => {
+    const testAgent = async () => {
+      if (!publicKey) {
+        console.error("Public key is not available.");
+        return;
+      }
 
-  // async function handleAgentKitTest() {
-  //   // Implement your logic here
-  //   const rpc_url =
-  //     process.env.NEXT_PUBLIC_RPC_URL || "https://api.mainnet-beta.solana.com";
-  //   const walletContext = null;
-  //   console.log("RUNNING AGENT KIT TEST");
-  //   testAgentKit(rpc_url, walletContext);
-  // }
+      console.log("Initializing Agent");
+      const solanaAgent = await createSolanaAgent(publicKey.toString());
+      console.log("Successfully initialized agent", solanaAgent);
 
-  // useEffect(() => {
-  //   handleAgentKitTest()
-  //     .then(() => {
-  //       console.log("AgentKit test completed successfully.");
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error during AgentKit test:", error);
-  //     });
-  // }, []);
+      // Mock sign method
+      // const signTransaction = (txn: any) => {
+      //   console.log("Transaction signed:", txn);
+      // };
+
+      
+      
+      // Generate the node tree
+      executeTree(nodeSamples, solanaAgent.agent, signTransaction)
+        .then(() => {
+          console.log("All nodes executed successfully.");
+          console.log(nodeSamples);
+        })
+        .catch((error) => {
+          console.error("Error executing nodes:", error);
+        });
+
+      // const result = await solanaAgent.agent.methods.getWalletAddress();
+      // console.log(result);
+
+      // const prices = await solanaAgent.agent.methods.sanctumGetLSTPrice([
+      //   "bSo13r4TkiE4KumL71LsHTPpL2euBYLFx6h9HP3piy1",
+      //   "7Q2afV64in6N6SeZsAAB81TJzwDoD6zpqmHkzi9Dcavn",
+      // ]);
+
+      // console.log("prices", prices);
+    };
+
+    testAgent();
+  };
 
   return (
     (connected && publicKey && (
@@ -280,6 +305,15 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
             >
               <Save />
               Save Strategy
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                handleTestClick();
+              }}
+            >
+              <Bot />
+              Test API
             </Button>
           </div>
         </main>

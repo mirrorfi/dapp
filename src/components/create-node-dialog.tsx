@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
+import { protocolOptions, tokenOptions } from "../constants/nodeOptions";
 
 interface CreateNodeDialogProps {
   onCreateNode: (nodeData: {
@@ -23,21 +24,6 @@ interface CreateNodeDialogProps {
   isOpen: boolean
   onClose: () => void
 }
-
-const protocolOptions = ["Raydium", "Orca", "Kamino", "Drift"]
-const tokenOptions = [
-  "SOL",
-  "JupSOL",
-  "JitoSOL",
-  "BNSOL",
-  "mSOL",
-  "bbSOL",
-  "USDC",
-  "USDT",
-  "PYUSD",
-  "FDUSD",
-  "USDS",
-]
 
 export function CreateNodeDialog({ onCreateNode, isOpen, onClose }: CreateNodeDialogProps) {
   const [nodeType, setNodeType] = useState<"protocol" | "token" | null>(null)
