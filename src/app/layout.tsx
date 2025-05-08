@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,9 +7,9 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { Navbar } from "@/components/navbar";
 
 export const metadata: Metadata = {
-  title: "Solana dApp Template",
+  title: "MirrorFi",
   description:
-    "A beautiful, minimalist template for building Solana applications",
+    "Share/Mirror the best Yield Strategies across multiple protocols",
 };
 
 export default function RootLayout({
@@ -20,24 +19,24 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-        <WalletProviderWrapper>
-      <header className="">
-      <Navbar />
-      </header>
-      <body>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem={false}
-          disableTransitionOnChange={false}
-        >
+      <WalletProviderWrapper>
+        <header className="">
+          <Navbar />
+        </header>
+        <body>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem={false}
+            disableTransitionOnChange={false}
+          >
             <TooltipProvider>
               {children}
               <Toaster richColors />
             </TooltipProvider>
-        </ThemeProvider>
-      </body>
-          </WalletProviderWrapper>
+          </ThemeProvider>
+        </body>
+      </WalletProviderWrapper>
     </html>
   );
 }
