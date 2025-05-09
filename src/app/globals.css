@@ -1,6 +1,12 @@
 @import "tailwindcss";
 @config "../../tailwind.config.ts";
 
+@theme inline {
+  --font-satoshi: "Satoshi", "Inter", "Roboto", "SF Pro Display", Arial,
+    sans-serif;
+  --font-univa: var(--font-univa);
+}
+
 :root {
   --background: 230 35% 7%;
   --foreground: 210 40% 98%;
@@ -176,7 +182,7 @@
 }
 
 body {
-  font-family: "Inter", "Roboto", "SF Pro Display", Arial, sans-serif;
+  font-family: var(--font-satoshi);
   background-image: radial-gradient(
       circle at 10% 20%,
       rgba(0, 100, 255, 0.03) 0%,
