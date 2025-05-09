@@ -202,8 +202,6 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
       //   console.log("Transaction signed:", txn);
       // };
 
-      
-      
       // Generate the node tree
       executeTree(nodeSamples, solanaAgent.agent, signTransaction)
         .then(() => {
@@ -231,8 +229,7 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
   return (
     (connected && publicKey && (
       <div className="flex flex-col h-screen bg-background text-foreground">
-        
-          {/* <div className="flex items-center justify-between">
+        {/* <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <Image
                 src="/SVG/MirrorFi-Logo-Blue.svg"
@@ -271,7 +268,15 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
             isOpen={open}
             onClose={() => setOpen(false)}
           />
-          <NodeModal node={nodeToConnect} isOpen={nodeOpen} onClose={() => setNodeOpen(false) } onCreateHook={() => {setNodeOpen(false); setOpen(true)} }          />
+          <NodeModal
+            node={nodeToConnect}
+            isOpen={nodeOpen}
+            onClose={() => setNodeOpen(false)}
+            onCreateHook={() => {
+              setNodeOpen(false);
+              setOpen(true);
+            }}
+          />
           <ReactFlow
             nodes={nodes}
             edges={edges}

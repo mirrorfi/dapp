@@ -1,4 +1,5 @@
 import {
+  Connection,
   TransactionInstruction,
   TransactionMessage,
   VersionedTransaction,
@@ -55,7 +56,13 @@ export async function sanctumAddLiquidity(
     console.log("Response from Sanctum:", response.data);
 
     const txBuffer = Buffer.from(response.data.tx, "base64");
-    const { blockhash } = await agent.connection.getLatestBlockhash();
+
+    const rpcUrl = process.env.NEXT_PUBLIC_RPC_LINK;
+    if (!rpcUrl) {
+      throw new Error("RPC link is not defined");
+    }
+    const connection = new Connection(rpcUrl)
+    const { blockhash } = await connection.getLatestBlockhash();
 
     const tx = VersionedTransaction.deserialize(txBuffer);
 
