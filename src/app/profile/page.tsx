@@ -40,7 +40,7 @@ export default function Home() {
   const [address, setAddress] = useState<string>("");
   const [tokens, setTokens] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [connection, setConnection] = useState<Connection | null>(null);
   const anchorWallet = useAnchorWallet();
   const { connected, publicKey } = useWallet();
@@ -68,7 +68,7 @@ export default function Home() {
           err instanceof Error ? err.message : "Failed to load strategies"
         );
       } finally {
-        setLoading(false);
+
       }
     };
 
@@ -126,7 +126,6 @@ export default function Home() {
       setTopAssets([]);
       setPortfolioUSDBalance(0);
       setPortfolioUSDChange(0);
-      setLoading(false);
     }
   }, [address]);
 
@@ -221,15 +220,29 @@ export default function Home() {
 
       setPortfolioUSDChange(newPortfolioUSDChange);
       setAssets(newAssetsCalculated);
-      setLoading(false); // Set loading to false after all data is fetched
     }
   }, [tokens, tokenPrices]);
 
   useEffect(() => {
-    if (assets.length > 0) {
-      getTopAssets();
+    // This effect determines when the main portfolio data loading and processing is complete.
+    if (tokens.length > 0 && tokenPrices.length === tokens.length) {
+      // Path A: Tokens exist and all prices fetched
+      if (assets.length > 0) {
+        getTopAssets();
+      } else {
+        // Assets might be empty if all token values are zero.
+        setTopAssets([]);
+      }
+    } else if (address && tokens.length === 0 && tokenPrices.length === 0 && loading) {
+      // Path B: An address is set, loading was true, but the fetch resulted in no tokens/prices.
+      // This implies the fetch cycle for this address is complete but yielded nothing.
+      setAssets([]); // Ensure assets are cleared
+      setTopAssets([]); // Ensure top assets are cleared
+      setPortfolioUSDBalance(0); // Reset balances
+      setPortfolioUSDChange(0);
     }
-  }, [assets]);
+    // Note: If 'address' becomes empty, setLoading(false) is handled by the useEffect depending on [address].
+  }, [assets, tokens, tokenPrices, address, loading]); // Added address and loading to dependencies
 
   useEffect(() => {
     const checkLocalSignature = () => {
@@ -246,6 +259,12 @@ export default function Home() {
 
     checkLocalSignature();
   }, [publicKey]);
+
+  useEffect(() => {
+    if (tokens.length == tokenPrices.length && tokenPrices.length > 0 && tokens.length > 0) {
+      setLoading(false); // Set loading to false when all token prices are fetched
+    }
+  }, [tokens, tokenPrices])
 
   function getTopAssets() {
     const sortedAssets = assets.sort((a, b) => b[1] - a[1]);
