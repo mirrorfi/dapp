@@ -20,10 +20,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <WalletProviderWrapper>
-        <header className="">
+        <header className="h-16 sticky top-0 z-50">
           <Navbar />
         </header>
-        <body>
+        <body className="h-screen">
           <ThemeProvider
             attribute="class"
             defaultTheme="dark"
