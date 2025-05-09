@@ -19,6 +19,9 @@ import {
 } from "@/components/ui/select";
 import InteractiveFlow from "@/components/interactive-flow";
 import type { Node, Edge } from "reactflow";
+import { executeTree, generateTree, type TreeNode } from "@/lib/treeUtils";
+import { createSolanaAgent } from "@/lib/agent";
+import { parse } from "path";
 
 interface TokenBalance {
   mint: string;
@@ -49,8 +52,8 @@ const StrategyModal: FC<StrategyModalProps> = ({
   isOpen,
   onClose,
 }) => {
+  const { connected, publicKey, signTransaction } = useWallet();
   const { connection } = useConnection();
-  const { publicKey } = useWallet();
   const [loading, setLoading] = useState(false);
   const [tokenBalances, setTokenBalances] = useState<TokenBalances>({
     tokens: [],
@@ -100,10 +103,45 @@ const StrategyModal: FC<StrategyModalProps> = ({
   };
 
   const handleConfirm = () => {
-    // Here you would implement the actual mirroring logic
-    console.log("Mirroring strategy:", strategy.name);
-    console.log("Token:", selectedTokenMint, "Amount:", tokenAmount);
-    onClose();
+    const executeStrategy = async () => {
+      // Here you would implement the actual mirroring logic
+      console.log("Mirroring strategy:", strategy.name);
+      console.log("Token:", selectedTokenMint, "Amount:", tokenAmount);
+      console.log("Public Key:", publicKey?.toString());
+      if (tokenAmount === "") {
+        console.error("Token amount is required.");
+        return;
+      }
+
+      if (parseFloat(tokenAmount) <= 0) {
+        console.error("Token amount must be greater than 0.");
+        return;
+      }
+
+      if (!publicKey) {
+        console.error("Public key is not available.");
+        return;
+      }
+
+      console.log("Initializing Agent");
+      const solanaAgent = await createSolanaAgent(publicKey.toString());
+      console.log("Successfully initialized agent", solanaAgent.agent);
+
+      const initialSolanaDeposit = parseFloat(tokenAmount) * 10 ** 9; // Convert to lamports
+      console.log("Initial Solana Deposit:", initialSolanaDeposit);
+
+      // Run strategy
+      const treeNodes: Record<string, TreeNode> = generateTree(
+        strategy.nodes,
+        strategy.edges,
+        initialSolanaDeposit
+      );
+
+      await executeTree(treeNodes, solanaAgent.agent, signTransaction);
+      onClose();
+    };
+
+    executeStrategy();
   };
 
   const handleExit = () => {
