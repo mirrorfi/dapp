@@ -35,7 +35,7 @@ export function CreateNodeDialog({ onCreateNode, selectedNode, isOpen, onClose, 
   const selectedNodeType = selectedNode?.data?.nodeType
   console.log("Selected Node Type:", selectedNodeType)
   console.log("Selected Node Label:", selectedNode?.data?.label)
-  const [nodeType, setNodeType] = useState<"protocol" | "token" | null>(null)
+  const [nodeType, setNodeType] = useState<"protocol" | "token" | "lst" | null>(null)
   const [selectedOption, setSelectedOption] = useState<string | null>(null)
 
   // Reset state when the dialog is closed
@@ -165,7 +165,7 @@ export function CreateNodeDialog({ onCreateNode, selectedNode, isOpen, onClose, 
                     } ${selectedNode?.data?.label.toLowerCase() === token.toLowerCase() ? "hidden" : ""}`} 
                     onClick={() => {
                       setSelectedOption((prev) => (prev === token ? null : token));
-                      setNodeType("token");
+                      setNodeType("lst");
                     }}
                   >
                       <div className="flex items-center text-xs font-medium">
