@@ -12,6 +12,8 @@ import { Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import StrategyModal from "@/components/StrategyModal";
 
+import {getAgent} from "@/lib/agentKitUtils";
+
 interface Node {
   id: string;
   type: string;
@@ -49,6 +51,9 @@ const StrategyDashboardPage = () => {
 
   useEffect(() => {
     const fetchStrategies = async () => {
+      console.log("Fetching Agent");
+      const agent = await getAgent();
+      console.log("Agent Fetched:", agent);
       try {
         const response = await fetch("/api/get-strategies");
         if (!response.ok) {
@@ -115,8 +120,8 @@ const StrategyDashboardPage = () => {
               className="w-full sm:w-[300px] lg:w-[400px]"
             >
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger className="cursor-pointer" value="all">All Strategies</TabsTrigger>
-                <TabsTrigger className="cursor-pointer" value="mine">My Strategies</TabsTrigger>
+                <TabsTrigger value="all">All Strategies</TabsTrigger>
+                <TabsTrigger value="mine">My Strategies</TabsTrigger>
               </TabsList>
             </Tabs>
           </div>

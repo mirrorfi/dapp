@@ -5,10 +5,11 @@ import { Connection } from "@solana/web3.js";
 import type { Node, Edge } from "reactflow";
 
 const RPC_LINK = process.env.NEXT_PUBLIC_RPC_LINK || "https://api.mainnet-beta.solana.com/";
+const connection = new Connection(RPC_LINK);
 
 export interface TreeNode {
   nodeId: string;
-  nodeType: "deposit" | "token" | "protocol";
+  nodeType: "deposit" | "token" | "protocol" | "lst";
   label: string;
   inputToken?: string | null;
   inputAmount: number;
@@ -120,7 +121,6 @@ export const executeTree = async (nodes: Record<string, TreeNode>, agent: any, s
         const childNode = nodes[childId];
         if (childNode) {
           const amountPerChildNode = Math.floor(((currentNode.amount)) / currentNode.children.length);
-          console.log("NUMBER OF CHILDREN:", currentNode.children.length);
             childNode.inputToken = currentNode.token; // Set the input token for child nodes
             childNode.inputAmount = amountPerChildNode; // Set the input amount for child nodes
             console.log(childNode);
@@ -143,11 +143,12 @@ export const executeTree = async (nodes: Record<string, TreeNode>, agent: any, s
           await handleSwapping(agent, currentNode, signTransaction, nodes);
 
         }
+        
+        if (currentNode.nodeType === "lst") {
+          await handleSanctumProtocols(agent, currentNode, signTransaction, nodes);
+        }
 
         if (currentNode.nodeType === "protocol") {
-          if (currentNode.label.toLowerCase() === "sanctum") {
-            await handleSanctumProtocols(agent, currentNode, signTransaction, nodes);
-          }
 
           if (currentNode.label.toLowerCase() === "lula") {
             await handleLulaProtocols(agent, currentNode, signTransaction, nodes);
@@ -238,10 +239,6 @@ const handleSwapping = async (agent: any, currentNode: TreeNode, signTransaction
 
 const handleSanctumProtocols = async (agent: any, currentNode: TreeNode, signTransaction: any, nodes: Record<string, TreeNode>) => {
 
-  // hardcode the currentNode.token to use Xandeum SOL
-  currentNode.token = "xandSOL";
-
-
   if (!currentNode?.inputToken) {
     console.error(`Input token is not defined for node ${currentNode.nodeId}`);
     throw new Error(`Input token is not defined for node ${currentNode.nodeId}`);
@@ -254,38 +251,109 @@ const handleSanctumProtocols = async (agent: any, currentNode: TreeNode, signTra
     "Input Amount": currentNode.inputAmount,
   })
 
-  const quote = await agent.methods.sanctumGetLSTPrice(
-    [
-      LSTMintAddresses[currentNode.token],
-    ],
-  )
+  const getLiquidityQuote = async (inputMint: string, outputLstMint: string, amount: string) => {
+    try {
+      // Construct the URL with query parameters
+
+      console.log("Liquidity Quote parameters:", {
+        "Input Mint": inputMint,
+        "Output LST Mint": outputLstMint,
+        "Amount": amount,
+      })
+      const url = new URL("https://sanctum-s-api.fly.dev/v1/swap/quote");
+      url.searchParams.append("input", inputMint);
+      url.searchParams.append("outputLstMint", outputLstMint);
+      url.searchParams.append("amount", amount);
+      url.searchParams.append("mode", "ExactIn");
   
-  console.log("Quote:", quote);
-  if (!quote) {
+      // Fetch the data from the API
+      const response = await fetch(url.toString(), {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+  
+      // Check if the response is successful
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      // Parse the JSON response
+      const data = await response.json();
+      console.log("Liquidity Quote:", data);
+      return data;
+    } catch (error) {
+      console.error("Error fetching liquidity quote:", error);
+      throw error;
+    }
+  };
+  const lstMint = LSTMintAddresses[currentNode.token];
+
+  const quoteData = await getLiquidityQuote(
+    tokenMintAddresses[currentNode?.inputToken],
+    LSTMintAddresses[currentNode?.token],
+    currentNode.inputAmount.toString(),
+  );
+
+  console.log("Quote Data:", quoteData);
+  
+  if (!quoteData) {
     console.error(`Failed to get quote for node ${currentNode.nodeId}`);
     throw new Error(`Failed to get quote for node ${currentNode.nodeId}`);
   }
 
-  const lstPrice = parseInt(quote[currentNode.token]); // price in terms of solana, i.e. 1 xandSOL = ??? SOL
-  console.log("LST Price:", lstPrice);
-  console.log(currentNode.inputAmount, lstPrice, currentNode.inputAmount / lstPrice);
-  const txn = await agent.methods.sanctumAddLiquidity(
-    
-    // "So11111111111111111111111111111111111111112",
-    // "1000000000",
-    // "1100000000",
-    // 5000
-    // agent,
-      LSTMintAddresses[currentNode?.token],
-      (currentNode.inputAmount).toString(),
-      (currentNode.inputAmount / lstPrice).toString(), // amount in terms of xandSOL
-      500, // 5%
+  const outAmount = parseInt(quoteData.outAmount);
+  console.log("Input Amount:", currentNode.inputAmount);
+  console.log("Out Amount:", outAmount);
+  // Check if lstMint is a String
+  if (typeof lstMint !== "string") {
+    console.log("LST Mint:", lstMint);
+    console.error(`LST Mint is not a string for node ${currentNode.nodeId}`);
+    throw new Error(`LST Mint is not a string for node ${currentNode.nodeId}`);
+  }
+
+  // const txn = await agent.methods.sanctumAddLiquidity(
+  //     lstMint,
+  //     (currentNode.inputAmount).toString(),
+  //     lpAmount.toString(),
+  //     500, // 5%
+  // )
+
+  
+  // inputLstMint: string,
+  // amount: string,
+  // quotedAmount: string,
+  // priorityFee: number,
+  // outputLstMint: string,
+  
+  // inputLstMint={currentNode.inputToken},
+  // amount={currentNode.inputAmount},
+  // outputLstMint={currentNode.token},
+  // quotedAmount={lpAmount},
+  // priorityFee={500},
+
+  const txn = await agent.methods.sanctumSwapLST(
+    tokenMintAddresses[currentNode.inputToken],
+    currentNode.inputAmount.toString(),
+    LSTMintAddresses[currentNode.token],
+    outAmount.toString(),
+    500, // 5%
   )
+
+  console.log("Transaction:", txn);
 
   if (!txn) {
     console.error(`Failed to get transaction for node ${currentNode.nodeId}`);
     throw new Error(`Failed to get transaction for node ${currentNode.nodeId}`);
   }
+
+  const connection = new Connection(RPC_LINK);
+  const { blockhash } = await connection.getLatestBlockhash();
+  console.log("Latest blockhash:", blockhash);
+
+  const res = await connection.simulateTransaction(txn);
+  console.log("Simulation result:", res);
 
   console.log("Transaction:", txn);
   const signed = await signTransaction(txn); // Sign the transaction
@@ -293,7 +361,7 @@ const handleSanctumProtocols = async (agent: any, currentNode: TreeNode, signTra
 
 
   // Send Transaction
-  const connection = new Connection(RPC_LINK);
+
   const signature = await connection.sendTransaction(signed, { skipPreflight: false, preflightCommitment: "confirmed" });
   console.log("Transaction sent with signature:", signature);
 
