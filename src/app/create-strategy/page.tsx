@@ -19,11 +19,8 @@ import { CreateNodeDialog } from "@/components/create-node-dialog";
 import { CustomNode } from "@/components/custom-node";
 import { Button } from "@/components/ui/button";
 import { Save, Bot } from "lucide-react";
-import { createStrategy } from "@/lib/database/db_actions/test-actions";
 import { SaveStrategyDialog } from "@/components/save-strategy-dialog";
 import { useWallet } from "@solana/wallet-adapter-react";
-import bs58 from "bs58";
-import { VersionedTransaction } from "@solana/web3.js";
 
 import { createSolanaAgent } from "@/lib/agent";
 import { executeTree, nodeSamples } from "@/lib/treeUtils";
@@ -268,8 +265,10 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
           />
           <CreateNodeDialog
             onCreateNode={handleCreateNode}
+            selectedNode={nodeToConnect}
             isOpen={open}
             onClose={() => setOpen(false)}
+            nodes={nodes}
           />
           <NodeModal node={nodeToConnect} isOpen={nodeOpen} onClose={() => setNodeOpen(false) } onCreateHook={() => {setNodeOpen(false); setOpen(true)} }          />
           <ReactFlow

@@ -1,4 +1,4 @@
-export const protocolOptions = ["Raydium", "Orca", "Kamino", "Drift", "Sanctum"];
+export const protocolOptions = ["Raydium", "Orca", "Kamino", "Drift", "Meteora", "Lulo"];
 
 export const tokenMintAddresses: Record<string, string> = {
     "SOL": "So11111111111111111111111111111111111111112",
