@@ -199,8 +199,6 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
       //   console.log("Transaction signed:", txn);
       // };
 
-      
-      
       // Generate the node tree
       executeTree(nodeSamples, solanaAgent.agent, signTransaction)
         .then(() => {
@@ -226,10 +224,9 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
   };
 
   return (
-    (connected && publicKey && (
+    //(connected && publicKey && (
       <div className="flex flex-col h-screen bg-background text-foreground">
-        
-          {/* <div className="flex items-center justify-between">
+        {/* <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <Image
                 src="/SVG/MirrorFi-Logo-Blue.svg"
@@ -270,7 +267,15 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
             onClose={() => setOpen(false)}
             nodes={nodes}
           />
-          <NodeModal node={nodeToConnect} isOpen={nodeOpen} onClose={() => setNodeOpen(false) } onCreateHook={() => {setNodeOpen(false); setOpen(true)} }          />
+          <NodeModal
+            node={nodeToConnect}
+            isOpen={nodeOpen}
+            onClose={() => setNodeOpen(false)}
+            onCreateHook={() => {
+              setNodeOpen(false);
+              setOpen(true);
+            }}
+          />
           <ReactFlow
             nodes={nodes}
             edges={edges}
@@ -312,7 +317,7 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
           </div>
         </main>
       </div>
-    )) ||
+    /*))
     (!connected && (
       <div className="flex flex-col items-center justify-center h-screen bg-background text-foreground">
         <h1 className="text-2xl font-semibold">
@@ -329,7 +334,7 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
           Connect Wallet
         </Button>
       </div>
-    ))
+    ))*/
   );
 };
 

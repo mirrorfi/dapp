@@ -152,7 +152,7 @@ export function CreateNodeDialog({ onCreateNode, selectedNode, isOpen, onClose, 
 
           {/* Token Options */}
           <div>
-            <h3 className="text-sm font-medium text-muted-foreground mb-2">LSTs</h3>
+            <h3 className="text-sm font-medium text-muted-foreground mb-2">Stake LSTs</h3>
             <div className="max-h-48 overflow-y-auto grid grid-cols-2 gap-4">
               {LSToptions.map((token) => {
 
@@ -165,7 +165,7 @@ export function CreateNodeDialog({ onCreateNode, selectedNode, isOpen, onClose, 
                     } ${selectedNode?.data?.label.toLowerCase() === token.toLowerCase() ? "hidden" : ""}`} 
                     onClick={() => {
                       setSelectedOption((prev) => (prev === token ? null : token));
-                      setNodeType("token");
+                      setNodeType("lst");
                     }}
                   >
                       <div className="flex items-center text-xs font-medium">
