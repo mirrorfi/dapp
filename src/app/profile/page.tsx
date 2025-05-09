@@ -8,6 +8,33 @@ import Moralis from "moralis";
 import { TokenPortfolioCard } from "@/components/TokenPortfolioCard"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
+import { PortfolioChart } from "@/components/PortfolioChart";
+import { PortfolioValueCard } from "@/components/PortfolioValueCard";
+import { getStrategies } from "@/lib/database/db_actions/test-actions";
+import SimplifiedFlow from "@/components/simplified-flow";
+
+interface Strategy {
+  _id: string;
+  nodes: Node[];
+  edges: Edge[];
+  name: string;
+  user: string;
+  __v: number;
+}
+
+interface Node {
+  id: string;
+  type: string;
+  position: { x: number; y: number };
+  data: Record<string, unknown>;
+}
+
+interface Edge {
+  id: string;
+  source: string;
+  target: string;
+  type?: string;
+}
 
 export default function Home() {
   const [address, setAddress] = useState<string>("");
@@ -19,10 +46,34 @@ export default function Home() {
   const { connected, publicKey } = useWallet();
   const [hasSignedTerms, setHasSignedTerms] = useState(false);
   const [checking, setChecking] = useState(true);
-  const [loadingBalance, setLoadingBalance] = useState(true);
   const [portfolioUSDBalance, setPortfolioUSDBalance] = useState<number>(0);
   const [portfolioUSDChange, setPortfolioUSDChange] = useState<number>(0);
-  const [apiResponse, setApiResponse] = useState<any>(null);
+  const [tokenPrices, setTokenPrices] = useState<any[]>([]);
+  const [topAssets, setTopAssets] = useState<any[]>([]);
+  const [assets, setAssets] = useState<[string, number][]>([]); // Typed assets for clarity
+  const [strategies, setStrategies] = useState<Strategy[]>([]);
+
+  useEffect(() => {
+    const fetchStrategies = async () => {
+      try {
+        const response = await fetch("/api/get-strategies");
+        if (!response.ok) {
+          throw new Error("Failed to fetch strategies");
+        }
+        const data = await response.json();
+        setStrategies(data);
+        console.log("Fetched strategies:", data);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to load strategies"
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStrategies();
+  }, []);
 
   useEffect(() => {
     // Initialize the connection and Moralis API when the component mounts
@@ -58,7 +109,24 @@ export default function Home() {
   useEffect(() => {
     if (address != "") {
       console.log("Fetching wallet data for address:", address);
+      // Reset states for new address
+      setTokens([]);
+      setTokenPrices([]);
+      setAssets([]);
+      setTopAssets([]);
+      setPortfolioUSDBalance(0);
+      setPortfolioUSDChange(0);
+      setLoading(true); // For fetchWalletData
       fetchWalletData(); // Fetch wallet data when address changes
+    } else {
+      // Clear all data if address is removed
+      setTokens([]);
+      setTokenPrices([]);
+      setAssets([]);
+      setTopAssets([]);
+      setPortfolioUSDBalance(0);
+      setPortfolioUSDChange(0);
+      setLoading(false);
     }
   }, [address]);
 
@@ -66,17 +134,15 @@ export default function Home() {
     if (tokens.length > 0) {
       console.log("Fetching portfolio USD balance for tokens:", tokens);
       fetchPortfolioUSDBalance(); // Fetch portfolio USD balance when tokens change
+    } else {
+      // If there are no tokens, reset dependent states
+      setPortfolioUSDBalance(0);
+      setPortfolioUSDChange(0);
+      setTokenPrices([]);
+      setAssets([]);
+      setTopAssets([]);
     }
-  }, [tokens])
-
-  useEffect(() => {
-    tokens.forEach((token) => {
-      if(token.mint == apiResponse?.tokenAddress) {
-        setPortfolioUSDChange((prev) => prev + ((apiResponse?.usdPrice24hrUsdChange) * token.amount));
-      }
-      console.log("Portfolio USD Change:", portfolioUSDChange);
-    })
-  }, [apiResponse])
+  }, [tokens]);
 
   const fetchWalletData = async () => {
     if (!connection) return; // Ensure connection is available before fetching
@@ -98,7 +164,7 @@ export default function Home() {
       setError("Invalid address or unable to fetch data.");
       console.error("Error in fetchWalletData:", err);
     } finally {
-      setLoading(false);
+      
     }
   };
 
@@ -108,22 +174,62 @@ export default function Home() {
         "network": "mainnet",
         "address": token.mint,
       });
-      setPortfolioUSDBalance((prev) => prev + ((response.raw.usdPrice ?? 0) * token.amount));
-      setApiResponse(response.raw);
+      const priceData = response.raw;
+      // Ensure priceData has a way to be identified, e.g., priceData.tokenAddress or add token.mint to it
+      const dataWithMint = { ...priceData, mint: token.mint, symbol: token.symbol }; // Add mint and symbol for easier mapping
+
+      setPortfolioUSDBalance((prev) => prev + ((dataWithMint.usdPrice ?? 0) * token.amount));
+      setTokenPrices((prevPrices) => [...prevPrices, dataWithMint]);
     } catch (err) {
-      console.error("Error fetching token price:", err);
+      console.error(`Error fetching token price for ${token.mint}:`, err);
+      // Add a placeholder with error and mint/symbol for completion check and mapping
+      setTokenPrices((prevPrices) => [...prevPrices, { mint: token.mint, symbol: token.symbol, error: true, usdPrice: 0, usdPrice24hrUsdChange: 0 }]);
     }
   };
 
   const fetchPortfolioUSDBalance = async () => {
-    console.log("IM HERE")
     if (tokens.length > 0) {
-      tokens.forEach((token) => {
-        fetchTokenPrice(token);
-      })
+      // Reset portfolioUSDBalance and tokenPrices before fetching new set
+      setPortfolioUSDBalance(0);
+      setTokenPrices([]);
+
+      // Using a loop to fetch prices one by one.
+      // Consider Promise.all if parallel fetching is desired and API supports it well.
+      for (const token of tokens) {
+        await fetchTokenPrice(token);
+      }
+      // setLoadingBalance(false) will be handled by the useEffect watching tokenPrices completion
     }
-    setLoadingBalance(false);
-  }
+    // If tokens.length is 0, loadingBalance is handled by the useEffect depending on [tokens]
+  };
+
+  // New useEffect to process data once all token prices are fetched
+  useEffect(() => {
+    if (tokens.length > 0 && tokenPrices.length === tokens.length) {
+      let newPortfolioUSDChange = 0;
+      const newAssetsCalculated: [string, number][] = [];
+
+      tokens.forEach((token) => {
+        // Find the corresponding price info using mint
+        const priceInfo = tokenPrices.find(p => p.mint === token.mint && !p.error);
+
+        if (priceInfo) {
+          newPortfolioUSDChange += (priceInfo.usdPrice24hrUsdChange ?? 0) * token.amount;
+          newAssetsCalculated.push([token.symbol, (token.amount * (priceInfo.usdPrice ?? 0))]);
+        }
+      });
+
+      setPortfolioUSDChange(newPortfolioUSDChange);
+      setAssets(newAssetsCalculated);
+      setLoading(false); // Set loading to false after all data is fetched
+    }
+  }, [tokens, tokenPrices]);
+
+  useEffect(() => {
+    if (assets.length > 0) {
+      getTopAssets();
+    }
+  }, [assets]);
 
   useEffect(() => {
     const checkLocalSignature = () => {
@@ -141,6 +247,13 @@ export default function Home() {
     checkLocalSignature();
   }, [publicKey]);
 
+  function getTopAssets() {
+    const sortedAssets = assets.sort((a, b) => b[1] - a[1]);
+    const topAssets = sortedAssets.slice(0, 3);
+    setTopAssets(topAssets);
+    console.log("Top Assets:", topAssets);
+  }
+
   if (checking) {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center p-24 bg-gradient-to-br from-gray-900 via-black to-gray-800 text-foreground">
@@ -150,51 +263,18 @@ export default function Home() {
   }
 
   return (
-    <main className="flex min-h-screen h-screen p-6 bg-gradient-to-br from-gray-900 via-black to-gray-800 text-foreground overflow-hidden">
+    <main className="flex min-h-screen h-screen p-6 bg-gradient-to-br from-gray-900 via-black to-gray-800 text-foreground overflow-hidden items-center justify-center">
       {!loading ? (
-        <div className="w-full h-full flex flex-col gap-6">
+        <div className="w-[80%] h-full flex flex-col gap-6">
           {/* Portfolio Summary */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
-            <Card className="bg-[#171923] border-[#2D3748]/30">
-              <CardHeader className="pb-2">
-                <CardDescription className="text-gray-400">Total Portfolio Value</CardDescription>
-                <CardTitle className="text-2xl text-white">
-                  {!loadingBalance || portfolioUSDBalance > 0 ? 
-                    `$${Math.round(portfolioUSDBalance * 100) / 100}` :
-                   "Loading..."}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className={`text-sm font-medium ${portfolioUSDChange > 0 ? "text-green-500" : "text-red-500"}`}>
-                  {portfolioUSDChange > 0 ? "+" : ""}
-                  {portfolioUSDChange.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (24h)
-                </div>
-              </CardContent>
-            </Card>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+            <PortfolioValueCard totalValue = {portfolioUSDBalance} totalChange={portfolioUSDChange} topAssets = {topAssets} />
 
-            <Card className="bg-[#171923] border-[#2D3748]/30">
-              <CardHeader className="pb-2">
-                <CardDescription className="text-gray-400">Assets</CardDescription>
-                <CardTitle className="text-2xl text-white">{tokens.length}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-sm text-gray-400">Across multiple chains</div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-[#171923] border-[#2D3748]/30">
-              <CardHeader className="pb-2">
-                <CardDescription className="text-gray-400">Recommended Actions</CardDescription>
-                <CardTitle className="text-2xl text-white">3</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-sm text-gray-400">Based on your portfolio</div>
-              </CardContent>
-            </Card>
+            <PortfolioChart currentValue = {portfolioUSDBalance} valueChange24h={portfolioUSDChange} />
           </div>
 
           {/* Main Content */}
-          <div className="flex flex-col lg:flex-row gap-6 h-[calc(100%-130px)]">
+          <div className="flex flex-col lg:flex-row gap-6 h-[calc(100%-130px)] overflow-hidden">
             {/* Portfolio Section */}
             <Card className="w-full lg:w-[60%] h-full bg-[#0F1218] border-[#2D3748]/30 flex flex-col">
               <CardHeader className="pb-2">
@@ -202,7 +282,7 @@ export default function Home() {
                   <CardTitle className="text-xl text-white">Portfolio</CardTitle>
                 </div>
               </CardHeader>
-              <CardContent className="flex-1 overflow-y-auto pt-4 pb-6 pr-2">
+              <CardContent className="flex-1 overflow-y-auto pt-4 pb-6 pr-2 h-full">
                 <div className="space-y-3">
                   {tokens.map((token, index) => (
                     <TokenPortfolioCard key={index} tokenData={token} />
@@ -216,16 +296,37 @@ export default function Home() {
               <CardHeader className="pb-2">
                 <CardTitle className="text-xl text-white">Recommended Strategies</CardTitle>
               </CardHeader>
-              <CardContent className="flex-1 overflow-y-auto pt-4">
+              <CardContent className="flex flex-col overflow-y-auto pt-4 gap-8">
+                {strategies.slice(0,3).map((strategy: Strategy, index) => (
+
+                    <Card
+                  key={strategy._id}
+                  className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border-none backdrop-blur-sm relative min-h-[300px] cursor-pointer"
+                >
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                    <CardTitle className="text-lg font-bold">
+                      {strategy.name}
+                    </CardTitle>
+                  </CardHeader>
+                  <div className="absolute inset-x-0 top-[60px] bottom-0">
+                    <SimplifiedFlow
+                      nodes={strategy.nodes}
+                      edges={strategy.edges}
+                    />
+                  </div>
+                </Card>
+              
+              ))}
+
               </CardContent>
             </Card>
           </div>
         </div>
       ) : (
-        <div className="w-full h-full flex flex-col gap-6">
+        <div className="w-[80%] h-full flex flex-col gap-6">
           {/* Loading skeleton */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
-            {[1, 2, 3].map((i) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+            {[1, 2].map((i) => (
               <Card key={i} className="bg-[#171923] border-[#2D3748]/30">
                 <CardHeader className="pb-2">
                   <Skeleton className="h-4 w-24 bg-[#2D3748]" />
@@ -258,7 +359,7 @@ export default function Home() {
               </CardHeader>
               <CardContent>
                 <Skeleton className="h-10 w-full mb-4 bg-[#2D3748]" />
-                {[1, 2, 3].map((i) => (
+                {[1, 2].map((i) => (
                   <div key={i} className="mb-4">
                     <Skeleton className="h-24 w-full bg-[#2D3748]" />
                   </div>

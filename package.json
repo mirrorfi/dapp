@@ -42,6 +42,7 @@
     "react-dom": "^19.0.0",
     "react-particles": "^2.12.2",
     "reactflow": "^11.11.4",
+    "recharts": "^2.15.3",
     "redaxios": "^0.5.1",
     "rpc-websockets": "7.11.0",
     "solana-agent-kit": "^2.0.3",
