@@ -1,4 +1,4 @@
-import { VersionedTransaction } from "@solana/web3.js";
+import { Connection, VersionedTransaction } from "@solana/web3.js";
 import { type SolanaAgentKit, signOrSendTX } from "solana-agent-kit";
 
 /**
@@ -9,9 +9,14 @@ import { type SolanaAgentKit, signOrSendTX } from "solana-agent-kit";
  */
 export async function lendAsset(agent: SolanaAgentKit, amount: number) {
   try {
-    console.log("User:",agent.wallet.publicKey.toBase58());
-    console.log("Agent:", agent);
-    console.log("Amount:",amount);
+
+    console.log("Parameters:", {
+      agent: agent,
+      amount: amount,
+    });
+
+    console.log("Agent public key:", agent.wallet.publicKey.toBase58());
+    
     const response = await fetch(
       `https://blink.lulo.fi/actions?amount=${amount}&symbol=USDC`,
       {
@@ -33,7 +38,9 @@ export async function lendAsset(agent: SolanaAgentKit, amount: number) {
     );
 
     // Get a recent blockhash and set it
-    const { blockhash } = await agent.connection.getLatestBlockhash();
+    const rpc = process.env.NEXT_PUBLIC_RPC_LINK || "https://api.mainnet-beta.solana.com";
+    const connection = new Connection(rpc);
+    const { blockhash } = await connection.getLatestBlockhash();
     luloTxn.message.recentBlockhash = blockhash;
 
     // return signOrSendTX(agent, luloTxn);

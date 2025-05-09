@@ -4,6 +4,7 @@ import { SolanaAgentKit } from 'solana-agent-kit';
 import TokenPlugin from '@solana-agent-kit/plugin-token';
 import SanctumPlugin from '@/lib/plugin/sanctum';
 import { Connection, PublicKey } from '@solana/web3.js';
+import LuloPlugin from './plugin/lulo';
 
 export async function createSolanaAgent(publicKeyString: string) {
   
@@ -44,7 +45,8 @@ export async function createSolanaAgent(publicKeyString: string) {
       {}
     )
       .use(TokenPlugin)
-      .use(SanctumPlugin);
+      .use(SanctumPlugin)
+      .use(LuloPlugin);
 
       // // test if simple data fecthing 
       // console.log("Feching usdc token data")

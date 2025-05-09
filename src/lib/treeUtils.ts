@@ -107,70 +107,101 @@ export const executeTree = async (nodes: Record<string, TreeNode>, agent: any, s
 
   console.log("Initializing starting conditions")
   // First level simply pushes the children of the root node to the queue
-    const currentNode = nodes["1"]; // Assuming node1 is the root node
-    if (!currentNode) {
-        console.error("Root node does not exist in nodes.");
-        return;
-    }
-    console.log("Current node:", currentNode);
-    if (!currentNode?.amount) {
-        console.error("Root node amount does not exist in nodes.");
-        return;
-    }
-    for (const childId of currentNode.children) {
-        const childNode = nodes[childId];
-        if (childNode) {
-          const amountPerChildNode = Math.floor(((currentNode.amount)) / currentNode.children.length);
-            childNode.inputToken = currentNode.token; // Set the input token for child nodes
-            childNode.inputAmount = amountPerChildNode; // Set the input amount for child nodes
-            console.log(childNode);
-            queue.push(childId);
-        } else {
-            console.error(`Child node with ID ${childId} does not exist in nodes.`);
-        }
-    }
+  const currentNode = nodes["1"]; // Assuming node1 is the root node
+  if (!currentNode) {
+      console.error("Root node does not exist in nodes.");
+      return;
+  }
+  console.log("Current node:", currentNode);
+  if (!currentNode?.amount) {
+      console.error("Root node amount does not exist in nodes.");
+      return;
+  }
+  for (const childId of currentNode.children) {
+      const childNode = nodes[childId];
+      if (childNode) {
+        const amountPerChildNode = Math.floor(((currentNode.amount)) / currentNode.children.length);
+          childNode.inputToken = currentNode.token; // Set the input token for child nodes
+          childNode.inputAmount = amountPerChildNode; // Set the input amount for child nodes
+          console.log(childNode);
+          queue.push(childId);
+      } else {
+          console.error(`Child node with ID ${childId} does not exist in nodes.`);
+      }
+  }
+  
+  // Process nodes using BFS
+  while (queue.length > 0) {
+    const currentNodeId = queue.shift()!;
+    const currentNode = nodes[currentNodeId];
+
+    // Execute the node's function
+    try {
+      console.log(`Processing node: ${currentNode.nodeId} (${nodes[currentNode.parent]?.token} -> ${currentNode.token}*)`);
+      let retryCount = 0;
+      const maxRetries = 2;
+      let success = false;
+
+      while (!success && retryCount < maxRetries) {
+        try {
+          if (currentNode.nodeType === "token") {
+            await handleSwapping(agent, currentNode, signTransaction, nodes);
+
+          }
+          
+          if (currentNode.nodeType === "lst") {
+            await handleSanctumProtocols(agent, currentNode, signTransaction, nodes);
+          }
+
+          if (currentNode.nodeType === "protocol") {
+
+            if (currentNode.label.toLowerCase() === "lulo") {
+              await handleLulaProtocols(agent, currentNode, signTransaction, nodes);
+            }
+
+            if (currentNode.label.toLowerCase() === "orca") {
+              await handleOrcaProtocols(agent, currentNode, signTransaction, nodes);
+            }
+          }
+
+          success = true; // Mark success if no error occurs
+        } catch (error: any) {
+          retryCount++;
+          console.error(`Error during transaction attempt ${retryCount}:`, error.message);
     
-    // Process nodes using BFS
-    while (queue.length > 0) {
-      const currentNodeId = queue.shift()!;
-      const currentNode = nodes[currentNodeId];
-
-      // Execute the node's function
-      try {
-        console.log(`Getting txn of node: ${currentNode.nodeId}`);
-
-        if (currentNode.nodeType === "token") {
-          await handleSwapping(agent, currentNode, signTransaction, nodes);
-
-        }
-        
-        if (currentNode.nodeType === "lst") {
-          await handleSanctumProtocols(agent, currentNode, signTransaction, nodes);
-        }
-
-        if (currentNode.nodeType === "protocol") {
-
-          if (currentNode.label.toLowerCase() === "lula") {
-            await handleLulaProtocols(agent, currentNode, signTransaction, nodes);
+          // Check if the error is a "Transaction simulation failed"
+          if (error.message.includes("Transaction simulation failed")) {
+            console.warn("Simulation failed, retrying...");
           }
-
-          if (currentNode.label.toLowerCase() === "orca") {
-            await handleOrcaProtocols(agent, currentNode, signTransaction, nodes);
+          else if (error.message.includes("Transaction signature verification failure")) {
+            console.warn("Transaction signature verification failure, retrying...");
+          }
+          else {
+            console.error("Unexpected error, not retrying.");
+            throw error; // Re-throw unexpected errors
+          }
+    
+          if (retryCount > maxRetries) {
+            console.error("Max retries reached. Moving on...");
+            throw new Error(`Failed to send transaction after ${maxRetries + 1} attempts.`);
           }
         }
+      }
 
-        // Mark the node as executed
-        currentNode.executed = true;
-        executed.add(currentNodeId);
+      // Mark the node as executed
+      currentNode.executed = true;
+      executed.add(currentNodeId);
 
-        // Enqueue child nodes
-        for (const childId of currentNode.children) {
-            queue.push(childId);
-        }
-        
+      // Enqueue child nodes
+      for (const childId of currentNode.children) {
+          queue.push(childId);
+      }
+      
     } catch (error) {
       console.error(`Error executing node ${currentNode.nodeId}:`, error);
     }
+
+    console.log("Executed nodes:", nodes)
   }
 };
 
@@ -186,7 +217,7 @@ const handleSwapping = async (agent: any, currentNode: TreeNode, signTransaction
       tokenMintAddresses[currentNode?.inputToken || "SOL"],
       tokenMintAddresses[currentNode?.token],
       currentNode.inputAmount,
-      500, // 5%
+      1000,
   )
 
   if (!result) {
@@ -206,10 +237,18 @@ const handleSwapping = async (agent: any, currentNode: TreeNode, signTransaction
   const signature = await connection.sendTransaction(signed, { skipPreflight: false, preflightCommitment: "confirmed" });
   console.log("Transaction sent with signature:", signature);
 
-  // delay 5s 
-  await new Promise((resolve) => setTimeout(resolve, 5000));
-
-  const txData = await connection.getTransaction(signature, { commitment: "confirmed", maxSupportedTransactionVersion: 0 });
+  // Wait for transaction to be confirmed
+  let txData = null;
+  while (!txData) {
+    console.log("Waiting for transaction...");
+    await new Promise((resolve) => setTimeout(resolve, 2000)); // Wait for 2 seconds
+  
+    txData = await connection.getTransaction(signature, {
+      commitment: "confirmed",
+      maxSupportedTransactionVersion: 0,
+    });
+  }
+  
   console.log("Transaction data:", txData);
 
   // Get balances in terms of lamports
@@ -228,6 +267,9 @@ const handleSwapping = async (agent: any, currentNode: TreeNode, signTransaction
   
   const amountPerChildNode = Math.floor(((postTokenBalance - preTokenBalance)) / currentNode.children.length); // Each child node shares equal amount of the output
 
+  console.warn(
+    `[${currentNode.inputToken}(${currentNode.inputAmount}) -> ${currentNode.token}(${postTokenBalance - preTokenBalance})] each child (${currentNode.children.length}) is ${amountPerChildNode}`
+  );
   for (const childId of currentNode.children) {
       const childNode = nodes[childId];
       if (childNode) {
@@ -313,26 +355,6 @@ const handleSanctumProtocols = async (agent: any, currentNode: TreeNode, signTra
     throw new Error(`LST Mint is not a string for node ${currentNode.nodeId}`);
   }
 
-  // const txn = await agent.methods.sanctumAddLiquidity(
-  //     lstMint,
-  //     (currentNode.inputAmount).toString(),
-  //     lpAmount.toString(),
-  //     500, // 5%
-  // )
-
-  
-  // inputLstMint: string,
-  // amount: string,
-  // quotedAmount: string,
-  // priorityFee: number,
-  // outputLstMint: string,
-  
-  // inputLstMint={currentNode.inputToken},
-  // amount={currentNode.inputAmount},
-  // outputLstMint={currentNode.token},
-  // quotedAmount={lpAmount},
-  // priorityFee={500},
-
   const txn = await agent.methods.sanctumSwapLST(
     tokenMintAddresses[currentNode.inputToken],
     currentNode.inputAmount.toString(),
@@ -369,10 +391,70 @@ const handleSanctumProtocols = async (agent: any, currentNode: TreeNode, signTra
   await new Promise((resolve) => setTimeout(resolve, 2000));
 
   const txData = await connection.getTransaction(signature, { commitment: "confirmed", maxSupportedTransactionVersion: 0 });
+  
   console.log("Transaction data:", txData);
+
+  // Get balances in terms of lamports
+  const postTokenBalance = Number(txData?.meta?.postTokenBalances?.find(
+    (balance) => (balance.mint === tokenMintAddresses[currentNode.token] && balance.owner === agent.wallet.publicKey.toString())
+  )?.uiTokenAmount.amount);
+  const preTokenBalance = Number(txData?.meta?.preTokenBalances?.find(
+    (balance) => (balance.mint === tokenMintAddresses[currentNode.token] && balance.owner === agent.wallet.publicKey.toString())
+  )?.uiTokenAmount.amount);
+
+  if (postTokenBalance === undefined || preTokenBalance === undefined) {
+      throw new Error(`Failed to get token balance for node ${currentNode.nodeId}`);
+  }
+
+  currentNode.amount = postTokenBalance - preTokenBalance; // Set the output amount for the current node
+  
+  const amountPerChildNode = Math.floor(((postTokenBalance - preTokenBalance)) / currentNode.children.length); // Each child node shares equal amount of the output
+
+  console.warn(
+    `[${currentNode.inputToken}(${currentNode.inputAmount}) -> ${currentNode.token}(${postTokenBalance - preTokenBalance})] each child (${currentNode.children.length}) is ${amountPerChildNode}`
+  );
+  for (const childId of currentNode.children) {
+      const childNode = nodes[childId];
+      if (childNode) {
+          childNode.inputToken = currentNode.token; // Set the input token for child nodes
+          childNode.inputAmount = amountPerChildNode; // Set the input amount for child nodes
+      }
+  }
 }
 
 const handleLulaProtocols = async (agent: any, currentNode: TreeNode, signTransaction: any, nodes: Record<string, TreeNode>) => {
+  
+  console.log("Getting Lend Transaction");
+  console.log("Input Amount:", currentNode.inputAmount);
+
+  const inputAmount = (currentNode.inputAmount / (10 ** 6)).toString(); // Convert to string
+
+
+  const tx = await agent.methods.lendAsset(inputAmount);
+  console.log("Lulo Lend Asset txn:", tx);
+
+  const res = await connection.simulateTransaction(tx);
+  console.log("Simulation Result:", res);
+  console.log(res.value.logs);
+
+  if (!tx) {
+    console.error(`Failed to get transaction for node ${currentNode.nodeId}`);
+    throw new Error(`Failed to get transaction for node ${currentNode.nodeId}`);
+  }
+  
+  const signed = await signTransaction(tx); // Sign the transaction
+  console.log("Signed:", signed);
+  console.log("Tx:", tx);
+
+  // Send Transaction
+  const signature = await connection.sendTransaction(signed, { skipPreflight: false, preflightCommitment: "confirmed" });
+  console.log("Transaction sent with signature:", signature);
+
+  // delay 5s
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+  const txData = await connection.getTransaction(signature, { commitment: "confirmed", maxSupportedTransactionVersion: 0 });
+  console.log("Transaction data:", txData);
+  // Get balances in terms of lamports
 }
 
 const handleOrcaProtocols = async (agent: any, currentNode: TreeNode, signTransaction: any, nodes: Record<string, TreeNode>) => {

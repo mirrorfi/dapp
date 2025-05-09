@@ -161,8 +161,6 @@ export async function quoteAndBuildSwapInstructions(
 
     const outputAmount: number = parseFloat(quote.outAmount);
 
-    console.log("Using wallet public key:", walletPublicKey.toBase58());
-
     //  1. Get swap instructions
     const swapInstructions = await client.getSwapInstructions(
       quote,
