@@ -15,16 +15,20 @@ import { useState, useEffect } from "react"
 import type { Node } from "reactflow"
 
 interface NodeModalProps {
-  node: Node | null
-  isOpen: boolean
-  onClose: () => void
-  onCreateHook: () => void
+  node: Node | null;
+  isOpen: boolean;
+  onClose: () => void;
+  onCreateHook: () => void;
+  onDeleteNode: (nodeId: string) => void; // Add a prop for deleting the node
 }
 
-export function NodeModal({ node, isOpen, onClose, onCreateHook }: NodeModalProps) {
-  // console.log("Node Modal Opened")
-  // console.log("Node Data:", node)
-  // console.log("Node ID:", node?.id)
+export function NodeModal({
+  node,
+  isOpen,
+  onClose,
+  onCreateHook,
+  onDeleteNode,
+}: NodeModalProps) {
   const [desc, setDesc] = useState<string>("");
 
   // Load the description from localStorage when the dialog opens
@@ -32,7 +36,6 @@ export function NodeModal({ node, isOpen, onClose, onCreateHook }: NodeModalProp
     if (isOpen && node) {
       const savedDescription = localStorage.getItem(`node-desc-${node.id}`);
       if (savedDescription) {
-        console.log("Loaded description from localStorage:", savedDescription);
         setDesc(savedDescription);
       }
     }
@@ -47,6 +50,14 @@ export function NodeModal({ node, isOpen, onClose, onCreateHook }: NodeModalProp
     onClose();
   };
 
+  const handleDelete = () => {
+    if (node) {
+      localStorage.removeItem(`node-desc-${node.id}`); // Remove the description from localStorage
+      onDeleteNode(node.id); // Call the delete function passed from the parent
+      onClose(); // Close the dialog
+    }
+  };
+
   const handleCreate = () => {
     if (node) {
       localStorage.setItem(`node-desc-${node.id}`, desc);
@@ -54,6 +65,7 @@ export function NodeModal({ node, isOpen, onClose, onCreateHook }: NodeModalProp
     setDesc("");
     onCreateHook();
   };
+
   if (!node) return null;
 
   return (
@@ -61,21 +73,30 @@ export function NodeModal({ node, isOpen, onClose, onCreateHook }: NodeModalProp
       <DialogContent className=" text-gray-200 sm:max-w-md sm:rounded-lg">
         <div className="">
           <DialogHeader className="mb-6">
-            <DialogTitle className="text-2xl flex items-center font-semibold text-white">{node.data.label === "Wallet" ? <Wallet className="mr-2"/> : <Image
-                            src={`/PNG/${node.data.label.toLowerCase()}-logo.png`}
-                            alt={`${node.data.label} logo`}
-                            className="mr-2"
-                            width={24}
-                            height={24}
-                          />} {node.data.label} Node</DialogTitle>
+            <DialogTitle className="text-2xl flex items-center font-semibold text-white">
+              {node.data.label === "Wallet" ? (
+                <Wallet className="mr-2" />
+              ) : (
+                <Image
+                  src={`/PNG/${node.data.label.toLowerCase()}-logo.png`}
+                  alt={`${node.data.label} logo`}
+                  className="mr-2"
+                  width={24}
+                  height={24}
+                />
+              )}{" "}
+              {node.data.label} Node
+            </DialogTitle>
           </DialogHeader>
 
-            {/* Divider */}
-            <div className="border-t border-zinc-500 my-4"></div>
+          {/* Divider */}
+          <div className="border-t border-zinc-500 my-4"></div>
 
           <DialogDescription className="mb-4">
             <div className="items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-200">Node Description</h2>
+              <h2 className="text-lg font-semibold text-gray-200">
+                Node Description
+              </h2>
               {/* Input from the user */}
               <input
                 type="text"
@@ -88,10 +109,12 @@ export function NodeModal({ node, isOpen, onClose, onCreateHook }: NodeModalProp
           </DialogDescription>
 
           <DialogFooter className="mt-8 flex gap-3">
-            <Button variant="destructive">
-              <Trash2 />
-            </Button>
-            {(node.data?.nodeType !== "protocol") ? (
+            {node.data?.label !== "Wallet" ? (
+              <Button variant="destructive" onClick={handleDelete}>
+                <Trash2 />
+              </Button>
+            ) : null}
+            {node.data?.nodeType !== "protocol" ? (
               <Button onClick={handleCreate} variant={"outline"} className="">
                 <PlusCircle />
               </Button>
@@ -100,5 +123,5 @@ export function NodeModal({ node, isOpen, onClose, onCreateHook }: NodeModalProp
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

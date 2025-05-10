@@ -142,6 +142,11 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
     [nodes, setNodes, nodeToConnect, setEdges]
   );
 
+  const handleDeleteNode = (nodeId: string) => {
+    setNodes((nds) => nds.filter((node) => node.id !== nodeId)); // Remove the node
+    setEdges((eds) => eds.filter((edge) => edge.source !== nodeId && edge.target !== nodeId)); // Remove related edges
+  };
+
   const onNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
     setNodeToConnect(node);
     setNodeOpen(true);
@@ -172,6 +177,7 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
               setNodeOpen(false);
               setOpen(true);
             }}
+            onDeleteNode={handleDeleteNode} // Pass the delete function
           />
           <ReactFlow
             nodes={nodes}
