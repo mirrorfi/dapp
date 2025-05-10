@@ -9,7 +9,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { PlusCircle, Trash2 } from "lucide-react"
+import { PlusCircle, Trash2, Wallet } from "lucide-react"
+import Image from "next/image"
+import { useState, useEffect } from "react"
 import type { Node } from "reactflow"
 
 interface NodeModalProps {
@@ -20,21 +22,68 @@ interface NodeModalProps {
 }
 
 export function NodeModal({ node, isOpen, onClose, onCreateHook }: NodeModalProps) {
-  if (!node) return null
+  // console.log("Node Modal Opened")
+  // console.log("Node Data:", node)
+  // console.log("Node ID:", node?.id)
+  const [desc, setDesc] = useState<string>("");
+
+  // Load the description from localStorage when the dialog opens
+  useEffect(() => {
+    if (isOpen && node) {
+      const savedDescription = localStorage.getItem(`node-desc-${node.id}`);
+      if (savedDescription) {
+        console.log("Loaded description from localStorage:", savedDescription);
+        setDesc(savedDescription);
+      }
+    }
+  }, [isOpen, node]);
+
+  // Save the description to localStorage when the dialog closes
+  const handleClose = () => {
+    if (node) {
+      localStorage.setItem(`node-desc-${node.id}`, desc);
+    }
+    setDesc("");
+    onClose();
+  };
+
+  const handleCreate = () => {
+    if (node) {
+      localStorage.setItem(`node-desc-${node.id}`, desc);
+    }
+    setDesc("");
+    onCreateHook();
+  };
+  if (!node) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className=" text-gray-200 sm:max-w-md sm:rounded-lg">
         <div className="">
           <DialogHeader className="mb-6">
-            <DialogTitle className="text-2xl font-semibold text-white">Node Details</DialogTitle>
-            <DialogDescription className="text-gray-400">View and manage details for this node.</DialogDescription>
+            <DialogTitle className="text-2xl flex items-center font-semibold text-white">{node.data.label === "Wallet" ? <Wallet className="mr-2"/> : <Image
+                            src={`/PNG/${node.data.label.toLowerCase()}-logo.png`}
+                            alt={`${node.data.label} logo`}
+                            className="mr-2"
+                            width={24}
+                            height={24}
+                          />} {node.data.label} Node</DialogTitle>
           </DialogHeader>
+
+            {/* Divider */}
+            <div className="border-t border-zinc-500 my-4"></div>
 
           <DialogDescription className="mb-4">
             <div className="items-center justify-between">
               <h2 className="text-lg font-semibold text-gray-200">Node Description</h2>
-              <h1>random description thingy</h1>
+              {/* Input from the user */}
+              <input
+                type="text"
+                value={desc}
+                onChange={(e) => setDesc(e.target.value)}
+                className="mt-2 w-full rounded-md border-gray-600 bg-gray-800 p-2 text-gray-200 focus:border-blue-500 focus:ring focus:ring-blue-500"
+                placeholder="Enter node description"
+              />
             </div>
           </DialogDescription>
 
@@ -42,9 +91,11 @@ export function NodeModal({ node, isOpen, onClose, onCreateHook }: NodeModalProp
             <Button variant="destructive">
               <Trash2 />
             </Button>
-            <Button onClick={onCreateHook} variant={"outline"} className="">
-              <PlusCircle />
-            </Button>
+            {(node.data?.nodeType !== "protocol") ? (
+              <Button onClick={handleCreate} variant={"outline"} className="">
+                <PlusCircle />
+              </Button>
+            ) : null}
           </DialogFooter>
         </div>
       </DialogContent>

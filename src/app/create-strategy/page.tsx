@@ -14,7 +14,6 @@ import ReactFlow, {
   MarkerType,
   Position,
 } from "reactflow";
-import { ReactFlowProvider } from "reactflow";
 import "reactflow/dist/style.css";
 
 import { CreateNodeDialog } from "@/components/create-node-dialog";
@@ -183,6 +182,9 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
             onNodeClick={onNodeClick}
             nodeTypes={nodeTypes}
             proOptions={{ hideAttribution: true }}
+            panOnDrag={false}
+            zoomOnDoubleClick={false}
+            zoomOnPinch={false}
             fitView
             className="bg-background"
           >

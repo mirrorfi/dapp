@@ -26,7 +26,6 @@ interface StrategyProps {
 
 
 export function SaveStrategyDialog({ nodeList, edgeList, userAddress, isOpen, onClose}: StrategyProps) {
-    console.log("User Address:", userAddress)
     const [strategyName, setStrategyName] = useState("")
     const [description, setDescription] = useState("")
 
