@@ -92,6 +92,17 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
       description: string;
       nodeType: "protocol" | "token" | "lst";
     }) => {
+      const positions = nodes.map((node) => node.position);
+      const x = nodeToConnect ? nodeToConnect.position.x + 400: Math.random() * 300 + 200;
+      let y = nodeToConnect ? nodeToConnect.position.y: Math.random() * 300 + 50;
+
+      let factor = 0;
+
+      while (nodeToConnect && positions.some((pos) => pos.x === x && pos.y === y)) {
+        factor += 1;
+        y = nodeToConnect.position.y + (-1) ** factor * 200 * Math.ceil(factor / 2)
+      }
+
       let connectionCount = nodeToConnect ? nodeToConnect.data.connectionCount : 0;
 
       const newNode: Node = {
@@ -99,13 +110,8 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
         type: "customNode",
         data: nodeData,
         position: {
-          x: nodeToConnect
-            ? nodeToConnect.position.x + 400
-            : Math.random() * 300 + 200,
-          y: nodeToConnect
-            ? nodeToConnect.position.y +
-              (-1) ** connectionCount * 200 * Math.ceil(connectionCount / 2)
-            : Math.random() * 300 + 50,
+          x: x,
+          y: y,
         },
       };
 
@@ -143,8 +149,30 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
   );
 
   const handleDeleteNode = (nodeId: string) => {
-    setNodes((nds) => nds.filter((node) => node.id !== nodeId)); // Remove the node
-    setEdges((eds) => eds.filter((edge) => edge.source !== nodeId && edge.target !== nodeId)); // Remove related edges
+    // Helper function to recursively find all child nodes
+    const findChildNodes = (parentId: string, edges: Edge[], nodes: Node[]): string[] => {
+      const childNodes = edges
+        .filter((edge) => edge.source === parentId)
+        .map((edge) => edge.target);
+  
+      return childNodes.reduce(
+        (acc, childId): string[] => [...acc, childId, ...findChildNodes(childId, edges, nodes)],
+        [] as string[]
+      );
+    };
+  
+    // Find all child nodes of the node to be deleted
+    const childNodeIds = findChildNodes(nodeId, edges, nodes);
+  
+    // Remove the node, its children, and their associated edges
+    setNodes((nds) => nds.filter((node) => ![nodeId, ...childNodeIds].includes(node.id)));
+    setEdges((eds) =>
+      eds.filter(
+        (edge) =>
+          ![nodeId, ...childNodeIds].includes(edge.source) &&
+          ![nodeId, ...childNodeIds].includes(edge.target)
+      )
+    );
   };
 
   const onNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
@@ -182,6 +210,7 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
           <ReactFlow
             nodes={nodes}
             edges={edges}
+            nodesDraggable={false}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
