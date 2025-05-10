@@ -1,7 +1,7 @@
 "use client"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid } from "recharts"
 
 interface PortfolioChartProps {
   currentValue: number
@@ -23,10 +23,18 @@ export function PortfolioChart({ currentValue, valueChange24h }: PortfolioChartP
       // Linear progression from start to end value as the base
       const baseValue = startingValue + (valueChange24h * i) / (hours - 1)
 
-      // Add random fluctuation (smaller near the endpoints to ensure accuracy)
-      const fluctuationFactor = Math.min(i, hours - 1 - i) / ((hours - 1) / 2)
-      const maxFluctuation = Math.abs(valueChange24h) * 0.75 * fluctuationFactor
-      const randomFluctuation = (Math.random() * 2 - 1) * maxFluctuation
+      // Add random fluctuation with higher volatility
+      const fluctuationFactor = 1.5 // Increased for more volatility
+      const maxFluctuation = Math.abs(valueChange24h) * 0.2 * fluctuationFactor
+
+      // Add occasional spikes for more erratic movement
+      const spikeChance = Math.random()
+      let randomFluctuation = (Math.random() * 2 - 1) * maxFluctuation
+
+      // Add occasional larger spikes (10% chance)
+      if (spikeChance > 0.9 && i > 1 && i < hours - 2) {
+        randomFluctuation = randomFluctuation * 2.5
+      }
 
       // For the first and last points, use exact values
       let value
@@ -38,10 +46,18 @@ export function PortfolioChart({ currentValue, valueChange24h }: PortfolioChartP
         value = baseValue + randomFluctuation
       }
 
+      // Calculate the hour label based on the current time
+      const now = new Date()
+      const hour = new Date(now.getTime() - (hours - 1 - i) * 60 * 60 * 1000).getHours()
+      const hourLabel = `${hour.toString().padStart(2, "0")}:00`
+      // Only show every 4 hours for cleaner x-axis
+      const displayLabel = i % 4 === 0 ? hourLabel : ""
+
       data.push({
         hour: i,
         value: Math.max(0, value), // Ensure no negative values
-        label: `${(24 - i) % 24}:00`,
+        label: hourLabel,
+        displayLabel: displayLabel,
       })
     }
 
@@ -76,6 +92,20 @@ export function PortfolioChart({ currentValue, valueChange24h }: PortfolioChartP
     })
   }
 
+  // Format Y-axis ticks
+  const formatYAxis = (value: number) => {
+    if (value >= 1000) {
+      return `$${(value / 1000).toFixed(1)}k`
+    }
+    return `$${value}`
+  }
+
+  // Format X-axis ticks to show the correct hour label from chartData
+  const formatXAxis = (value: number) => {
+    const dataPoint = chartData.find((item) => item.hour === value)
+    return dataPoint?.displayLabel || ""
+  }
+
   // Custom tooltip component
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -88,6 +118,14 @@ export function PortfolioChart({ currentValue, valueChange24h }: PortfolioChartP
     }
     return null
   }
+
+  // Calculate min and max for Y-axis domain
+  const dataMin = Math.min(...chartData.map((item) => item.value))
+  const dataMax = Math.max(...chartData.map((item) => item.value))
+  const yAxisDomain = [
+    Math.floor(dataMin * 0.995), // Slightly below min
+    Math.ceil(dataMax * 1.005), // Slightly above max
+  ]
 
   return (
     <Card className="bg-[#171923] border-[#2D3748]/30">
@@ -103,23 +141,35 @@ export function PortfolioChart({ currentValue, valueChange24h }: PortfolioChartP
         </div>
       </CardHeader>
       <CardContent className="pt-0">
-        <div className={`text-sm font-medium ${isPositive ? "text-green-500" : "text-red-500"} mb-2`}>
-          {formattedChange} (24h)
-        </div>
-        <div className="h-[160px] w-full">
+        <div className="h-[180px] w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+            <AreaChart data={chartData} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
               <defs>
                 <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor={isPositive ? "#10B981" : "#EF4444"} stopOpacity={0.3} />
                   <stop offset="95%" stopColor={isPositive ? "#10B981" : "#EF4444"} stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <XAxis dataKey="hour" tick={false} axisLine={false} tickLine={false} />
-              <YAxis domain={["dataMin - 100", "dataMax + 100"]} hide />
+              <CartesianGrid strokeDasharray="3 3" stroke="#2D3748" opacity={0.3} vertical={false} />
+              <XAxis
+                dataKey="hour"
+                tickFormatter={formatXAxis}
+                axisLine={{ stroke: "#2D3748" }}
+                tickLine={{ stroke: "#2D3748" }}
+                tick={{ fill: "#94A3B8", fontSize: 10 }}
+                ticks={[]}
+              />
+              <YAxis
+                domain={yAxisDomain}
+                tickFormatter={formatYAxis}
+                axisLine={{ stroke: "#2D3748" }}
+                tickLine={{ stroke: "#2D3748" }}
+                tick={{ fill: "#94A3B8", fontSize: 10 }}
+                width={40}
+              />
               <Tooltip content={<CustomTooltip />} />
               <Area
-                type="monotone"
+                type="natural"
                 dataKey="value"
                 stroke={isPositive ? "#10B981" : "#EF4444"}
                 strokeWidth={2}

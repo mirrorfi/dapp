@@ -1,7 +1,7 @@
 "use client"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowUpRight, ArrowDownRight, TrendingUp, Clock } from "lucide-react"
+import { ArrowUpRight, ArrowDownRight, TrendingUp, TrendingDown, Clock } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
 
 interface PortfolioValueCardProps {
@@ -37,10 +37,18 @@ export function PortfolioValueCard({ totalValue, totalChange, topAssets
         </div>
       </CardHeader>
       <CardContent>
-        <div className={`text-sm font-medium ${isPositive ? "text-green-500" : "text-red-500"} mb-4`}>
-          {isPositive ? "+" : ""}
-          {totalChange.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (24h)
-        </div>
+        <div className="flex items-center gap-2 pb-4">
+            <div className="h-8 w-8 rounded-full bg-[#2D3748] flex items-center justify-center">
+              {isPositive ? <TrendingUp className="h-4 w-4 text-green-500" /> : <TrendingDown className="h-4 w-4 text-red-500" />}
+            </div>
+            <div className="flex flex-col justify-center h-fit">
+              <p className="text-xs text-gray-400">Portfolio Value Change (24h)</p>
+              <div className={`text-sm font-medium ${isPositive ? "text-green-500" : "text-red-500"} flex items-center`}>
+              {isPositive ? "+" : ""}
+              {totalChange.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (24h)
+              </div>
+            </div>
+          </div>
 
         {/* Top assets */}
         <div className="space-y-3">
