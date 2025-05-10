@@ -26,7 +26,6 @@ interface StrategyProps {
 
 
 export function SaveStrategyDialog({ nodeList, edgeList, userAddress, isOpen, onClose}: StrategyProps) {
-    console.log("User Address:", userAddress)
     const [strategyName, setStrategyName] = useState("")
     const [description, setDescription] = useState("")
 
@@ -51,7 +50,7 @@ export function SaveStrategyDialog({ nodeList, edgeList, userAddress, isOpen, on
                 ...node,
                 data: {
                 ...node.data,
-                description: node.data.description || "Description", // Provide a default value for description
+                description: localStorage.getItem(`node-desc-${node.id}`) || "Description", // look into user's local storage for description
                 },
             }));
 

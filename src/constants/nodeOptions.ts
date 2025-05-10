@@ -1,4 +1,4 @@
-export const protocolOptions = ["Raydium", "Orca", "Kamino", "Drift", "Lulo"];
+export const protocolOptions = ["Raydium", "Orca", "Kamino", "Drift", "Meteora", "Lulo"];
 
 export const tokenMintAddresses: Record<string, string> = {
     "SOL": "So11111111111111111111111111111111111111112",
@@ -15,7 +15,6 @@ export const LSTMintAddresses: Record<string, string> = {
     "BNSOL": "BNso1VUJnh4zcfpZa6986Ea66P6TCp59hvtNJ8b1X85",
     "mSOL": "mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So",
     "bbSOL": "Bybit2vBJGhPF52GBdNaQfUJ6ZpThSgHBobjWZpLPb4B",
-    // "xandSOL": "XAnDeUmMcqFyCdef9jzpNgtZPjTj3xUMj9eXKn2reFN",
 };
 
 export const tokenOptions = Object.keys(tokenMintAddresses);

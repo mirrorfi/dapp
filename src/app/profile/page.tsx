@@ -10,8 +10,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Skeleton } from "@/components/ui/skeleton"
 import { PortfolioChart } from "@/components/PortfolioChart";
 import { PortfolioValueCard } from "@/components/PortfolioValueCard";
-import { getStrategies } from "@/lib/database/db_actions/test-actions";
 import SimplifiedFlow from "@/components/simplified-flow";
+
 
 interface Strategy {
   _id: string;
@@ -43,7 +43,7 @@ export default function Home() {
   const [loading, setLoading] = useState<boolean>(true);
   const [connection, setConnection] = useState<Connection | null>(null);
   const anchorWallet = useAnchorWallet();
-  const { connected, publicKey } = useWallet();
+  const {connected, publicKey } = useWallet();
   const [hasSignedTerms, setHasSignedTerms] = useState(false);
   const [checking, setChecking] = useState(true);
   const [portfolioUSDBalance, setPortfolioUSDBalance] = useState<number>(0);
@@ -52,6 +52,7 @@ export default function Home() {
   const [topAssets, setTopAssets] = useState<any[]>([]);
   const [assets, setAssets] = useState<[string, number][]>([]); // Typed assets for clarity
   const [strategies, setStrategies] = useState<Strategy[]>([]);
+  const [solBalance, setSolBalance] = useState<String>("");
 
   useEffect(() => {
     const fetchStrategies = async () => {
@@ -60,7 +61,7 @@ export default function Home() {
         if (!response.ok) {
           throw new Error("Failed to fetch strategies");
         }
-        const data = await response.json();
+        const data = await response.json() as Strategy[];
         setStrategies(data);
         console.log("Fetched strategies:", data);
       } catch (err) {
@@ -118,6 +119,7 @@ export default function Home() {
       setPortfolioUSDChange(0);
       setLoading(true); // For fetchWalletData
       fetchWalletData(); // Fetch wallet data when address changes
+      getSolBalance();
     } else {
       // Clear all data if address is removed
       setTokens([]);
@@ -186,6 +188,20 @@ export default function Home() {
     }
   };
 
+  const getSolBalance = async () => {
+    try {
+    const response = await Moralis.SolApi.account.getBalance({
+    "network": "mainnet",
+    "address": address,
+  });
+
+      console.log("Acquired Sol Balance is ", response.raw);
+      setSolBalance(response.raw.solana);
+    } catch (e) {
+      console.error(e);
+    }
+    }
+
   const fetchPortfolioUSDBalance = async () => {
     if (tokens.length > 0) {
       // Reset portfolioUSDBalance and tokenPrices before fetching new set
@@ -197,9 +213,7 @@ export default function Home() {
       for (const token of tokens) {
         await fetchTokenPrice(token);
       }
-      // setLoadingBalance(false) will be handled by the useEffect watching tokenPrices completion
     }
-    // If tokens.length is 0, loadingBalance is handled by the useEffect depending on [tokens]
   };
 
   // New useEffect to process data once all token prices are fetched
@@ -287,7 +301,7 @@ export default function Home() {
         <div className="w-[80%] h-full flex flex-col gap-6">
           {/* Portfolio Summary */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
-            <PortfolioValueCard totalValue = {portfolioUSDBalance} totalChange={portfolioUSDChange} topAssets = {topAssets} />
+            <PortfolioValueCard totalValue = {portfolioUSDBalance} totalChange={portfolioUSDChange} topAssets = {topAssets} solBalance={solBalance} />
 
             <PortfolioChart currentValue = {portfolioUSDBalance} valueChange24h={portfolioUSDChange} />
           </div>
@@ -304,7 +318,7 @@ export default function Home() {
               <CardContent className="flex-1 overflow-y-auto pt-4 pb-6 pr-2 h-full">
                 <div className="space-y-3">
                   {tokens.map((token, index) => (
-                    <TokenPortfolioCard key={index} tokenData={token} />
+                    <TokenPortfolioCard key={index} tokenData={token} tokenPrices={tokenPrices} />
                   ))}
                 </div>
               </CardContent>

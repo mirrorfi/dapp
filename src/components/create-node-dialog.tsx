@@ -21,7 +21,7 @@ interface CreateNodeDialogProps {
   onCreateNode: (nodeData: {
     label: string
     description: string
-    nodeType: "protocol" | "token"
+    nodeType: "protocol" | "token" | "lst"
     connectionCount: number
   }) => void
 
@@ -33,8 +33,6 @@ interface CreateNodeDialogProps {
 
 export function CreateNodeDialog({ onCreateNode, selectedNode, isOpen, onClose, nodes }: CreateNodeDialogProps) {
   const selectedNodeType = selectedNode?.data?.nodeType
-  console.log("Selected Node Type:", selectedNodeType)
-  console.log("Selected Node Label:", selectedNode?.data?.label)
   const [nodeType, setNodeType] = useState<"protocol" | "token" | "lst" | null>(null)
   const [selectedOption, setSelectedOption] = useState<string | null>(null)
 
@@ -144,7 +142,7 @@ export function CreateNodeDialog({ onCreateNode, selectedNode, isOpen, onClose, 
       </Button>
     )
   ))}
-</div>
+          </div>
             {/* Divider */}
             <div className="border-t border-border my-4"></div>
           </div>
