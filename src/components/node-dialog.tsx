@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { PlusCircle, Trash2 } from "lucide-react"
 import type { Node } from "reactflow"
 
 interface NodeModalProps {
@@ -38,15 +39,11 @@ export function NodeModal({ node, isOpen, onClose, onCreateHook }: NodeModalProp
           </DialogDescription>
 
           <DialogFooter className="mt-8 flex gap-3">
-            <Button
-              variant="outline"
-              onClick={onClose}
-              className=" bg-[#0a0b14] text-gray-300 hover:bg-[#1a1b29] hover:text-gray-100"
-            >
-              Cancel
+            <Button variant="destructive">
+              <Trash2 />
             </Button>
             <Button onClick={onCreateHook} variant={"outline"} className="">
-              Create New Node
+              <PlusCircle />
             </Button>
           </DialogFooter>
         </div>

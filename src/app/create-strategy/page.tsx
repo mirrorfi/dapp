@@ -1,5 +1,5 @@
 "use client";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import type React from "react";
 
 import ReactFlow, {
@@ -7,25 +7,24 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
   Background,
+  useReactFlow,
   type Node,
   type Edge,
   type Connection,
   MarkerType,
   Position,
 } from "reactflow";
+import { ReactFlowProvider } from "reactflow";
 import "reactflow/dist/style.css";
 
 import { CreateNodeDialog } from "@/components/create-node-dialog";
 import { CustomNode } from "@/components/custom-node";
 import { Button } from "@/components/ui/button";
-import { Save, Bot } from "lucide-react";
 import { SaveStrategyDialog } from "@/components/save-strategy-dialog";
 import { useWallet } from "@solana/wallet-adapter-react";
 
-import { createSolanaAgent } from "@/lib/agent";
-import { executeTree, nodeSamples } from "@/lib/treeUtils";
-
 import { NodeModal } from "@/components/node-dialog";
+import { Bot, Save } from "lucide-react";
 
 // Define node types
 const nodeTypes = {
@@ -33,12 +32,12 @@ const nodeTypes = {
 };
 
 // Initial nodes with custom styling
-let initialNodes: Node[] = [
+const initialNodes: Node[] = [
   {
     id: "1",
     type: "customNode",
     data: {
-      label: "SOL Wallet",
+      label: "Wallet",
       description: "",
       nodeType: "deposit",
       connectionCount: 0,
@@ -51,23 +50,24 @@ let initialNodes: Node[] = [
 ];
 
 // Initial edges with custom styling
-let initialEdges: Edge[] = [];
+const initialEdges: Edge[] = [];
 
 const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
-  console.log("Node List:", nodeList);
-  console.log("Edge List:", edgeList);
-  // Initialize state for nodes and edges
-  initialNodes = nodeList.length > 0 ? nodeList : initialNodes;
-  initialEdges = edgeList.length > 0 ? edgeList : initialEdges;
+  const { publicKey } = useWallet();
 
-  const { connected, publicKey, signTransaction } = useWallet();
-
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const [nodes, setNodes, onNodesChange] = useNodesState(nodeList.length > 0 ? nodeList : initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(edgeList.length > 0 ? edgeList : initialEdges);
   const [open, setOpen] = useState(false);
   const [saveOpen, setSaveOpen] = useState(false);
   const [nodeOpen, setNodeOpen] = useState(false);
   const [nodeToConnect, setNodeToConnect] = useState<Node | null>(null);
+
+  const { fitView } = useReactFlow(); // Access the fitView method
+
+  // Automatically fit the view whenever nodes or edges change
+  useEffect(() => {
+    fitView({ padding: 0.2 }); // Add padding to ensure nodes and edges are not too close to the edges
+  }, [nodes, edges, fitView]);
 
   const onConnect = useCallback(
     (params: Connection) =>
@@ -93,10 +93,7 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
       description: string;
       nodeType: "protocol" | "token";
     }) => {
-      let connectionCount = nodeToConnect
-        ? nodeToConnect.data.connectionCount
-        : 0;
-      //Find which handle was clicked
+      let connectionCount = nodeToConnect ? nodeToConnect.data.connectionCount : 0;
 
       const newNode: Node = {
         id: `${nodes.length + 1}-${Date.now()}`,
@@ -113,7 +110,6 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
         },
       };
 
-      // Update connection count for the node being connected to
       connectionCount += 1;
       if (nodeToConnect) {
         setNodes((nds) =>
@@ -152,106 +148,8 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
     setNodeOpen(true);
   }, []);
 
-  // const handleSaveStrategy = () => {
-  //   // Ensure all nodes have a description (default to an empty string if missing)
-  //   console.log("Nodes before sanitization:", nodes);
-  //   console.log("Edges before sanitization:", edges);
-  //   const sanitizedNodes = nodes.map((node) => ({
-  //     ...node,
-  //     data: {
-  //       ...node.data,
-  //       description: node.data.description || "Description", // Provide a default value for description
-  //     },
-  //   }));
-
-  //   console.log("Nodes after sanitization:", sanitizedNodes);
-
-  //   // Save the strategy to the database
-  //   const strategy = {
-  //     nodes: sanitizedNodes,
-  //     edges: edges,
-  //   };
-
-  //   createStrategy(strategy)
-  //     .then((response) => {
-  //       console.log("Strategy saved successfully:", response);
-  //       // Optionally, redirect or show a success message
-  //       window.location.href = "/strategy-dashboard"; // Redirect to the strategy dashboard
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error saving strategy:", error);
-  //     });
-  // };
-
-  const handleTestClick = () => {
-    const testAgent = async () => {
-      if (!publicKey) {
-        console.error("Public key is not available.");
-        return;
-      }
-
-      console.log("Initializing Agent");
-      const solanaAgent = await createSolanaAgent(publicKey.toString());
-      console.log("Successfully initialized agent", solanaAgent);
-
-      // Mock sign method
-      // const signTransaction = (txn: any) => {
-      //   console.log("Transaction signed:", txn);
-      // };
-
-      // Generate the node tree
-      executeTree(nodeSamples, solanaAgent.agent, signTransaction)
-        .then(() => {
-          console.log("All nodes executed successfully.");
-          console.log(nodeSamples);
-        })
-        .catch((error) => {
-          console.error("Error executing nodes:", error);
-        });
-
-      // const result = await solanaAgent.agent.methods.getWalletAddress();
-      // console.log(result);
-
-      // const prices = await solanaAgent.agent.methods.sanctumGetLSTPrice([
-      //   "bSo13r4TkiE4KumL71LsHTPpL2euBYLFx6h9HP3piy1",
-      //   "7Q2afV64in6N6SeZsAAB81TJzwDoD6zpqmHkzi9Dcavn",
-      // ]);
-
-      // console.log("prices", prices);
-    };
-
-    testAgent();
-  };
-
   return (
-    //(connected && publicKey && (
       <div className="flex flex-col h-screen bg-background text-foreground">
-        {/* <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Image
-                src="/SVG/MirrorFi-Logo-Blue.svg"
-                alt="MirrorFi Logo"
-                width={32}
-                height={32}
-                className="h-8 w-auto"
-              />
-              <h1 className="text-xl font-semibold">Create Yield Strategy</h1>
-            </div>
-            <NavigationMenu>
-              <NavigationMenuList>
-                <NavigationMenuItem>
-                  <NavigationMenuLink
-                    href="/strategy-dashboard"
-                    className="text-sm font-medium text-foreground hover:text-primary"
-                  >
-                    Strategy Dashboard
-                  </NavigationMenuLink>
-                </NavigationMenuItem>
-                {/* Add more NavigationMenuItems here if needed 
-              </NavigationMenuList>
-            </NavigationMenu>
-          </div> */}
-
         <main className="flex-1">
           <SaveStrategyDialog
             nodeList={nodes}
@@ -285,14 +183,9 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
             onNodeClick={onNodeClick}
             nodeTypes={nodeTypes}
             proOptions={{ hideAttribution: true }}
-            defaultViewport={{
-              zoom: 0.7,
-              x: initialNodes[0]?.position.x * 2 || 0,
-              y: initialNodes[0]?.position.y * 1.5 || 0,
-            }} // Align viewport with the initial nodes
+            fitView
             className="bg-background"
           >
-            {/* <Controls className="bg-card border border-border text-foreground" /> */}
             <Background color="#3b82f6" gap={16} size={1} />
           </ReactFlow>
           <div className="absolute bottom-4 right-4 flex space-x-2">
@@ -308,7 +201,7 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
             <Button
               variant="ghost"
               onClick={() => {
-                handleTestClick();
+                console.log("Test API clicked");
               }}
             >
               <Bot />
@@ -317,24 +210,6 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
           </div>
         </main>
       </div>
-    /*))
-    (!connected && (
-      <div className="flex flex-col items-center justify-center h-screen bg-background text-foreground">
-        <h1 className="text-2xl font-semibold">
-          Connect your wallet to create a strategy
-        </h1>
-        <p className="mt-4 text-sm text-muted-foreground">
-          Please connect your wallet to access this feature.
-        </p>
-        <Button
-          variant="outline"
-          className="mt-4"
-          onClick={() => (window.location.href = "/")}
-        >
-          Connect Wallet
-        </Button>
-      </div>
-    ))*/
   );
 };
 
