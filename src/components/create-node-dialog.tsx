@@ -113,7 +113,7 @@ export function CreateNodeDialog({ onCreateNode, selectedNode, isOpen, onClose, 
           </TooltipTrigger>
           {protocol === "Lulo" && selectedNode?.data?.label !== "USDC" && (
             <TooltipContent>
-              You need to select a USDC node first.
+              Only Available for USDC.
             </TooltipContent>
           )}
         </Tooltip>

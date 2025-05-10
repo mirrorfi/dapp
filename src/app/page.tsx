@@ -17,9 +17,10 @@ export default function Home() {
         return;
       }
 
-      const storedSignatures = localStorage.getItem("termsSignatures") || "{}";
-      const signatures = JSON.parse(storedSignatures);
-      setHasSignedTerms(!!signatures[publicKey.toBase58()]);
+      // const storedSignatures = localStorage.getItem("termsSignatures") || "{}";
+      // const signatures = JSON.parse(storedSignatures);
+      // setHasSignedTerms(!!signatures[publicKey.toBase58()]);
+      setHasSignedTerms(false);
       setChecking(false);
     };
 
