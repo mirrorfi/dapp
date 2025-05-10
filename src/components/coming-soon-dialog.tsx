@@ -26,14 +26,21 @@ export function ComingSoonDialog({brokenAhhProtocol}: ComingSoonDialogProps) {
                   height={24}
                 />{brokenAhhProtocol}</Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-[425px]flex flex-col items-center justify-center text-center">
+        <DialogHeader className="flex flex-col items-center">
           <DialogTitle>Coming Soon</DialogTitle>
 
         </DialogHeader>
+        <div className="w-full flex flex-col items-center">
+          <Image
+            src={`/PNG/${brokenAhhProtocol.toLowerCase()}-logo.png`}
+            alt={`${brokenAhhProtocol} logo`}
+            width={64}
+            height={64}
+          />
+        </div>
         <DialogDescription>
-            We are currently working on this feature to allow you to use protocols such as Raydium, Kamino, Drift and Orca.
-            These features will be coming soon. Stay tuned for updates! 😁
+            Work in Progress. Coming Soon! 😁
         </DialogDescription>
       </DialogContent>
     </Dialog>

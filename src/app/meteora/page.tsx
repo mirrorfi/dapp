@@ -26,8 +26,8 @@ export default function MeteoraPage() {
 
     const { connected, publicKey, signTransaction } = useWallet();
 
+    // Collect all meteora pools given two tokens
     async function getPools(){
-
         const tokenX_address = "So11111111111111111111111111111111111111112"
         const tokenY_address = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
 
@@ -35,30 +35,34 @@ export default function MeteoraPage() {
         // data is an array of JSONs
         const data = await response.json();
 
-        // filter data based on mint_x and mint_y 
-        const filteredData = data.filter((pool: any) => {
-            return pool.mint_x === 'So11111111111111111111111111111111111111112'
-                && pool.mint_y === 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
-        });
-        
-        console.log("Filtered Data:", filteredData);
+        const pools = data.groups[0].pairs;
 
         // Sort by apy
-        const sortedData = filteredData.sort((a: any, b: any) => {
-            return b.apy - a.apy;
-        });
-        console.log("Sorted Data:", sortedData);
+        // const sortedData = data.sort((a: any, b: any) => {
+        //     return b.apy - a.apy;
+        // });
+        // console.log("Sorted Data:", sortedData);
 
         console.log(data);
+        console.log("Pools:", pools);
+        return pools as any[];
     }
 
+    // Get the data of a specific pool
     async function getPoolData(){
-        const res = await fetch(`https://dlmm-api.meteora.ag/pair/${SOL_USDC_POOL.toBase58()}`);
+        const pools = await getPools();
+        const examplePool = pools[0];
+
+        // const poolAddress = SOL_USDC_POOL;
+        const poolAddress = examplePool.address;
+        
+        const res = await fetch(`https://dlmm-api.meteora.ag/pair/${poolAddress}`);
         const data = await res.json();
 
         console.log("Pool Data:", data);
     }
 
+    // Get the user positions of a specific pool
     async function getUserPositions(){
         if(!connected || !publicKey || !signTransaction) {            
             console.log("Wallet not connected or public key not available");
@@ -112,25 +116,12 @@ export default function MeteoraPage() {
             shouldClaimAndClose: true, // should claim swap fee and close position together
         });
 
-        console.log("Remove Liquidity Transaction:", removeLiquidityTx);   
-
-        // try {
-        //     for (let tx of Array.isArray(removeLiquidityTx)
-        //         ? removeLiquidityTx
-        //         : [removeLiquidityTx]) {
-        //         const removeBalanceLiquidityTxHash = await sendAndConfirmTransaction(
-        //         connection,
-        //         tx,
-        //         [user],
-        //         { skipPreflight: false, preflightCommitment: "singleGossip" }
-        //         );
-        //     }
-        // } catch (error) {}
-
-        
+        console.log("Remove Liquidity Transaction:", removeLiquidityTx);        
     }
 
-    async function fetchPool(){
+    // Reference: https://docs.meteora.ag/integration/dlmm-integration/dlmm-sdk/dlmm-typescript-sdk
+    // Function to open a position on meteora
+    async function openPosition(){
         if(!connected || !publicKey || !signTransaction) {
             console.log(connected);
             console.log(publicKey);
@@ -161,9 +152,19 @@ export default function MeteoraPage() {
         console.log("Active Bin Price (Token):", activeBinPricePerToken);
 
         // Try to create Transaction
-        const TOTAL_RANGE_INTERVAL = 10; // 10 bins on each side of the active bin
+        const TOTAL_RANGE_INTERVAL = 50; // 50 bins on each side of the active bin
         const minBinId = activeBin.binId - TOTAL_RANGE_INTERVAL;
         const maxBinId = activeBin.binId + TOTAL_RANGE_INTERVAL;
+
+        /*
+        Given Token amount X , and Token Amount Y
+
+        Use tokenX amount to calculate Y' amount using autoFillYByStrategy.
+        If Y' > Y:
+            Use Y amount then calculate X', where X' < X
+        Else:
+            Use X amount and Y', where Y' < Y
+        */
 
         // const totalXAmount = new BN(10 * 10 ** tokenX_decimals);
         // const totalYAmount = autoFillYByStrategy(
@@ -194,7 +195,7 @@ export default function MeteoraPage() {
         console.log("Secret Key:", newBalancePosition.secretKey.toString());
         console.log("Public Key:", newBalancePosition.publicKey.toBase58());
 
-        // Create Position
+        // Get Create Position Tx
         const createPositionTx = await dlmmPool.initializePositionAndAddLiquidityByStrategy({
             positionPubKey: newBalancePosition.publicKey,
             user: publicKey,
@@ -232,11 +233,6 @@ export default function MeteoraPage() {
             const rawTx = signedTx.serialize();
             const txHash = await connection.sendRawTransaction(rawTx);
             console.log("Signature:", txHash);
-            // const createBalancePositionTxHash = await sendAndConfirmTransaction(
-            //     connection,
-            //     createPositionTx,
-            //     [user, newBalancePosition]
-            // );
         } catch (error) {
             console.error("Transaction error:", error);
         }
@@ -252,7 +248,7 @@ export default function MeteoraPage() {
         <div>
             <h1>Meteora</h1>
             <p>Check the console for details.</p>
-            <button onClick={fetchPool}>Fetch Pool</button>
+            <button onClick={openPosition}>Fetch Pool</button>
             <p>.</p>
             <button onClick={getUserPositions}>Get User Positions</button>
             <p>.</p>
