@@ -142,7 +142,7 @@ export function CreateNodeDialog({ onCreateNode, selectedNode, isOpen, onClose, 
       </Button>
     )
   ))}
-</div>
+          </div>
             {/* Divider */}
             <div className="border-t border-border my-4"></div>
           </div>

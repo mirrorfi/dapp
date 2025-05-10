@@ -90,7 +90,7 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
     (nodeData: {
       label: string;
       description: string;
-      nodeType: "protocol" | "token";
+      nodeType: "protocol" | "token" | "lst";
     }) => {
       let connectionCount = nodeToConnect ? nodeToConnect.data.connectionCount : 0;
 
