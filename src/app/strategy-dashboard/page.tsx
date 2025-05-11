@@ -232,7 +232,7 @@ const StrategyDashboardPage = () => {
                 <div
                   key={strategy._id}
                   onClick={() => handleCardClick(strategy)}
-                  className="grid grid-cols-[40px_2fr_1fr_1fr_1fr] gap-2 p-4 transition-colors duration-200 hover:bg-accent/80 rounded-lg cursor-pointer items-center"
+                  className="grid grid-cols-[40px_2fr_1fr_1fr_1fr] gap-2 p-4 transition-colors duration-200 hover:bg-gray-800 rounded-lg cursor-pointer items-center"
                 >
                   <div className="text-muted-foreground">{index + 1}</div>
                   <div className="font-medium">{strategy.name}</div>
