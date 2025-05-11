@@ -4,10 +4,10 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import SimplifiedFlow from "@/components/simplified-flow";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Trash2, LayoutGrid, List } from "lucide-react";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import StrategyModal from "@/components/StrategyModal";
 
 interface Node {
@@ -48,7 +48,7 @@ const StrategyDashboardPage = () => {
   );
   const [modalOpen, setModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
-  const [searchQuery, setSearchQuery] = useState("");
+  // const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const { connected, publicKey } = useWallet();
 
@@ -103,37 +103,51 @@ const StrategyDashboardPage = () => {
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-background via-background/95 to-blue-950/20 text-foreground">
       <main className="p-6">
-        <div className="mb-8 flex flex-col sm:flex-row items-center justify-between gap-4 sm:space-x-2">
-          <div className="flex-1/3 flex items-center gap-2">
-            <Button
-              variant={viewMode === "grid" ? "default" : "ghost"}
-              size="icon"
-              onClick={() => setViewMode("grid")}
-              className="h-8 w-8"
-            >
-              <LayoutGrid className="h-4 w-4" />
-            </Button>
-            <Button
-              variant={viewMode === "list" ? "default" : "ghost"}
-              size="icon"
-              onClick={() => setViewMode("list")}
-              className="h-8 w-8"
-            >
-              <List className="h-4 w-4" />
-            </Button>
+        <div className="mb-8 flex items-center justify-between gap-4 sm:space-x-2">
+          <div className="flex-1/3">
+            <div className="inline-flex h-8 items-center rounded-full border-gray-600 border-2 bg-card text-card-foreground">
+              <div
+                className={`flex h-full items-center justify-center rounded-l-full px-3 transition-colors ${
+                  viewMode === "grid"
+                    ? "bg-primary text-primary-foreground"
+                    : ""
+                }`}
+              >
+                <button
+                  onClick={() => setViewMode("grid")}
+                  className="flex items-center justify-center"
+                >
+                  <LayoutGrid className="h-5 w-5" />
+                </button>
+              </div>
+              <div
+                className={`flex h-full items-center justify-center rounded-r-full px-3 transition-colors ${
+                  viewMode === "list"
+                    ? "bg-primary text-primary-foreground"
+                    : ""
+                }`}
+              >
+                <button
+                  onClick={() => setViewMode("list")}
+                  className="flex items-center justify-center"
+                >
+                  <List className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
           </div>
-          <Input
+          {/* <Input
             placeholder="Search strategies..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full sm:w-[400px] lg:w-[500px] rounded-full flex-1/3"
-          />
+          /> */}
           <div className="flex-1/3 flex justify-end">
             <Tabs
               defaultValue="all"
               value={activeTab}
               onValueChange={setActiveTab}
-              className="w-full sm:w-[300px] lg:w-[400px]"
+              className="w-full sm:w-[250px] lg:w-[300px]"
             >
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="all">All Strategies</TabsTrigger>
@@ -146,23 +160,11 @@ const StrategyDashboardPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {strategies
               .filter((strategy) => {
-                // First filter by tab
-                const tabFilter =
-                  activeTab === "all"
-                    ? true
-                    : connected &&
+                return activeTab === "all"
+                  ? true
+                  : connected &&
                       publicKey &&
                       strategy.user === publicKey.toBase58();
-
-                // Then filter by search query
-                const searchFilter =
-                  searchQuery.trim() === ""
-                    ? true
-                    : strategy.name
-                        .toLowerCase()
-                        .includes(searchQuery.toLowerCase());
-
-                return tabFilter && searchFilter;
               })
               .map((strategy: Strategy) => (
                 <Card
@@ -209,21 +211,11 @@ const StrategyDashboardPage = () => {
             </div>
             {strategies
               .filter((strategy) => {
-                const tabFilter =
-                  activeTab === "all"
-                    ? true
-                    : connected &&
+                return activeTab === "all"
+                  ? true
+                  : connected &&
                       publicKey &&
                       strategy.user === publicKey.toBase58();
-
-                const searchFilter =
-                  searchQuery.trim() === ""
-                    ? true
-                    : strategy.name
-                        .toLowerCase()
-                        .includes(searchQuery.toLowerCase());
-
-                return tabFilter && searchFilter;
               })
               .map((strategy: Strategy) => (
                 <div
@@ -236,11 +228,13 @@ const StrategyDashboardPage = () => {
                     {strategy.nodes
                       .filter((node) => node.data.nodeType === "token")
                       .map((node) => (
-                        <img
+                        <Image
                           key={node.id}
                           src={`/PNG/${node.data.label.toLowerCase()}-logo.png`}
                           alt={node.data.label}
-                          className="w-6 h-6 rounded-full"
+                          width={24}
+                          height={24}
+                          className="rounded-full"
                         />
                       ))}
                   </div>
