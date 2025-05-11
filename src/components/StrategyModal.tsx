@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import type { FC } from "react";
+import Image from "next/image";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { getTokenBalances } from "@/lib/solana";
 import { Input } from "@/components/ui/input";
@@ -10,22 +11,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import InteractiveFlow from "@/components/interactive-flow";
 import type { Node, Edge } from "reactflow";
-import {
-  executeTree,
-  generateTree,
-  type TreeNode,
-} from "@/lib/txnUtils/treeUtils";
-import { createSolanaAgent } from "@/lib/agent";
-import { parse } from "path";
 import { useToast } from "@/components/ui/use-toast";
 
 interface TokenBalance {
@@ -42,6 +29,7 @@ interface TokenBalances {
 interface Strategy {
   name: string;
   creator?: string;
+  description?: string;
   nodes: Node[];
   edges: Edge[];
 }
@@ -57,15 +45,49 @@ const StrategyModal: FC<StrategyModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const { connected, publicKey, signTransaction } = useWallet();
+  const { publicKey } = useWallet();
   const { connection } = useConnection();
   const [loading, setLoading] = useState(false);
   const [tokenBalances, setTokenBalances] = useState<TokenBalances>({
     tokens: [],
     sol: 0,
   });
-  const [selectedTokenMint, setSelectedTokenMint] = useState("");
-  const [tokenAmount, setTokenAmount] = useState("");
+  const [nodeAmounts, setNodeAmounts] = useState<{ [nodeId: string]: string }>(
+    {}
+  );
+
+  // Get required input tokens from strategy graph
+  const getRequiredTokens = () => {
+    const sourceEdges = strategy.edges.filter((edge) => edge.source === "1");
+    const requiredTokenNodes = sourceEdges
+      .map((edge) => {
+        const targetNode = strategy.nodes.find(
+          (node) => node.id === edge.target
+        );
+        if (targetNode && targetNode.data.nodeType === "token") {
+          return {
+            id: targetNode.id,
+            label: targetNode.data.label,
+          };
+        }
+        return null;
+      })
+      .filter((node): node is { id: string; label: string } => node !== null);
+    return requiredTokenNodes;
+  };
+
+  // Helper to get token label from node ID
+  const getTokenLabel = (nodeId: string) => {
+    const node = strategy.nodes.find((n) => n.id === nodeId);
+    return node?.data.label || nodeId;
+  };
+
+  const getTokenLogo = (label: string) => {
+    // Convert token label to lowercase for file naming
+    const tokenName = label.toLowerCase();
+    return `/PNG/${tokenName}-logo.png`;
+  };
+
   const apy = "25%";
   const { toast } = useToast();
 
@@ -77,8 +99,6 @@ const StrategyModal: FC<StrategyModalProps> = ({
         setLoading(true);
         const balances = await getTokenBalances(connection, publicKey);
         setTokenBalances(balances);
-        // Set SOL as default selected token
-        setSelectedTokenMint("SOL");
       } catch (error) {
         console.error("Failed to fetch token balances:", error);
       } finally {
@@ -89,39 +109,36 @@ const StrategyModal: FC<StrategyModalProps> = ({
     fetchBalances();
   }, [connection, publicKey]);
 
-  const getMaxAmount = () => {
-    if (selectedTokenMint === "SOL") {
+  const getMaxAmount = (tokenLabel: string) => {
+    if (tokenLabel === "SOL") {
       return tokenBalances.sol;
     }
-    const token = tokenBalances.tokens.find(
-      (t) => t.mint === selectedTokenMint
-    );
+    const token = tokenBalances.tokens.find((t) => t.mint === tokenLabel);
     return token?.balance || 0;
   };
 
-  const handleMaxAmount = () => {
-    setTokenAmount(getMaxAmount().toString());
-  };
-
-  const handleTokenSelect = (mint: string) => {
-    setSelectedTokenMint(mint);
-    setTokenAmount("");
+  const handleMaxAmount = (nodeId: string) => {
+    const tokenLabel = getTokenLabel(nodeId);
+    setNodeAmounts((prev) => ({
+      ...prev,
+      [nodeId]: getMaxAmount(tokenLabel).toString(),
+    }));
   };
 
   const handleConfirm = () => {
     const executeStrategy = async () => {
       // Here you would implement the actual mirroring logic
       console.log("Mirroring strategy:", strategy.name);
-      console.log("Token:", selectedTokenMint, "Amount:", tokenAmount);
+      console.log("Node Amounts:", nodeAmounts);
       console.log("Public Key:", publicKey?.toString());
-      if (tokenAmount === "") {
-        console.error("Token amount is required.");
-        return;
-      }
 
-      if (parseFloat(tokenAmount) <= 0) {
-        console.error("Token amount must be greater than 0.");
-        return;
+      // Validate all token amounts
+      for (const [nodeId, amount] of Object.entries(nodeAmounts)) {
+        if (!amount || parseFloat(amount) <= 0) {
+          const tokenLabel = getTokenLabel(nodeId);
+          console.error(`Invalid amount for ${tokenLabel}`);
+          return;
+        }
       }
 
       if (!publicKey) {
@@ -129,27 +146,12 @@ const StrategyModal: FC<StrategyModalProps> = ({
         return;
       }
 
-      console.log("Initializing Agent");
-      const solanaAgent = await createSolanaAgent(publicKey.toString());
-      console.log("Successfully initialized agent", solanaAgent.agent);
-
-      const initialSolanaDeposit = parseFloat(tokenAmount) * 10 ** 9; // Convert to lamports
-      console.log("Initial Solana Deposit:", initialSolanaDeposit);
-
       toast({
         title: "Executing strategy...",
-        description: `Mirroring ${strategy.name} with ${tokenAmount} ${selectedTokenMint}`,
+        description: `Mirroring ${strategy.name} with multiple tokens`,
         duration: 5000,
       });
 
-      // Run strategy
-      const treeNodes: Record<string, TreeNode> = generateTree(
-        strategy.nodes,
-        strategy.edges,
-        initialSolanaDeposit
-      );
-
-      await executeTree(treeNodes, solanaAgent.agent, signTransaction, toast);
       onClose();
     };
 
@@ -183,99 +185,98 @@ const StrategyModal: FC<StrategyModalProps> = ({
           <div className="flex flex-col justify-between">
             <div>
               <h3 className="text-xl font-bold mb-1">{strategy.name}</h3>
-              <p className="text-muted-foreground mb-3">APY: {apy} (?)</p>
+              <p className="text-muted-foreground mb-2">APY: {apy} (?)</p>
+              {strategy.description && (
+                <p className="text-sm text-gray-400 mb-3">
+                  Description: {strategy.description}
+                </p>
+              )}
             </div>
 
             <div className="flex flex-col space-y-4">
-              <div className="rounded-lg bg-slate-900 overflow-hidden">
-                <div className="p-4 pb-1">
-                  <div className="flex justify-end space-x-2 items-center mb-2">
-                    <p className="font-medium text-sm text-gray-500">
-                      {selectedTokenMint === "SOL"
-                        ? tokenBalances.sol.toFixed(4)
-                        : tokenBalances.tokens
-                            .find((t) => t.mint === selectedTokenMint)
-                            ?.balance.toFixed(4) || "0"}{" "}
-                      {selectedTokenMint === "SOL"
-                        ? "SOL"
-                        : selectedTokenMint.slice(0, 4)}
-                    </p>
-                    <div className="flex space-x-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 px-2 py-0 text-xs font-medium bg-gray-700 text-gray-400"
-                        onClick={() =>
-                          setTokenAmount((getMaxAmount() / 2).toString())
-                        }
-                      >
-                        HALF
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 px-2 py-0 text-xs font-medium bg-gray-700 text-gray-400"
-                        onClick={handleMaxAmount}
-                      >
-                        MAX
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-between items-center p-1 rounded-lg mb-2">
-                    <div className="flex items-center">
-                      <Select
-                        value={selectedTokenMint}
-                        onValueChange={handleTokenSelect}
-                      >
-                        <SelectTrigger className="border-0 bg-slate-800 py-2 px-4 h-auto">
-                          <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white">
-                              $
-                            </div>
-                            <SelectValue
-                              className="font-medium"
-                              placeholder="Select a token"
-                            />
-                          </div>
-                        </SelectTrigger>
-                        <SelectContent className="border-0">
-                          <SelectItem className="py-3" value="SOL">
-                            SOL
-                          </SelectItem>
-                          {tokenBalances.tokens.map((token) => (
-                            <SelectItem
-                              className="py-3"
-                              key={token.mint}
-                              value={token.mint}
-                            >
-                              {token.mint.slice(0, 4)}...
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+              {getRequiredTokens().map(({ id, label }) => (
+                <div
+                  key={id}
+                  className="rounded-lg bg-slate-900 overflow-hidden"
+                >
+                  <div className="p-4 pb-1">
+                    <div className="flex justify-between items-center mb-2">
+                      <div className="flex items-center gap-2">
+                        <Image
+                          src={getTokenLogo(label)}
+                          alt={`${label} logo`}
+                          width={32}
+                          height={32}
+                          className="rounded-full"
+                        />
+                        <span className="font-medium">{label}</span>
+                      </div>
+                      <div className="flex items-center space-x-4">
+                        <p className="font-medium text-sm text-gray-500">
+                          {label === "SOL"
+                            ? tokenBalances.sol.toFixed(4)
+                            : tokenBalances.tokens
+                                .find((t) => t.mint === label)
+                                ?.balance.toFixed(4) || "0"}{" "}
+                          {label}
+                        </p>
+                        <div className="flex space-x-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 px-2 py-0 text-xs font-medium bg-gray-700 text-gray-400"
+                            onClick={() =>
+                              setNodeAmounts((prev) => ({
+                                ...prev,
+                                [id]: (getMaxAmount(label) / 2).toString(),
+                              }))
+                            }
+                          >
+                            HALF
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 px-2 py-0 text-xs font-medium bg-gray-700 text-gray-400"
+                            onClick={() => handleMaxAmount(id)}
+                          >
+                            MAX
+                          </Button>
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="flex flex-col items-end">
-                      <Input
-                        type="number"
-                        value={tokenAmount}
-                        onChange={(e) => setTokenAmount(e.target.value)}
-                        placeholder="0.00"
-                        className="text-right border-0 bg-transparent p-0 h-auto text-3xl font-medium w-40 focus-visible:ring-0 focus-visible:ring-offset-0"
-                      />
-                      <span className="text-xs text-gray-400 font-medium mt-2">
-                        ${0}
-                      </span>
+                    <div className="flex justify-end items-center p-1 rounded-lg mb-2">
+                      <div className="flex flex-col items-end">
+                        <Input
+                          type="number"
+                          value={nodeAmounts[id] || ""}
+                          onChange={(e) =>
+                            setNodeAmounts((prev) => ({
+                              ...prev,
+                              [id]: e.target.value,
+                            }))
+                          }
+                          placeholder="0.00"
+                          className="text-right border-0 bg-transparent p-0 h-auto text-3xl font-medium w-40 focus-visible:ring-0 focus-visible:ring-offset-0"
+                        />
+                        <span className="text-xs text-gray-400 font-medium mt-2">
+                          ${0}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              ))}
 
               <Button
                 onClick={handleConfirm}
                 className="w-full bg-blue-700 hover:bg-blue-800 text-white cursor-pointer"
-                disabled={!selectedTokenMint || !tokenAmount || loading}
+                disabled={
+                  Object.keys(nodeAmounts).length === 0 ||
+                  Object.values(nodeAmounts).some((amount) => !amount) ||
+                  loading
+                }
               >
                 Confirm Mirror
               </Button>

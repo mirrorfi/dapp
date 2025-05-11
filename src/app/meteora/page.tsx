@@ -7,8 +7,10 @@ import { BN } from "@coral-xyz/anchor";
 import { useWallet } from "@solana/wallet-adapter-react";
 
 //import { autoFillYByStrategy, StrategyType } from '@meteora-ag/dlmm/dist/utils/strategy'
-import { autoFillYByStrategy, StrategyType } from "@meteora-ag/dlmm";
-import { create } from "domain";
+import { autoFillYByStrategy, StrategyType } from '@meteora-ag/dlmm';
+import {getAllUserPositions} from '@/lib/meteora';
+
+import { create } from 'domain';
 
 const RPC_LINK =
   process.env.NEXT_PUBLIC_RPC_LINK || "https://api.mainnet-beta.solana.com";
@@ -102,65 +104,65 @@ export default function MeteoraPage() {
       return;
     }
 
-    const firstPosition = userPositions[0];
-    const binIdsToRemove = firstPosition.positionData.positionBinData.map(
-      (bin: any) => bin.binId
-    );
-    const dlmmPool = await DLMM.create(connection, SOL_USDC_POOL);
+    // Get the user positions of a specific pool
+    async function getUserPositions(){
+        if(!connected || !publicKey || !signTransaction) {            
+            console.log("Wallet not connected or public key not available");
+            return;
+        }
+        console.log("Fetching user positions...");
+        const tes = await getAllUserPositions(publicKey);
+        console.log('Positions fetched');
+        console.log("User Positions:", tes);
+        // if(!connected || !publicKey || !signTransaction) {            
+        //     console.log("Wallet not connected or public key not available");
+        //     return;
+        // }
+        
+        // const dlmmPool = await DLMM.create(connection, SOL_USDC_POOL)
+        // console.log(dlmmPool);
 
-    const removeLiquidityTx = await dlmmPool.removeLiquidity({
-      position: publicKey,
-      user: publicKey,
-      fromBinId: binIdsToRemove[0],
-      toBinId: binIdsToRemove[binIdsToRemove.length - 1],
-      bps: new BN(100 * 100),
-      // bps: new Array(binIdsToRemove.length).fill(
-      //     new BN(100 * 100)
-      // ), // 100% (range from 0 to 100)
-      shouldClaimAndClose: true, // should claim swap fee and close position together
-    });
+        // const { userPositions } = await dlmmPool.getPositionsByUserAndLbPair(
+        //     publicKey
+        // );
 
-    console.log("Remove Liquidity Transaction:", removeLiquidityTx);
-  }
+        // console.log("User Positions:", userPositions);
+        // const binData = userPositions[0].positionData.positionBinData;
 
-  // Reference: https://docs.meteora.ag/integration/dlmm-integration/dlmm-sdk/dlmm-typescript-sdk
-  // Function to open a position on meteora
-  async function openPosition() {
-    if (!connected || !publicKey || !signTransaction) {
-      console.log(connected);
-      console.log(publicKey);
-      console.log(signTransaction);
+        // console.log("Bin Data:", binData);
 
-      console.log("Wallet not connected or public key not available");
-      return;
+        // userPositions.forEach((position: any) => {
+        //     console.log("Public Key:", position.publicKey.toBase58());
+        // });
+        // return userPositions
     }
 
     // Fetch Pool
-    const dlmmPool = await DLMM.create(connection, SOL_USDC_POOL);
-    console.log(dlmmPool);
+    // const dlmmPool = await DLMM.create(connection, SOL_USDC_POOL);
+    // console.log(dlmmPool);
 
-    const tokenX_mint = dlmmPool.tokenX.mint.address;
-    const tokenY_mint = dlmmPool.tokenY.mint.address;
-    const tokenX_decimals = dlmmPool.tokenX.mint.decimals;
-    const tokenY_decimals = dlmmPool.tokenY.mint.decimals;
-    console.log("Token X Mint Address:", tokenX_mint.toBase58());
-    console.log("Token Y Mint Address:", tokenY_mint.toBase58());
+    // const tokenX_mint = dlmmPool.tokenX.mint.address;
+    // const tokenY_mint = dlmmPool.tokenY.mint.address;
+    // const tokenX_decimals = dlmmPool.tokenX.mint.decimals;
+    // const tokenY_decimals = dlmmPool.tokenY.mint.decimals;
+    // console.log("Token X Mint Address:", tokenX_mint.toBase58());
+    // console.log("Token Y Mint Address:", tokenY_mint.toBase58());
 
-    // Fetch Bin Info
-    const activeBin = await dlmmPool.getActiveBin();
-    const activeBinPriceLamport = activeBin.price;
-    const activeBinPricePerToken = dlmmPool.fromPricePerLamport(
-      Number(activeBin.price)
-    );
+    // // Fetch Bin Info
+    // const activeBin = await dlmmPool.getActiveBin();
+    // const activeBinPriceLamport = activeBin.price;
+    // const activeBinPricePerToken = dlmmPool.fromPricePerLamport(
+    //   Number(activeBin.price)
+    // );
 
-    console.log("Active Bin:", activeBin);
-    console.log("Active Bin Price (Lamport):", activeBinPriceLamport);
-    console.log("Active Bin Price (Token):", activeBinPricePerToken);
+    // console.log("Active Bin:", activeBin);
+    // console.log("Active Bin Price (Lamport):", activeBinPriceLamport);
+    // console.log("Active Bin Price (Token):", activeBinPricePerToken);
 
-        // Try to create Transaction
-        const TOTAL_RANGE_INTERVAL = 50; // 50 bins on each side of the active bin
-        const minBinId = activeBin.binId - TOTAL_RANGE_INTERVAL;
-        const maxBinId = activeBin.binId + TOTAL_RANGE_INTERVAL;
+    //     // Try to create Transaction
+    //     const TOTAL_RANGE_INTERVAL = 50; // 50 bins on each side of the active bin
+    //     const minBinId = activeBin.binId - TOTAL_RANGE_INTERVAL;
+    //     const maxBinId = activeBin.binId + TOTAL_RANGE_INTERVAL;
 
     /*
         Given Token amount X , and Token Amount Y
@@ -183,88 +185,105 @@ export default function MeteoraPage() {
     //     maxBinId,
     //     StrategyType.Spot // can be StrategyType.Spot, StrategyType.BidAsk, StrategyType.Curve
     // );
-    const totalYAmount = new BN(10 * 10 ** tokenY_decimals);
-    const totalXAmount = autoFillYByStrategy(
-      activeBin.binId,
-      dlmmPool.lbPair.binStep,
-      totalYAmount,
-      activeBin.xAmount,
-      activeBin.yAmount,
-      minBinId,
-      maxBinId,
-      StrategyType.Spot // can be StrategyType.Spot, StrategyType.BidAsk, StrategyType.Curve
-    );
-    console.log("Total X Amount:", totalXAmount.toString());
-    console.log("Total Y Amount:", totalYAmount.toString());
+    // const totalYAmount = new BN(10 * 10 ** tokenY_decimals);
+    // const totalXAmount = autoFillYByStrategy(
+    //   activeBin.binId,
+    //   dlmmPool.lbPair.binStep,
+    //   totalYAmount,
+    //   activeBin.xAmount,
+    //   activeBin.yAmount,
+    //   minBinId,
+    //   maxBinId,
+    //   StrategyType.Spot // can be StrategyType.Spot, StrategyType.BidAsk, StrategyType.Curve
+    // );
+    // console.log("Total X Amount:", totalXAmount.toString());
+    // console.log("Total Y Amount:", totalYAmount.toString());
 
-    const newBalancePosition = Keypair.generate();
-    console.log("Secret Key:", newBalancePosition.secretKey.toString());
-    console.log("Public Key:", newBalancePosition.publicKey.toBase58());
+    // const newBalancePosition = Keypair.generate();
+    // console.log("Secret Key:", newBalancePosition.secretKey.toString());
+    // console.log("Public Key:", newBalancePosition.publicKey.toBase58());
 
-    // Get Create Position Tx
-    const createPositionTx =
-      await dlmmPool.initializePositionAndAddLiquidityByStrategy({
-        positionPubKey: newBalancePosition.publicKey,
-        user: publicKey,
-        totalXAmount,
-        totalYAmount,
-        strategy: {
-          maxBinId,
-          minBinId,
-          strategyType: StrategyType.Spot, // can be StrategyType.Spot, StrategyType.BidAsk, StrategyType.Curve
-        },
-      });
+    // // Get Create Position Tx
+    // const createPositionTx =
+    //   await dlmmPool.initializePositionAndAddLiquidityByStrategy({
+    //     positionPubKey: newBalancePosition.publicKey,
+    //     user: publicKey,
+    //     totalXAmount,
+    //     totalYAmount,
+    //     strategy: {
+    //       maxBinId,
+    //       minBinId,
+    //       strategyType: StrategyType.Spot, // can be StrategyType.Spot, StrategyType.BidAsk, StrategyType.Curve
+    //     },
+    //   });
 
-    if (!createPositionTx) {
-      console.log("Failed to create transaction");
-      return;
+    // if (!createPositionTx) {
+    //   console.log("Failed to create transaction");
+    //   return;
+    // }
+
+    async function meteoraGetAllUserPositions(){
+        if(!connected || !publicKey || !signTransaction) {
+            console.log("Wallet not connected or public key not available");
+            return;
+        }
+        const positions = await DLMM.getAllLbPairPositionsByUser(connection, publicKey);
+        console.log("All User Positions:", positions);
+
+
+        positions.forEach((position: any) => {
+            console.log(position);
+            console.log("Pair Public Key:", position.publicKey.toBase58());
+            
+            const tokenX = position.tokenX;
+            const tokenY = position.tokenY;
+            const positionsData = position.lbPairPositionsData;
+
+            positionsData.forEach((positionData: any) => {
+                console.log("Token X:", tokenX);
+                console.log("Token Y:", tokenY);
+
+    
+                console.log("Position Public Key?:", positionData.publicKey.toString());
+
+
+                console.log("Position Data:", positionData);
+
+                const totalFeeX = positionData.totalFeeX.toString();
+                const totalFeeY = positionData.totalFeeY.toString();
+                console.log("Total Fee X:", totalFeeX);
+                console.log("Total Fee Y:", totalFeeY);
+
+                const totalAmountX = positionData.totalAmountX.toString();
+                const totalAmountY = positionData.totalAmountY.toString();
+                console.log("Total Amount X:", totalAmountX);
+                console.log("Total Amount Y:", totalAmountY);
+            });
+        });
     }
 
-    try {
-      const res = await connection.simulateTransaction(createPositionTx);
-      console.log("Simulation Result:", res);
+    useEffect(() => {
+        console.log();
+        //getUserPositions();
+        //getPools();
+    }, []);
 
-      if (!createPositionTx) {
-        console.log("Failed to create transaction");
-        return;
-      }
-
-      createPositionTx.feePayer = publicKey;
-      const recentBlockchash = await connection.getRecentBlockhash();
-      createPositionTx.recentBlockhash = recentBlockchash.blockhash;
-
-      createPositionTx.partialSign(newBalancePosition);
-      let signedTx = await signTransaction(createPositionTx);
-      console.log("Sending transaction:");
-
-      const rawTx = signedTx.serialize();
-      const txHash = await connection.sendRawTransaction(rawTx);
-      console.log("Signature:", txHash);
-    } catch (error) {
-      console.error("Transaction error:", error);
-    }
+    return(
+        <div>
+            <h1>Meteora</h1>
+            <p>Check the console for details.</p>
+            <button onClick={() => {}}>Fetch Pool</button>
+            <p>.</p>
+            <button onClick={getUserPositions}>Get User Positions</button>
+            <p>.</p>
+            <button onClick={closeUserPosition}>Close User Position</button>
+            <p>.</p>
+            <button onClick={getPools}>Get Pools</button>
+            <p>.</p>
+            <button onClick={getPoolData}>Get Pool Data</button>
+            <p>.</p>
+            <button onClick={meteoraGetAllUserPositions}>Get All User Positions</button>
+        </div>
+    )
   }
-
-  useEffect(() => {
-    console.log();
-    //getUserPositions();
-    getPools();
-  }, []);
-
-  return (
-    <div>
-      <h1>Meteora</h1>
-      <p>Check the console for details.</p>
-      <button onClick={openPosition}>Fetch Pool</button>
-      <p>.</p>
-      <button onClick={getUserPositions}>Get User Positions</button>
-      <p>.</p>
-      <button onClick={closeUserPosition}>Close User Position</button>
-      <p>.</p>
-      <button onClick={getPools}>Get Pools</button>
-      <p>.</p>
-      <button onClick={getPoolData}>Get Pool Data</button>
-      <p>.</p>
-    </div>
-  );
 }
