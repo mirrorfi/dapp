@@ -19,9 +19,14 @@ import {
 } from "@/components/ui/select";
 import InteractiveFlow from "@/components/interactive-flow";
 import type { Node, Edge } from "reactflow";
-import { executeTree, generateTree, type TreeNode } from "@/lib/treeUtils";
+import {
+  executeTree,
+  generateTree,
+  type TreeNode,
+} from "@/lib/txnUtils/treeUtils";
 import { createSolanaAgent } from "@/lib/agent";
 import { parse } from "path";
+import { useToast } from "@/components/ui/use-toast";
 
 interface TokenBalance {
   mint: string;
@@ -62,6 +67,7 @@ const StrategyModal: FC<StrategyModalProps> = ({
   const [selectedTokenMint, setSelectedTokenMint] = useState("");
   const [tokenAmount, setTokenAmount] = useState("");
   const apy = "25%";
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchBalances = async () => {
@@ -130,6 +136,12 @@ const StrategyModal: FC<StrategyModalProps> = ({
       const initialSolanaDeposit = parseFloat(tokenAmount) * 10 ** 9; // Convert to lamports
       console.log("Initial Solana Deposit:", initialSolanaDeposit);
 
+      toast({
+        title: "Executing strategy...",
+        description: `Mirroring ${strategy.name} with ${tokenAmount} ${selectedTokenMint}`,
+        duration: 5000,
+      });
+
       // Run strategy
       const treeNodes: Record<string, TreeNode> = generateTree(
         strategy.nodes,
@@ -137,7 +149,7 @@ const StrategyModal: FC<StrategyModalProps> = ({
         initialSolanaDeposit
       );
 
-      await executeTree(treeNodes, solanaAgent.agent, signTransaction);
+      await executeTree(treeNodes, solanaAgent.agent, signTransaction, toast);
       onClose();
     };
 

@@ -2,7 +2,7 @@ import { Handle, Position, type NodeProps } from "reactflow"
 import Image from "next/image"
 import { Wallet } from "lucide-react"
 
-type NodeData = {
+export type NodeData = {
   label: string
   description?: string
   nodeType?: "protocol" | "token"
