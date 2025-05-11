@@ -11,6 +11,16 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { PortfolioChart } from "@/components/PortfolioChart";
 import { PortfolioValueCard } from "@/components/PortfolioValueCard";
 import SimplifiedFlow from "@/components/simplified-flow";
+import { PoolPortfolioCard } from "@/components/PoolPortfolioCard";
+import { LSTPortfolioCard } from "@/components/LSTPortfolioCard";
+
+export const LSTMintAddresses = [
+  "jupSoLaHXQiZZTSfEWMTRRgpnyFm8f6sZdosWBjx93v",
+  "J1toso1uCk3RLmjorhTtrVwY9HJ7X8V9yYac6Y7kGCPn",
+  "BNso1VUJnh4zcfpZa6986Ea66P6TCp59hvtNJ8b1X85",
+  "mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So",
+  "Bybit2vBJGhPF52GBdNaQfUJ6ZpThSgHBobjWZpLPb4B"]
+
 
 
 interface Strategy {
@@ -53,6 +63,7 @@ export default function Home() {
   const [assets, setAssets] = useState<[string, number][]>([]); // Typed assets for clarity
   const [strategies, setStrategies] = useState<Strategy[]>([]);
   const [solBalance, setSolBalance] = useState<String>("");
+  const [pools, setPools] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchStrategies = async () => {
@@ -119,6 +130,7 @@ export default function Home() {
       setPortfolioUSDChange(0);
       setLoading(true); // For fetchWalletData
       fetchWalletData(); // Fetch wallet data when address changes
+      fetchPool();
       getSolBalance();
     } else {
       // Clear all data if address is removed
@@ -168,6 +180,17 @@ export default function Home() {
       
     }
   };
+
+  const fetchPool = async () => {
+    try {
+      const response = await fetch("https://dlmm-api.meteora.ag/pair/5rCf1DM8LjKTw4YqhnoLcngyZYeNnQqztScTogYHAS6");
+      const data = await response.json();
+      console.log("Pool data: ", data);
+      setPools((prev) => [...prev, data]);
+    } catch (err) {
+      console.error("Error fetching pool data:", err);
+    }
+  }
 
   const fetchTokenPrice = async (token: any) => {
     try {
@@ -308,18 +331,58 @@ export default function Home() {
 
           {/* Main Content */}
           <div className="flex flex-col lg:flex-row gap-6 h-[calc(100%-130px)] overflow-hidden">
-            {/* Portfolio Section */}
+            {/* Combined Portfolio Section */}
             <Card className="w-full lg:w-[60%] h-full bg-[#0F1218] border-[#2D3748]/30 flex flex-col">
-              <CardHeader className="pb-2">
+              <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-xl text-white">Portfolio</CardTitle>
                 </div>
               </CardHeader>
+
               <CardContent className="flex-1 overflow-y-auto pt-4 pb-6 pr-2 h-full">
-                <div className="space-y-3">
-                  {tokens.map((token, index) => (
-                    <TokenPortfolioCard key={index} tokenData={token} tokenPrices={tokenPrices} />
-                  ))}
+                {/* Meteora Section */}
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-white mb-4">Meteora</h3>
+                  <div className="space-y-3">
+                    {pools.map((pool, index) => (
+                      <PoolPortfolioCard key={index} poolInfo={
+                        {
+                          tokenXMint: pool.mint_x,
+                          tokenYMint: pool.mint_y,
+                          poolAddress: pool.address,
+                          apy: pool.apy,
+                          fees_24h: pool.fees_24h,
+                          reserve_x_amt: pool.reserve_x_amount,
+                          reserve_y_amt: pool.reserve_y_amount,
+                          trade_volume_24h: pool.trade_volume_24h,
+                          poolName: pool.name,
+                        }
+                      } />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-white mb-4">LSTs</h3>
+                  <div className="space-y-3">
+                    {tokens
+                      .filter(token => LSTMintAddresses.includes(token.mint))
+                      .map((token, index) => (
+                        <LSTPortfolioCard key={index} tokenData={token} tokenPrices={tokenPrices} />
+                      ))}
+                  </div>
+                </div>
+
+                {/* Portfolio Section */}
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-4">Tokens</h3>
+                  <div className="space-y-3">
+                    {tokens
+                      .filter(token => !LSTMintAddresses.includes(token.mint))
+                      .map((token, index) => (
+                        <TokenPortfolioCard key={index} tokenData={token} tokenPrices={tokenPrices} />
+                      ))}
+                  </div>
                 </div>
               </CardContent>
             </Card>

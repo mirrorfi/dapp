@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import Moralis from "moralis";
 import { useEffect, useState } from "react";
 import { TrendingDown, TrendingUp } from "lucide-react";
+import { sanctumGetLSTAPY } from "@/lib/plugin/sanctum/tools";
 
 interface TokenData {
   amount: string;
@@ -15,14 +16,15 @@ interface TokenData {
   mint: string;
 }
 
-interface TokenPortfolioCardProps {
+interface LSTPortfolioCard {
   tokenData?: TokenData;
   tokenPrices: any;
 }
 
-export function TokenPortfolioCard({ tokenData, tokenPrices }: TokenPortfolioCardProps) {
+export function LSTPortfolioCard({ tokenData, tokenPrices }: LSTPortfolioCard) {
   const [tokenPrice, setTokenPrice] = useState<number | null>(null);
   const [apiResponse, setApiResponse] = useState<any>(null);
+  const [apy, setAPY] = useState<number>(0);
 
   const isPositiveChange = apiResponse?.usdPrice24hrUsdChange > 0;
 
@@ -31,6 +33,19 @@ export function TokenPortfolioCard({ tokenData, tokenPrices }: TokenPortfolioCar
     maximumFractionDigits: 6,
   });
 
+  const getAPY = async () => {
+    try {
+      const response: { apys: Record<string, number> } = await sanctumGetLSTAPY(tokenData?.mint ? [tokenData.mint] : []);
+      console.log("finding APY of ", tokenData?.mint);
+      console.log("APY data: ", response);
+      const mint = tokenData?.mint || "";
+      setAPY(response.apys[mint] ?? 0);
+      return response;
+    } catch (error) {
+      console.error("Error fetching APY data: ", error);
+    }
+  }
+
   useEffect(() => {
     // Fetch data when the component mounts
     console.log("Fetching data...");
@@ -38,6 +53,7 @@ export function TokenPortfolioCard({ tokenData, tokenPrices }: TokenPortfolioCar
     console.log("priceInfo of ", tokenData?.logo, " is ", priceInfo)
     setTokenPrice(priceInfo?.usdPrice ?? null);
     setApiResponse(priceInfo);
+    getAPY()
   }, []);
 
   return (
@@ -69,13 +85,21 @@ export function TokenPortfolioCard({ tokenData, tokenPrices }: TokenPortfolioCar
             )}
           </div>
 
-          <div className="flex flex-col">
-            <h3 className="font-bold text-lg text-white tracking-wide">
-              {tokenData?.name}
-            </h3>
-            <p className="text-sm text-gray-400 font-medium">
-              {formattedAmount} {tokenData?.symbol}
-            </p>
+          <div className="flex">
+
+            <div className="flex-col">
+              <h3 className="font-bold text-lg text-white tracking-wide">
+                {tokenData?.name}
+              </h3>
+              <p className="text-sm text-gray-400 font-medium">
+                {formattedAmount} {tokenData?.symbol}
+              </p>
+            </div>
+
+            <div className="w-fit h-[20%] p-2 bg-transparent text-green-500 text-lg flex">
+              {Math.round(apy * 10000) / 100}% APY
+            </div>
+
           </div>
         </div>
 
