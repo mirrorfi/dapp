@@ -16,6 +16,7 @@ import { LSTPortfolioCard } from "@/components/LSTPortfolioCard";
 import { getAllUserPositions } from "@/lib/meteora";
 import { PublicKey } from "@solana/web3.js";
 import Image from "next/image";
+import StrategyModal from "@/components/StrategyModal";
 
 export const LSTMintAddresses = [
   "jupSoLaHXQiZZTSfEWMTRRgpnyFm8f6sZdosWBjx93v",
@@ -68,8 +69,20 @@ export default function Home() {
   const [solBalance, setSolBalance] = useState<string>("");
   const [pools, setPools] = useState<any[]>([]);
   const [userPositions, setUserPositions] = useState<any[]>([]);
-  const [totalLockedValue, setTotalLockedValue] = useState<number>(0);
-  const [totalProfitValue, setTotalProfitValue] = useState<number>(0);
+  const [selectedStrategy, setSelectedStrategy] = useState<Strategy | null>(
+      null
+    );
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setSelectedStrategy(null);
+  };
+
+  const handleCardClick = (strategy: Strategy) => {
+    setSelectedStrategy(strategy);
+    setModalOpen(true);
+  };
 
   useEffect(() => {
     const fetchStrategies = async () => {
@@ -455,6 +468,7 @@ export default function Home() {
                     <Card
                   key={strategy._id}
                   className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border-none backdrop-blur-sm relative min-h-[300px] cursor-pointer"
+                  onClick ={() => handleCardClick(strategy)}
                 >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0">
                     <CardTitle className="text-lg font-bold">
@@ -522,6 +536,15 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      {selectedStrategy && (
+              <StrategyModal
+                strategy={selectedStrategy}
+                isOpen={modalOpen}
+                onClose={closeModal}
+              />
+            )}
+            
     </main>
   );
 }
