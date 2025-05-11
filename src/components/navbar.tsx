@@ -12,7 +12,7 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
 } from "@/components/ui/navigation-menu";
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+// import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import dynamic from 'next/dynamic'
 
 const WalletMultiButtonDynamic = dynamic(
@@ -40,7 +40,7 @@ export function Navbar() {
   };
 
   // Determine the title based on the current pathname
-  const title = pageTitles[pathname] || "MirrorFi";
+  const title = "MirrorFi"; //pageTitles[pathname] || "MirrorFi";
 
   return (
     <div className="border-b border-[#1a1b29] bg-[#0a0b14]">
@@ -73,7 +73,7 @@ export function Navbar() {
             <NavigationMenuList>
               <NavigationMenuItem>
                 <Link href="/strategy-dashboard" legacyBehavior passHref>
-                  <NavigationMenuLink className="text-sm font-medium text-foreground hover:text-primary">
+                  <NavigationMenuLink className={`text-sm font-medium ${pathname === "/strategy-dashboard" ? "text-primary": "text-foreground"}  hover:text-primary`}>
                     Strategy Dashboard
                   </NavigationMenuLink>
                 </Link>
@@ -84,7 +84,7 @@ export function Navbar() {
 
               <NavigationMenuItem>
                 <Link href="/create-strategy" legacyBehavior passHref>
-                  <NavigationMenuLink className="text-sm font-medium text-foreground hover:text-primary">
+                  <NavigationMenuLink className={`text-sm font-medium ${pathname === "/create-strategy" ? "text-primary": "text-foreground"} hover:text-primary`}>
                     Create Strategy
                   </NavigationMenuLink>
                 </Link>
@@ -94,8 +94,8 @@ export function Navbar() {
 
               <NavigationMenuItem>
                 <Link href="/profile" legacyBehavior passHref>
-                  <NavigationMenuLink className="text-sm font-medium text-foreground hover:text-primary">
-                    User Profile
+                  <NavigationMenuLink className={`text-sm font-medium ${pathname === "/profile" ? "text-primary": "text-foreground"}  hover:text-primary`}>
+                    Portfolio
                   </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>

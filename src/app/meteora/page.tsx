@@ -8,6 +8,8 @@ import { useWallet } from '@solana/wallet-adapter-react';
 
 //import { autoFillYByStrategy, StrategyType } from '@meteora-ag/dlmm/dist/utils/strategy'
 import { autoFillYByStrategy, StrategyType } from '@meteora-ag/dlmm';
+import {getAllUserPositions} from '@/lib/meteora';
+
 import { create } from 'domain';
 
 
@@ -68,23 +70,31 @@ export default function MeteoraPage() {
             console.log("Wallet not connected or public key not available");
             return;
         }
+        console.log("Fetching user positions...");
+        const tes = await getAllUserPositions(publicKey);
+        console.log('Positions fetched');
+        console.log("User Positions:", tes);
+        // if(!connected || !publicKey || !signTransaction) {            
+        //     console.log("Wallet not connected or public key not available");
+        //     return;
+        // }
         
-        const dlmmPool = await DLMM.create(connection, SOL_USDC_POOL)
-        console.log(dlmmPool);
+        // const dlmmPool = await DLMM.create(connection, SOL_USDC_POOL)
+        // console.log(dlmmPool);
 
-        const { userPositions } = await dlmmPool.getPositionsByUserAndLbPair(
-            publicKey
-        );
+        // const { userPositions } = await dlmmPool.getPositionsByUserAndLbPair(
+        //     publicKey
+        // );
 
-        console.log("User Positions:", userPositions);
-        const binData = userPositions[0].positionData.positionBinData;
+        // console.log("User Positions:", userPositions);
+        // const binData = userPositions[0].positionData.positionBinData;
 
-        console.log("Bin Data:", binData);
+        // console.log("Bin Data:", binData);
 
-        userPositions.forEach((position: any) => {
-            console.log("Public Key:", position.publicKey.toBase58());
-        });
-        return userPositions
+        // userPositions.forEach((position: any) => {
+        //     console.log("Public Key:", position.publicKey.toBase58());
+        // });
+        // return userPositions
     }
 
     async function closeUserPosition(){
@@ -238,6 +248,46 @@ export default function MeteoraPage() {
         }
     }
 
+    async function meteoraGetAllUserPositions(){
+        if(!connected || !publicKey || !signTransaction) {
+            console.log("Wallet not connected or public key not available");
+            return;
+        }
+        const positions = await DLMM.getAllLbPairPositionsByUser(connection, publicKey);
+        console.log("All User Positions:", positions);
+
+
+        positions.forEach((position: any) => {
+            console.log(position);
+            console.log("Pair Public Key:", position.publicKey.toBase58());
+            
+            const tokenX = position.tokenX;
+            const tokenY = position.tokenY;
+            const positionsData = position.lbPairPositionsData;
+
+            positionsData.forEach((positionData: any) => {
+                console.log("Token X:", tokenX);
+                console.log("Token Y:", tokenY);
+
+    
+                console.log("Position Public Key?:", positionData.publicKey.toString());
+
+
+                console.log("Position Data:", positionData);
+
+                const totalFeeX = positionData.totalFeeX.toString();
+                const totalFeeY = positionData.totalFeeY.toString();
+                console.log("Total Fee X:", totalFeeX);
+                console.log("Total Fee Y:", totalFeeY);
+
+                const totalAmountX = positionData.totalAmountX.toString();
+                const totalAmountY = positionData.totalAmountY.toString();
+                console.log("Total Amount X:", totalAmountX);
+                console.log("Total Amount Y:", totalAmountY);
+            });
+        });
+    }
+
     useEffect(() => {
         console.log();
         //getUserPositions();
@@ -258,6 +308,7 @@ export default function MeteoraPage() {
             <p>.</p>
             <button onClick={getPoolData}>Get Pool Data</button>
             <p>.</p>
+            <button onClick={meteoraGetAllUserPositions}>Get All User Positions</button>
         </div>
     )
 }
