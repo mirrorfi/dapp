@@ -13,6 +13,12 @@ import {
   NavigationMenuList,
 } from "@/components/ui/navigation-menu";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import dynamic from 'next/dynamic'
+
+const WalletMultiButtonDynamic = dynamic(
+    async () => (await import('@solana/wallet-adapter-react-ui')).WalletMultiButton,
+    { ssr: false }
+);
 
 export function Navbar() {
   const { publicKey } = useWallet();
@@ -109,7 +115,7 @@ export function Navbar() {
         </div>
 
         <div className="flex h-16 justify-around items-center px-6">
-          <WalletMultiButton />
+          <WalletMultiButtonDynamic />
         </div>
       </div>
     </div>
