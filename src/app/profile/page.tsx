@@ -394,6 +394,7 @@ export default function Home() {
                           reserve_y_amt: pool.reserve_y_amount,
                           trade_volume_24h: pool.trade_volume_24h,
                           poolName: pool.name,
+                          address: address,
                         }
                       } />
                     ))}

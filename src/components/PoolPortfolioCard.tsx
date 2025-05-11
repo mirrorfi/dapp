@@ -5,6 +5,8 @@ import { Card } from "@/components/ui/card";
 import Moralis from "moralis";
 import { useEffect, useState } from "react";
 import CryptoPoolModal from "./PoolModal";
+import { getAllUserPositions } from "@/lib/meteora";
+import { PublicKey } from "@solana/web3.js";
 
 interface poolData {
   tokenXMint: string;
@@ -16,6 +18,7 @@ interface poolData {
   reserve_y_amt: number;
   trade_volume_24h: number;
   poolName: string;
+  address: string;
 }
 
 interface PoolPortfolioCardProps {
@@ -27,6 +30,25 @@ export function PoolPortfolioCard({ poolInfo }: PoolPortfolioCardProps) {
   const [tokenYData, setTokenYData] = useState<any>();
   const [openModal, setOpenModal] = useState(false);
   const [tokenPrices, setTokenPrices] = useState<any>();
+  const [userPosition, setUserPosition] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUserPositions = async () => {
+      try {
+        setLoading(true);
+        const response = await getAllUserPositions(new PublicKey(poolInfo?.address || ""));
+        console.log("User positions: ", response);
+        setUserPosition(response[0]);
+      } catch (error) {
+        console.error("Error fetching user positions: ", error);
+      } finally {
+        // Even if there's an error, we should stop loading
+        setLoading(false);
+      }
+    }
+    fetchUserPositions();
+  }, []);
 
   useEffect(() => {
     // Fetch data when the component mounts
@@ -151,7 +173,7 @@ export function PoolPortfolioCard({ poolInfo }: PoolPortfolioCardProps) {
         </div>
       </Card>
       {/* Render modal outside the Card to prevent event bubbling */}
-      <CryptoPoolModal open={openModal} setOpen={setOpenModal} 
+      <CryptoPoolModal open={openModal} setOpen={setOpenModal}
       poolInfo={
         {
           poolName: poolInfo?.poolName ?? "",
