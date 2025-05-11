@@ -157,10 +157,10 @@ export default function MeteoraPage() {
     console.log("Active Bin Price (Lamport):", activeBinPriceLamport);
     console.log("Active Bin Price (Token):", activeBinPricePerToken);
 
-    // Try to create Transaction
-    const TOTAL_RANGE_INTERVAL = 10; // 50 bins on each side of the active bin
-    const minBinId = activeBin.binId - TOTAL_RANGE_INTERVAL;
-    const maxBinId = activeBin.binId + TOTAL_RANGE_INTERVAL;
+        // Try to create Transaction
+        const TOTAL_RANGE_INTERVAL = 50; // 50 bins on each side of the active bin
+        const minBinId = activeBin.binId - TOTAL_RANGE_INTERVAL;
+        const maxBinId = activeBin.binId + TOTAL_RANGE_INTERVAL;
 
     /*
         Given Token amount X , and Token Amount Y
