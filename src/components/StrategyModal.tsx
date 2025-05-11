@@ -25,7 +25,6 @@ import {
   type TreeNode,
 } from "@/lib/txnUtils/treeUtils";
 import { createSolanaAgent } from "@/lib/agent";
-import { parse } from "path";
 import { useToast } from "@/components/ui/use-toast";
 
 interface TokenBalance {
@@ -42,6 +41,7 @@ interface TokenBalances {
 interface Strategy {
   name: string;
   creator?: string;
+  description?: string;
   nodes: Node[];
   edges: Edge[];
 }
@@ -57,7 +57,7 @@ const StrategyModal: FC<StrategyModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const { connected, publicKey, signTransaction } = useWallet();
+  const { publicKey, signTransaction } = useWallet();
   const { connection } = useConnection();
   const [loading, setLoading] = useState(false);
   const [tokenBalances, setTokenBalances] = useState<TokenBalances>({
@@ -183,7 +183,12 @@ const StrategyModal: FC<StrategyModalProps> = ({
           <div className="flex flex-col justify-between">
             <div>
               <h3 className="text-xl font-bold mb-1">{strategy.name}</h3>
-              <p className="text-muted-foreground mb-3">APY: {apy} (?)</p>
+              <p className="text-muted-foreground mb-2">APY: {apy} (?)</p>
+              {strategy.description && (
+                <p className="text-sm text-gray-400 mb-3">
+                  Description: {strategy.description}
+                </p>
+              )}
             </div>
 
             <div className="flex flex-col space-y-4">
