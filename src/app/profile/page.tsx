@@ -131,7 +131,6 @@ export default function Home() {
       setLoading(true); // For fetchWalletData
       fetchWalletData(); // Fetch wallet data when address changes
       fetchPool();
-      getSolBalance();
     } else {
       // Clear all data if address is removed
       setTokens([]);
@@ -158,34 +157,46 @@ export default function Home() {
   }, [tokens]);
 
   const fetchWalletData = async () => {
-    if (!connection) return; // Ensure connection is available before fetching
+    if (!connection) return;
 
     setLoading(true);
     setError(null);
 
-    // Fetch portfolio data
     try {
+      // First get the SOL balance
+      const solResponse = await Moralis.SolApi.account.getBalance({
+        "network": "mainnet",
+        "address": address,
+      });
+      
+      console.log("Acquired Sol Balance is ", solResponse.raw);
+      const solBalanceValue = solResponse.raw.solana;
+      setSolBalance(solBalanceValue);
+
+      // Then fetch SPL tokens
       const response = await Moralis.SolApi.account.getSPL({
         network: "mainnet",
         address,
       });
 
       const data = response.toJSON();
-      setTokens(data);
       console.log("Tokens:", data);
-      setTokens((prev) => [...prev, {
-          amount: 0,
-          logo: "https://cdn.jsdelivr.net/gh/saber-hq/spl-token-icons@master/icons/101/So11111111111111111111111111111111111111112.png",
-          symbol: "SOL",
-          decimals: 6,
-          name: "Solana",
-          mint: "So11111111111111111111111111111111111111112",
-        }])
+      
+      // Add SOL to the data array with the correct balance already set
+      const dataWithSOL = [...data, {
+        amount: solBalanceValue, // Set the actual SOL balance right away
+        logo: "https://cdn.jsdelivr.net/gh/saber-hq/spl-token-icons@master/icons/101/So11111111111111111111111111111111111111112.png",
+        symbol: "SOL",
+        decimals: 9,
+        name: "Solana",
+        mint: "So11111111111111111111111111111111111111112",
+      }];
+      
+      // Set tokens state with the complete array including SOL with balance
+      setTokens(dataWithSOL);
     } catch (err) {
       setError("Invalid address or unable to fetch data.");
       console.error("Error in fetchWalletData:", err);
-    } finally {
-      
     }
   };
 
@@ -221,17 +232,30 @@ export default function Home() {
 
   const getSolBalance = async () => {
     try {
-    const response = await Moralis.SolApi.account.getBalance({
-    "network": "mainnet",
-    "address": address,
-  });
+      const response = await Moralis.SolApi.account.getBalance({
+        "network": "mainnet",
+        "address": address,
+      });
 
       console.log("Acquired Sol Balance is ", response.raw);
       setSolBalance(response.raw.solana);
+      
+      // Update the SOL token amount in the tokens array
+      setTokens(prevTokens => {
+        return prevTokens.map(token => {
+          if (token.mint === "So11111111111111111111111111111111111111112") {
+            return {
+              ...token,
+              amount: response.raw.solana,
+            };
+          }
+          return token;
+        });
+      });
     } catch (e) {
       console.error(e);
     }
-    }
+  };
 
   const fetchPortfolioUSDBalance = async () => {
     if (tokens.length > 0) {
@@ -254,10 +278,16 @@ export default function Home() {
       const newAssetsCalculated: [string, number][] = [];
 
       tokens.forEach((token) => {
+        if(token.symbol === "SOL") {
+          console.log("I SHOULD BE FUCKING CALCULATED WHAT THE FUCK BRO")
+        }
         // Find the corresponding price info using mint
         const priceInfo = tokenPrices.find(p => p.mint === token.mint && !p.error);
 
         if (priceInfo) {
+          if(token.symbol === "SOL") {
+            console.log("i should have a price info here")
+          }
           newPortfolioUSDChange += (priceInfo.usdPrice24hrUsdChange ?? 0) * token.amount;
           newAssetsCalculated.push([token.symbol, (token.amount * (priceInfo.usdPrice ?? 0))]);
         }
