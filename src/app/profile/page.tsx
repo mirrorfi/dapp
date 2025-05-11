@@ -351,7 +351,7 @@ export default function Home() {
   }
 
   return (
-    <main className="flex min-h-screen h-screen p-6 bg-gradient-to-br from-gray-900 via-black to-gray-800 text-foreground overflow-hidden items-center justify-center">
+    <main className="flex min-h-screen h-[calc(100vh+500px)] p-6 bg-gradient-to-br from-gray-900 via-black to-gray-800 text-foreground overflow-hidden items-center justify-center">
       {!loading ? (
         <div className="w-[80%] h-full flex flex-col gap-6">
           {/* Portfolio Summary */}

@@ -303,7 +303,7 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
         </main>
       </div>
       {/* Sidebar */}
-      {/* <div
+      <div
         className={`${
           isSidebarOpen ? "w-64" : "w-16"
         } bg-gray-900 text-white transition-all duration-300 flex flex-col`}
@@ -313,32 +313,29 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
           {isSidebarOpen && (
         <ul className="space-y-4">
           {/* User guide on how to create node */}
-          {/* <li>
-            <h3 className="text-sm font-semibold">How to create a node:</h3>
+          <li>
+            <h3 className="text-sm font-semibold">How to create strategy:</h3>
             <p className="text-xs text-gray-400">
-              Click on any node to open the node's details and click on the + button to create a new node.
+              Click a node and click "+" button to specify its next action.
               <br />
               <br />
-              - Wallet node, can only either create new token or LST nodes.<br />
+              1. Click wallet and select which tokens to use.<br />
+              2. Specify next actions using the token<br />
               <br />
-              - Token nodes, can create new protocol or LST nodes.<br />
+              {"*Supported Actions: (Swap (Jupiter), LST (Sanctum), Meteora"}<br />
               <br />
-              - LST nodes, can create new protocol or token nodes.<br />
-              <br />
-              - Protocol nodes, can't create any new nodes.<br />
+              {/*- Protocol nodes, can't create any new nodes.<br />*/}
             </p>
           </li>
 
-          
-
           <li>
-          <h3 className="text-sm font-semibold">How to delete a node:</h3>
+          <h3 className="text-sm font-semibold">Deleting a node:</h3>
             <p className="text-xs text-gray-400 flex">
-              Click on any node to open the node's details and click on the 🗑️ button to delete the node.
+              Click on a node and click on 🗑️ button to remove it.
 
               <br />
               <br />
-              - Deleting a node will also delete all the nodes that are connected from it.<br />
+              - Deleting a node will also delete the next actions from it.<br />
               <br />
               <br />
               - You can't delete the Wallet node.<br />
@@ -365,9 +362,12 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
         </ul>
           )}
         </div>
-      </div> */}
+      </div>
 
+      {/*
+      Wrong Function Calling cause error
       <CreatePageSidebar onSaveClick={() => setSaveOpen(true)} />
+      */}
 
     </div>
   );
