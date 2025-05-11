@@ -2,13 +2,11 @@
 
 import { useWallet } from "@solana/wallet-adapter-react";
 import SimplifiedFlow from "@/components/simplified-flow";
-import { InteractiveHoverButton } from "@/components/magicui/interactive-hover-button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import Image from "next/image";
-import { Trash2 } from "lucide-react";
+import { Trash2, LayoutGrid, List } from "lucide-react";
 import { useEffect, useState } from "react";
 import StrategyModal from "@/components/StrategyModal";
 
@@ -16,7 +14,13 @@ interface Node {
   id: string;
   type: string;
   position: { x: number; y: number };
-  data: Record<string, unknown>;
+  data: {
+    label: string;
+    description?: string;
+    nodeType?: "protocol" | "token";
+    percentage?: string;
+    connectionCount: number;
+  };
 }
 
 interface Edge {
@@ -45,6 +49,7 @@ const StrategyDashboardPage = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const { connected, publicKey } = useWallet();
 
   useEffect(() => {
@@ -99,7 +104,23 @@ const StrategyDashboardPage = () => {
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-background via-background/95 to-blue-950/20 text-foreground">
       <main className="p-6">
         <div className="mb-8 flex flex-col sm:flex-row items-center justify-between gap-4 sm:space-x-2">
-          <div className="flex-1/3">
+          <div className="flex-1/3 flex items-center gap-2">
+            <Button
+              variant={viewMode === "grid" ? "default" : "ghost"}
+              size="icon"
+              onClick={() => setViewMode("grid")}
+              className="h-8 w-8"
+            >
+              <LayoutGrid className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={viewMode === "list" ? "default" : "ghost"}
+              size="icon"
+              onClick={() => setViewMode("list")}
+              className="h-8 w-8"
+            >
+              <List className="h-4 w-4" />
+            </Button>
           </div>
           <Input
             placeholder="Search strategies..."
@@ -121,62 +142,121 @@ const StrategyDashboardPage = () => {
             </Tabs>
           </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {strategies
-            .filter((strategy) => {
-              // First filter by tab
-              const tabFilter =
-                activeTab === "all"
-                  ? true
-                  : connected &&
-                    publicKey &&
-                    strategy.user === publicKey.toBase58();
+        {viewMode === "grid" ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {strategies
+              .filter((strategy) => {
+                // First filter by tab
+                const tabFilter =
+                  activeTab === "all"
+                    ? true
+                    : connected &&
+                      publicKey &&
+                      strategy.user === publicKey.toBase58();
 
-              // Then filter by search query
-              const searchFilter =
-                searchQuery.trim() === ""
-                  ? true
-                  : strategy.name
-                      .toLowerCase()
-                      .includes(searchQuery.toLowerCase());
+                // Then filter by search query
+                const searchFilter =
+                  searchQuery.trim() === ""
+                    ? true
+                    : strategy.name
+                        .toLowerCase()
+                        .includes(searchQuery.toLowerCase());
 
-              return tabFilter && searchFilter;
-            })
-            .map((strategy: Strategy) => (
-              <Card
-                key={strategy._id}
-                className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border-none backdrop-blur-sm relative min-h-[300px] cursor-pointer"
-                onClick={() => handleCardClick(strategy)}
-              >
-                <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                  <CardTitle className="text-lg font-bold">
-                    {strategy.name}
-                  </CardTitle>
-                  {connected &&
-                    publicKey &&
-                    strategy.user === publicKey.toBase58() && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 p-0 hover:text-destructive cursor-pointer"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          // TODO: Implement delete functionality
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    )}
-                </CardHeader>
-                <div className="absolute inset-x-0 top-[60px] bottom-0">
-                  <SimplifiedFlow
-                    nodes={strategy.nodes}
-                    edges={strategy.edges}
-                  />
+                return tabFilter && searchFilter;
+              })
+              .map((strategy: Strategy) => (
+                <Card
+                  key={strategy._id}
+                  className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border-none backdrop-blur-sm relative min-h-[300px] cursor-pointer"
+                  onClick={() => handleCardClick(strategy)}
+                >
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                    <CardTitle className="text-lg font-bold">
+                      {strategy.name}
+                    </CardTitle>
+                    {connected &&
+                      publicKey &&
+                      strategy.user === publicKey.toBase58() && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 p-0 hover:text-destructive cursor-pointer"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // TODO: Implement delete functionality
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                  </CardHeader>
+                  <div className="absolute inset-x-0 top-[60px] bottom-0">
+                    <SimplifiedFlow
+                      nodes={strategy.nodes}
+                      edges={strategy.edges}
+                    />
+                  </div>
+                </Card>
+              ))}
+          </div>
+        ) : (
+          <div className="flex flex-col space-y-4">
+            <div className="grid grid-cols-4 gap-4 p-4 font-medium text-muted-foreground bg-card rounded-lg">
+              <div>Strategy Name</div>
+              <div>Tokens</div>
+              <div>Categories</div>
+              <div className="text-right">APY</div>
+            </div>
+            {strategies
+              .filter((strategy) => {
+                const tabFilter =
+                  activeTab === "all"
+                    ? true
+                    : connected &&
+                      publicKey &&
+                      strategy.user === publicKey.toBase58();
+
+                const searchFilter =
+                  searchQuery.trim() === ""
+                    ? true
+                    : strategy.name
+                        .toLowerCase()
+                        .includes(searchQuery.toLowerCase());
+
+                return tabFilter && searchFilter;
+              })
+              .map((strategy: Strategy) => (
+                <div
+                  key={strategy._id}
+                  onClick={() => handleCardClick(strategy)}
+                  className="grid grid-cols-4 gap-4 p-4 transition-colors duration-200 hover:bg-accent/80 rounded-lg cursor-pointer items-center"
+                >
+                  <div className="font-medium">{strategy.name}</div>
+                  <div className="flex items-center gap-1">
+                    {strategy.nodes
+                      .filter((node) => node.data.nodeType === "token")
+                      .map((node) => (
+                        <img
+                          key={node.id}
+                          src={`/PNG/${node.data.label.toLowerCase()}-logo.png`}
+                          alt={node.data.label}
+                          className="w-6 h-6 rounded-full"
+                        />
+                      ))}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {/* Placeholder categories */}
+                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                      DLMM
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <span className="font-medium">12.5%</span>
+                  </div>
                 </div>
-              </Card>
-            ))}
-        </div>
+              ))}
+          </div>
+        )}
       </main>
 
       {selectedStrategy && (
