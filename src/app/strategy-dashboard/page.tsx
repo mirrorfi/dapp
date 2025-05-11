@@ -4,9 +4,10 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import SimplifiedFlow from "@/components/simplified-flow";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Trash2, LayoutGrid, List } from "lucide-react";
+import { Trash2, LayoutGrid, List, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import StrategyModal from "@/components/StrategyModal";
 
 interface Node {
@@ -43,6 +44,7 @@ interface Strategy {
 }
 
 const StrategyDashboardPage = () => {
+  const router = useRouter();
   const [strategies, setStrategies] = useState<Strategy[]>([]);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [loading, setLoading] = useState(true);
@@ -168,31 +170,44 @@ const StrategyDashboardPage = () => {
               ))}
             </>
           </div>
-          <div className="inline-flex h-8 items-center rounded-full border-gray-600 border-2 bg-card text-card-foreground">
-            <div
-              className={`flex h-full items-center justify-center rounded-l-full px-3 transition-colors ${
-                viewMode === "grid" ? "bg-primary text-primary-foreground" : ""
-              }`}
-            >
-              <button
-                onClick={() => setViewMode("grid")}
-                className="flex items-center justify-center"
+          <div className="flex items-center gap-4">
+            <div className="inline-flex h-8 items-center rounded-full border-gray-600 border-2 bg-card text-card-foreground">
+              <div
+                className={`flex h-full items-center justify-center rounded-l-full px-3 transition-colors ${
+                  viewMode === "grid"
+                    ? "bg-primary text-primary-foreground"
+                    : ""
+                }`}
               >
-                <LayoutGrid className="h-5 w-5" />
-              </button>
-            </div>
-            <div
-              className={`flex h-full items-center justify-center rounded-r-full px-3 transition-colors ${
-                viewMode === "list" ? "bg-primary text-primary-foreground" : ""
-              }`}
-            >
-              <button
-                onClick={() => setViewMode("list")}
-                className="flex items-center justify-center"
+                <button
+                  onClick={() => setViewMode("grid")}
+                  className="flex items-center justify-center"
+                >
+                  <LayoutGrid className="h-5 w-5" />
+                </button>
+              </div>
+              <div
+                className={`flex h-full items-center justify-center rounded-r-full px-3 transition-colors ${
+                  viewMode === "list"
+                    ? "bg-primary text-primary-foreground"
+                    : ""
+                }`}
               >
-                <List className="h-5 w-5" />
-              </button>
+                <button
+                  onClick={() => setViewMode("list")}
+                  className="flex items-center justify-center"
+                >
+                  <List className="h-5 w-5" />
+                </button>
+              </div>
             </div>
+            <Button
+              onClick={() => router.push("/create-strategy")}
+              className="h-8 px-3 rounded-full border-gray-600 border-2 flex items-center gap-1 bg-primary text-primary-foreground hover:bg-primary/90"
+            >
+              <Plus className="h-4 w-4" />
+              Create Strategy
+            </Button>
           </div>
         </div>
         {viewMode === "grid" ? (
