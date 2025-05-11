@@ -13,6 +13,9 @@ import { PortfolioValueCard } from "@/components/PortfolioValueCard";
 import SimplifiedFlow from "@/components/simplified-flow";
 import { PoolPortfolioCard } from "@/components/PoolPortfolioCard";
 import { LSTPortfolioCard } from "@/components/LSTPortfolioCard";
+import { getAllUserPositions } from "@/lib/meteora";
+import { PublicKey } from "@solana/web3.js";
+import Image from "next/image";
 
 export const LSTMintAddresses = [
   "jupSoLaHXQiZZTSfEWMTRRgpnyFm8f6sZdosWBjx93v",
@@ -64,6 +67,9 @@ export default function Home() {
   const [strategies, setStrategies] = useState<Strategy[]>([]);
   const [solBalance, setSolBalance] = useState<string>("");
   const [pools, setPools] = useState<any[]>([]);
+  const [userPositions, setUserPositions] = useState<any[]>([]);
+  const [totalLockedValue, setTotalLockedValue] = useState<number>(0);
+  const [totalProfitValue, setTotalProfitValue] = useState<number>(0);
 
   useEffect(() => {
     const fetchStrategies = async () => {
@@ -86,6 +92,19 @@ export default function Home() {
 
     fetchStrategies();
   }, []);
+
+  const fetchUserPositions = async () => {
+        try {
+          setLoading(true);
+          const response = await getAllUserPositions(new PublicKey(address || ""));
+          console.log("User positions: ", response);
+          setUserPositions(response);
+        } catch (error) {
+          console.error("Error fetching user positions: ", error);
+        } finally {
+
+        }
+      }
 
   useEffect(() => {
     // Initialize the connection and Moralis API when the component mounts
@@ -130,7 +149,7 @@ export default function Home() {
       setPortfolioUSDChange(0);
       setLoading(true); // For fetchWalletData
       fetchWalletData(); // Fetch wallet data when address changes
-      fetchPool();
+      fetchUserPositions();
     } else {
       // Clear all data if address is removed
       setTokens([]);
@@ -200,17 +219,6 @@ export default function Home() {
     }
   };
 
-  const fetchPool = async () => {
-    try {
-      const response = await fetch("https://dlmm-api.meteora.ag/pair/5rCf1DM8LjKTw4YqhnoLcngyZYeNnQqztScTogYHAS6");
-      const data = await response.json();
-      console.log("Pool data: ", data);
-      setPools((prev) => [...prev, data]);
-    } catch (err) {
-      console.error("Error fetching pool data:", err);
-    }
-  }
-
   const fetchTokenPrice = async (token: any) => {
     try {
       const response = await Moralis.SolApi.token.getTokenPrice({
@@ -227,33 +235,6 @@ export default function Home() {
       console.error(`Error fetching token price for ${token.mint}:`, err);
       // Add a placeholder with error and mint/symbol for completion check and mapping
       setTokenPrices((prevPrices) => [...prevPrices, { mint: token.mint, symbol: token.symbol, error: true, usdPrice: 0, usdPrice24hrUsdChange: 0 }]);
-    }
-  };
-
-  const getSolBalance = async () => {
-    try {
-      const response = await Moralis.SolApi.account.getBalance({
-        "network": "mainnet",
-        "address": address,
-      });
-
-      console.log("Acquired Sol Balance is ", response.raw);
-      setSolBalance(response.raw.solana);
-      
-      // Update the SOL token amount in the tokens array
-      setTokens(prevTokens => {
-        return prevTokens.map(token => {
-          if (token.mint === "So11111111111111111111111111111111111111112") {
-            return {
-              ...token,
-              amount: response.raw.solana,
-            };
-          }
-          return token;
-        });
-      });
-    } catch (e) {
-      console.error(e);
     }
   };
 
@@ -362,7 +343,7 @@ export default function Home() {
         <div className="w-[80%] h-full flex flex-col gap-6">
           {/* Portfolio Summary */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
-            <PortfolioValueCard totalValue = {portfolioUSDBalance} totalChange={portfolioUSDChange} topAssets = {topAssets} solBalance={solBalance} />
+            <PortfolioValueCard totalValue = {portfolioUSDBalance} totalChange={portfolioUSDChange} topAssets = {topAssets} userPositions={userPositions} />
 
             <PortfolioChart currentValue = {portfolioUSDBalance} valueChange24h={portfolioUSDChange} />
           </div>
@@ -380,29 +361,54 @@ export default function Home() {
               <CardContent className="flex-1 overflow-y-auto pt-4 pb-6 pr-2 h-full">
                 {/* Meteora Section */}
                 <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-white mb-4">Meteora</h3>
+                  <div className="flex items-center gap-2 w-full h-fit mb-4">
+                    <Image src="/PNG/meteora-logo.png" alt="Meteora Logo" className="h-5 w-5" width={20} height={20} />
+                    <h3 className="text-lg font-semibold text-white">Meteora</h3>
+                  </div>
                   <div className="space-y-3">
-                    {pools.map((pool, index) => (
-                      <PoolPortfolioCard key={index} poolInfo={
-                        {
-                          tokenXMint: pool.mint_x,
-                          tokenYMint: pool.mint_y,
-                          poolAddress: pool.address,
-                          apy: pool.apy,
-                          fees_24h: pool.fees_24h,
-                          reserve_x_amt: pool.reserve_x_amount,
-                          reserve_y_amt: pool.reserve_y_amount,
-                          trade_volume_24h: pool.trade_volume_24h,
-                          poolName: pool.name,
-                          address: address,
-                        }
-                      } />
-                    ))}
+                      {userPositions.map((position, index) => (
+                        <PoolPortfolioCard key={index} positionInfo = {
+                          {
+                            tokenXMint: position.tokenXMint,
+                            tokenYMint: position.tokenYMint,
+                            pairAddress: position.pairAddress,
+                            apy: position.apy,
+                            apr: position.apr,
+                            fees_24h: position.fees_24h,
+                            reserveX: position.reserveX,
+                            reserveXUSD: position.reserveXUSD,
+                            reserveY: position.reserveY,
+                            volume_24h: position.volume_24h,
+                            pairName: position.pairName,
+                            tokenXLogo: position.tokenXLogo,
+                            tokenYLogo: position.tokenYLogo,
+                            tokenXPrice: position.tokenXPrice,
+                            tokenYPrice: position.tokenYPrice,
+                            tokenXSymbol: position.tokenXSymbol,
+                            tokenYSymbol: position.tokenYSymbol,
+                            tokenXDecimal: position.tokenXDecimal,
+                            tokenYDecimal: position.tokenYDecimal,
+                            positionX: position.positionX,
+                            positionY: position.positionY,
+                            positionXUSD: position.positionXUSD,
+                            positionYUSD: position.positionYUSD,
+                            profitY: position.profitY,
+                            profitYUSD: position.profitYUSD,
+                            reserveYUSD: position.reserveYUSD,
+                            yield_24h: position.yield_24h,
+                            profitX: position.profitX,
+                            profitXUSD: position.profitXUSD,
+                          }
+                        } />
+                      ))}
                   </div>
                 </div>
 
                 <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-white mb-4">LSTs</h3>
+                    <div className="flex items-center gap-2 w-full h-fit mb-4">
+                      <Image src="/PNG/sanctum-logo.png" alt="Sanctum Logo" className="h-5 w-5" width={20} height={20} />
+                      <h3 className="text-lg font-semibold text-white">LSTs</h3>
+                    </div>
                   <div className="space-y-3">
                     {tokens
                       .filter(token => LSTMintAddresses.includes(token.mint))
