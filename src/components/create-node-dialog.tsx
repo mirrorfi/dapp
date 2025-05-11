@@ -25,32 +25,52 @@ interface CreateNodeDialogProps {
     connectionCount: number
   }) => void
 
+  onCreateMeteoraNode: (nodeData: {
+    label: string
+    description: string
+    nodeType: "protocol" | "token" | "lst"
+    connectionCount: number
+  }, otherNode: Node | null) => void
+
   selectedNode: Node | null
   isOpen: boolean
   onClose: () => void
   nodes: Node[]
 }
 
-export function CreateNodeDialog({ onCreateNode, selectedNode, isOpen, onClose, nodes }: CreateNodeDialogProps) {
+export function CreateNodeDialog({ onCreateNode, onCreateMeteoraNode ,selectedNode, isOpen, onClose, nodes }: CreateNodeDialogProps) {
+  const userTokenOptions = nodes.filter((node) => node.data.nodeType === "token").map((node) => node.data.label)
   const selectedNodeType = selectedNode?.data?.nodeType
   const [nodeType, setNodeType] = useState<"protocol" | "token" | "lst" | null>(null)
   const [selectedOption, setSelectedOption] = useState<string | null>(null)
+  const [otherSelectedOption, setOtherSelectedOption] = useState<string | null>(null)
 
   // Reset state when the dialog is closed
   const handleClose = () => {
     setNodeType(null)
     setSelectedOption(null)
+    setOtherSelectedOption(null)
     onClose()
   }
   const handleConfirm = () => {
     if (!nodeType || !selectedOption) return
 
-    onCreateNode({
-      label: selectedOption,
-      description: nodeType === "protocol" ? `Protocol: ${selectedOption}` : `Token: ${selectedOption}`,
-      nodeType,
-      connectionCount: 0,
-    })
+    if (selectedOption === "Meteora") {
+      onCreateMeteoraNode({
+        label: selectedOption,
+        description: `Protocol: ${selectedOption}`,
+        nodeType,
+        connectionCount: 0,
+      }, nodes.find((node) => node.data.label === otherSelectedOption) || null)
+    }
+    else {
+      onCreateNode({
+        label: selectedOption,
+        description: nodeType === "protocol" ? `Protocol: ${selectedOption}` : `Token: ${selectedOption}`,
+        nodeType,
+        connectionCount: 0,
+      }) 
+  }
 
     // Reset state and close dialog
     handleClose()
@@ -73,7 +93,7 @@ export function CreateNodeDialog({ onCreateNode, selectedNode, isOpen, onClose, 
         </DialogHeader>
         <div className="grid gap-4 py-4">
           {/* Protocol Options */}
-        {selectedNode?.data?.label != "SOL Wallet" && selectedNodeType == "token" && (
+        {selectedNode?.data?.label != "Wallet" && selectedNodeType != "protocol" && (
           <div>
             <h3 className="text-sm font-medium text-muted-foreground mb-2">Protocols</h3>
             <div className="max-h-48 overflow-y-auto grid grid-cols-2 gap-4">
@@ -142,61 +162,73 @@ export function CreateNodeDialog({ onCreateNode, selectedNode, isOpen, onClose, 
       </Button>
     )
   ))}
+  
           </div>
             {/* Divider */}
             <div className="border-t border-border my-4"></div>
           </div>
         )}
 
-          {/* Token Options */}
-          <div>
-            <h3 className="text-sm font-medium text-muted-foreground mb-2">Stake LSTs</h3>
-            <div className="max-h-48 overflow-y-auto grid grid-cols-2 gap-4">
-              {LSToptions.map((token) => {
+          {((selectedOption !== "Meteora") ? (
+          // Token Options 
+          (<><div>
+              <h3 className="text-sm font-medium text-muted-foreground mb-2">Stake LSTs</h3>
+              <div className="max-h-48 overflow-y-auto grid grid-cols-2 gap-4">
+                {LSToptions.map((token) => {
 
-                return (
-                  <Button
-                    key={token}
-                    variant={"outline"}
-                    className={`flex items-center gap-2 p-2 justify-between ${
-                      selectedOption === token ? "bg-accent text-accent-foreground" : ""
-                    } ${selectedNode?.data?.label.toLowerCase() === token.toLowerCase() ? "hidden" : ""}`} 
-                    onClick={() => {
-                      setSelectedOption((prev) => (prev === token ? null : token));
-                      setNodeType("lst");
-                    }}
-                  >
+                  return (
+                    <Button
+                      key={token}
+                      variant={"outline"}
+                      className={`flex items-center gap-2 p-2 justify-between ${selectedOption === token ? "bg-accent text-accent-foreground" : ""} ${selectedNode?.data?.label.toLowerCase() === token.toLowerCase() ? "hidden" : ""}`}
+                      onClick={() => {
+                        setSelectedOption((prev) => (prev === token ? null : token))
+                        setNodeType("lst")
+                      } }>
                       <div className="flex items-center text-xs font-medium">
-                    <Image
-                      src={`/PNG/${token.toLowerCase()}-logo.png`}
-                      alt={`${token} logo`}
-                      width={24}
-                      height={24}
-                      className="mr-2"
-                    />
-                        {token}
+                        <Image src={`/PNG/${token.toLowerCase()}-logo.png`} alt={`${token} logo`} width={24} height={24} className="mr-2" /> {token}
                       </div>
                       <div className="ml-auto p-1 text-[10px] text-blue-300 outline outline-blue-400 bg-blue-950 px-2 py-1 rounded-md">7.25% APY</div>
-                  </Button>
-                );
-              })}
+                    </Button>
+                  )
+                })}
+              </div>
             </div>
-          </div>
-
-          {/* Divider */}
-          <div className="border-t border-border my-4"></div>
-
-          {/* Token Options */}
-          <div>
+              {/* Divider */}
+              <div className="border-t border-border my-4"></div>
+              {/* Token Options */}
+              <div>
+                <h3 className="text-sm font-medium text-muted-foreground mb-2">Tokens</h3>
+                <div className="max-h-48 overflow-y-auto grid grid-cols-2 gap-4">
+                  {tokenOptions.map((token) => (
+                    <Button
+                      key={token}
+                      variant={"outline"}
+                      className={` ${selectedOption === token ? "bg-accent text-accent-foreground" : ""} ${selectedNode?.data?.label.toLowerCase() === token.toLowerCase() ? "hidden" : ""}`}
+                      onClick={() => {
+                        setSelectedOption((prev) => (prev === token ? null : token))
+                        setNodeType("token")
+                      } }
+                    >
+                      <div className="flex items-center gap-2">
+                        <Image src={`/PNG/${token.toLowerCase()}-logo.png`} alt={`${token} logo`} width={24} height={24} />{token}
+                      </div>
+                    </Button>
+                  ))}
+                </div>
+              </div></>
+          )) : (
+          // Display the token options if the selected option is "Meteora"
+          <div className="border-t border-border my-4">
             <h3 className="text-sm font-medium text-muted-foreground mb-2">Tokens</h3>
             <div className="max-h-48 overflow-y-auto grid grid-cols-2 gap-4">
-              {tokenOptions.map((token) => (
+              {userTokenOptions.map((token) => (
                 <Button
                   key={token}
                   variant={"outline"}
-                  className={` ${selectedOption === token ? "bg-accent text-accent-foreground" : "" } ${selectedNode?.data?.label.toLowerCase() === token.toLowerCase() ? "hidden" : ""}`}
+                  className={` ${otherSelectedOption === token ? "bg-accent text-accent-foreground" : "" } ${selectedNode?.data?.label.toLowerCase() === token.toLowerCase() ? "hidden" : ""}`}
                   onClick={() => {
-                    setSelectedOption((prev) => (prev === token ? null : token));
+                    setOtherSelectedOption((prev) => (prev === token ? null : token));
                     setNodeType("token");
                   }}
                 >
@@ -207,8 +239,10 @@ export function CreateNodeDialog({ onCreateNode, selectedNode, isOpen, onClose, 
               ))}
             </div>
           </div>
+        ))}
+          
         </div>
-        {selectedOption && (
+        {(selectedOption !== "Meteora" || otherSelectedOption) && (
           <DialogFooter>
             <Button onClick={handleConfirm} variant={"outline"}>Confirm</Button>
           </DialogFooter>
