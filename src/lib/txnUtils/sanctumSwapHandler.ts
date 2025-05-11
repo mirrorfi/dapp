@@ -163,7 +163,7 @@ export const handleSanctumProtocols = async (agent: any, currentNode: TreeNode, 
       childNode.params[currentNode.token] = amountPerChildNode;
     }
     else {
-      childNode.inputToken = currentNode.token; // Set the input token for child nodes
+      childNode.inputToken = tokenMintAddresses[currentNode.token]; // Set the input token for child nodes
       childNode.inputAmount = amountPerChildNode; // Set the input amount for child nodes
     }
   }
