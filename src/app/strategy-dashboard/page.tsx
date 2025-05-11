@@ -69,36 +69,12 @@ const StrategyDashboardPage = () => {
           throw new Error("Failed to fetch strategies");
         }
         const data = await response.json();
-        // Assign random categories to strategies that don't have one
-        const dataWithCategories = data.map((strategy: Strategy) => {
-          const category =
-            strategy.category ||
-            CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)];
-          let apyRange;
-          switch (category) {
-            case "LST":
-              apyRange = { min: 4, max: 8 };
-              break;
-            case "DLMM":
-              apyRange = { min: 10, max: 20 };
-              break;
-            case "Lending":
-              apyRange = { min: 5, max: 12 };
-              break;
-            default:
-              apyRange = { min: 4, max: 20 };
-          }
-          return {
-            ...strategy,
-            category,
-            apy: Number(
-              (
-                Math.random() * (apyRange.max - apyRange.min) +
-                apyRange.min
-              ).toFixed(2)
-            ),
-          };
-        });
+        // Use actual category and APY values from fetched strategies, but provide defaults if missing
+        const dataWithCategories = data.map((strategy: Strategy) => ({
+          ...strategy,
+          category: strategy.category || CATEGORIES[0], // Default to first category if missing
+          apy: strategy.apy ?? 0, // Default to 0 if APY is missing
+        }));
         setStrategies(dataWithCategories);
         console.log("Fetched strategies:", dataWithCategories);
       } catch (err) {
