@@ -62,7 +62,7 @@ export default function Home() {
   const [topAssets, setTopAssets] = useState<any[]>([]);
   const [assets, setAssets] = useState<[string, number][]>([]); // Typed assets for clarity
   const [strategies, setStrategies] = useState<Strategy[]>([]);
-  const [solBalance, setSolBalance] = useState<String>("");
+  const [solBalance, setSolBalance] = useState<string>("");
   const [pools, setPools] = useState<any[]>([]);
 
   useEffect(() => {
@@ -173,6 +173,14 @@ export default function Home() {
       const data = response.toJSON();
       setTokens(data);
       console.log("Tokens:", data);
+      setTokens((prev) => [...prev, {
+          amount: 0,
+          logo: "https://cdn.jsdelivr.net/gh/saber-hq/spl-token-icons@master/icons/101/So11111111111111111111111111111111111111112.png",
+          symbol: "SOL",
+          decimals: 6,
+          name: "Solana",
+          mint: "So11111111111111111111111111111111111111112",
+        }])
     } catch (err) {
       setError("Invalid address or unable to fetch data.");
       console.error("Error in fetchWalletData:", err);
@@ -377,8 +385,20 @@ export default function Home() {
                 <div>
                   <h3 className="text-lg font-semibold text-white mb-4">Tokens</h3>
                   <div className="space-y-3">
+                      <TokenPortfolioCard tokenData={
+                        {
+                          amount: solBalance,
+                          logo: "https://cdn.jsdelivr.net/gh/saber-hq/spl-token-icons@master/icons/101/So11111111111111111111111111111111111111112.png",
+                          symbol: "SOL",
+                          decimals: 6,
+                          name: "Solana",
+                          mint: "So11111111111111111111111111111111111111112",
+                        }
+                      }
+                      tokenPrices={tokenPrices} />
+
                     {tokens
-                      .filter(token => !LSTMintAddresses.includes(token.mint))
+                      .filter(token => !LSTMintAddresses.includes(token.mint) && token.symbol !== "SOL")
                       .map((token, index) => (
                         <TokenPortfolioCard key={index} tokenData={token} tokenPrices={tokenPrices} />
                       ))}

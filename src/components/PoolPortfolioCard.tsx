@@ -53,6 +53,7 @@ export function PoolPortfolioCard({ poolInfo }: PoolPortfolioCardProps) {
 
         const data = await responseXToken.json();
         console.log("Data fetched for token x: ", data);
+        console.log(data.result.data.logo, " is logo of solana image")
         setTokenXData(data);
       } catch (error) {
         console.error("Error fetching data for token x: ", error);
@@ -90,6 +91,7 @@ export function PoolPortfolioCard({ poolInfo }: PoolPortfolioCardProps) {
     fetchXTokenData();
     fetchYTokenData();
     fetchTokenPrices();
+    console.log("Solana image: ", tokenXData?.result.data.logo);
   }, []);
 
   // This prevents the modal from reopening when clicking off the modal

@@ -35,11 +35,11 @@ export function LSTPortfolioCard({ tokenData, tokenPrices }: LSTPortfolioCard) {
 
   const getAPY = async () => {
     try {
-      const response: { apys: Record<string, number> } = await sanctumGetLSTAPY(tokenData?.mint ? [tokenData.mint] : []);
+      const response: Record<string, number>  = await sanctumGetLSTAPY(tokenData?.mint ? [tokenData.mint] : []);
       console.log("finding APY of ", tokenData?.mint);
       console.log("APY data: ", response);
       const mint = tokenData?.mint || "";
-      setAPY(response.apys[mint] ?? 0);
+      setAPY(response[mint] ?? 0);
       return response;
     } catch (error) {
       console.error("Error fetching APY data: ", error);

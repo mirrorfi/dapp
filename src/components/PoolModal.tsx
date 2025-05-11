@@ -50,14 +50,14 @@ export default function CryptoPoolModal({open, setOpen, poolInfo}: CryptoPoolMod
                 <div className="space-y-2">
                   <div className="flex items-center justify-between bg-gray-900 p-2 rounded">
                     <div className="flex items-center gap-2">
-                      <Circle className="h-4 w-4 fill-blue-500 text-blue-500" />
+                      <img src={poolInfo.tokenXLogo} alt="Token X" className="h-4 w-4 rounded-full" />
                       <span className="text-gray-200">0.01556 SOL</span>
                     </div>
                     <span className="text-gray-400">($0.03)</span>
                   </div>
                   <div className="flex items-center justify-between bg-gray-900 p-2 rounded">
                     <div className="flex items-center gap-2">
-                      <Circle className="h-4 w-4 fill-blue-300 text-blue-300" />
+                      <img src={poolInfo.tokenYLogo} alt="Token Y" className="h-4 w-4 rounded-full" />
                       <span className="text-gray-200">10.24 USDC</span>
                     </div>
                     <span className="text-gray-400">($10.24)</span>
@@ -73,14 +73,14 @@ export default function CryptoPoolModal({open, setOpen, poolInfo}: CryptoPoolMod
                 <div className="space-y-2">
                   <div className="flex items-center justify-between bg-gray-900 p-2 rounded">
                     <div className="flex items-center gap-2">
-                      <Circle className="h-4 w-4 fill-blue-500 text-blue-500" />
+                      <img src={poolInfo.tokenXLogo} alt="Token X" className="h-4 w-4 rounded-full" />
                       <span className="text-gray-200">0.01148 SOL</span>
                     </div>
                     <span className="text-gray-400">($0.02)</span>
                   </div>
                   <div className="flex items-center justify-between bg-gray-900 p-2 rounded">
                     <div className="flex items-center gap-2">
-                      <Circle className="h-4 w-4 fill-blue-300 text-blue-300" />
+                      <img src={poolInfo.tokenYLogo} alt="Token Y" className="h-4 w-4 rounded-full" />
                       <span className="text-gray-200">0.019931 USDC</span>
                     </div>
                     <span className="text-gray-400">($0.02)</span>
@@ -110,14 +110,14 @@ export default function CryptoPoolModal({open, setOpen, poolInfo}: CryptoPoolMod
                   <div className="space-y-2">
                     <div className="flex items-center justify-between bg-gray-900 p-2 rounded">
                       <div className="flex items-center gap-2">
-                        <Circle className="h-4 w-4 fill-blue-500 text-blue-500" />
+                        <img src={poolInfo.tokenXLogo} alt="Token X" className="h-4 w-4 rounded-full" />
                         <span className="text-gray-200">SOL</span>
                       </div>
                       <span className="text-gray-200">6,758.30</span>
                     </div>
                     <div className="flex items-center justify-between bg-gray-900 p-2 rounded">
                       <div className="flex items-center gap-2">
-                        <Circle className="h-4 w-4 fill-blue-300 text-blue-300" />
+                        <img src={poolInfo.tokenYLogo} alt="Token Y" className="h-4 w-4 rounded-full" />
                         <span className="text-gray-200">USDC</span>
                       </div>
                       <span className="text-gray-200">2,496,786.00</span>
