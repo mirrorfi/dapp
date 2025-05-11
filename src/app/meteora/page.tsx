@@ -103,6 +103,7 @@ export default function MeteoraPage() {
       console.log("No positions found");
       return;
     }
+    }
 
     // Get the user positions of a specific pool
     async function getUserPositions(){
@@ -285,5 +286,5 @@ export default function MeteoraPage() {
             <button onClick={meteoraGetAllUserPositions}>Get All User Positions</button>
         </div>
     )
-  }
 }
+
