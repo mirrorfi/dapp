@@ -29,6 +29,8 @@ interface Edge {
   type?: string;
 }
 
+const CATEGORIES = ["LST", "DLMM", "Lending"] as const;
+
 interface Strategy {
   _id: string;
   nodes: Node[];
@@ -36,6 +38,7 @@ interface Strategy {
   name: string;
   user: string;
   __v: number;
+  category?: "LST" | "DLMM" | "Lending";
 }
 
 const StrategyDashboardPage = () => {
@@ -51,6 +54,9 @@ const StrategyDashboardPage = () => {
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const { connected, publicKey } = useWallet();
 
+  const getCategoryCount = (category: string) =>
+    strategies.filter((s) => s.category === category).length;
+
   useEffect(() => {
     const fetchStrategies = async () => {
       try {
@@ -59,8 +65,15 @@ const StrategyDashboardPage = () => {
           throw new Error("Failed to fetch strategies");
         }
         const data = await response.json();
-        setStrategies(data);
-        console.log("Fetched strategies:", data);
+        // Assign random categories to strategies that don't have one
+        const dataWithCategories = data.map((strategy: Strategy) => ({
+          ...strategy,
+          category:
+            strategy.category ||
+            CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)],
+        }));
+        setStrategies(dataWithCategories);
+        console.log("Fetched strategies:", dataWithCategories);
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "Failed to load strategies"
@@ -104,46 +117,31 @@ const StrategyDashboardPage = () => {
       <main className="p-6">
         <div className="mb-8 flex items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-sm">
-            <button
-              onClick={() => setCategoryFilter("all")}
-              className={`h-8 px-4 rounded-full border-gray-600 border-2 bg-card transition-colors ${
-                categoryFilter === "all"
-                  ? "bg-primary text-primary-foreground"
-                  : ""
-              }`}
-            >
-              All ({strategies.length})
-            </button>
-            <button
-              onClick={() => setCategoryFilter("lst")}
-              className={`h-8 px-4 rounded-full border-gray-600 border-2 bg-card transition-colors ${
-                categoryFilter === "lst"
-                  ? "bg-primary text-primary-foreground"
-                  : ""
-              }`}
-            >
-              LST
-            </button>
-            <button
-              onClick={() => setCategoryFilter("dlmm")}
-              className={`h-8 px-4 rounded-full border-gray-600 border-2 bg-card transition-colors ${
-                categoryFilter === "dlmm"
-                  ? "bg-primary text-primary-foreground"
-                  : ""
-              }`}
-            >
-              DLMM
-            </button>
-            <button
-              onClick={() => setCategoryFilter("lending")}
-              className={`h-8 px-4 rounded-full border-gray-600 border-2 bg-card transition-colors ${
-                categoryFilter === "lending"
-                  ? "bg-primary text-primary-foreground"
-                  : ""
-              }`}
-            >
-              Lending
-            </button>
+            <>
+              <button
+                onClick={() => setCategoryFilter("all")}
+                className={`h-8 px-3 rounded-full border-gray-600 border-2 bg-card transition-colors ${
+                  categoryFilter === "all"
+                    ? "bg-primary text-primary-foreground"
+                    : ""
+                }`}
+              >
+                All ({strategies.length})
+              </button>
+              {CATEGORIES.map((category) => (
+                <button
+                  key={category}
+                  onClick={() => setCategoryFilter(category.toLowerCase())}
+                  className={`h-8 px-3 rounded-full border-gray-600 border-2 bg-card transition-colors ${
+                    categoryFilter === category.toLowerCase()
+                      ? "bg-primary text-primary-foreground"
+                      : ""
+                  }`}
+                >
+                  {category} ({getCategoryCount(category)})
+                </button>
+              ))}
+            </>
           </div>
           <div className="inline-flex h-8 items-center rounded-full border-gray-600 border-2 bg-card text-card-foreground">
             <div
@@ -175,9 +173,9 @@ const StrategyDashboardPage = () => {
         {viewMode === "grid" ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {strategies
-              .filter(() => {
-                // For now, show all strategies until category data is available
-                return true;
+              .filter((strategy) => {
+                if (categoryFilter === "all") return true;
+                return strategy.category?.toLowerCase() === categoryFilter;
               })
               .map((strategy: Strategy) => (
                 <Card
@@ -224,9 +222,9 @@ const StrategyDashboardPage = () => {
               <div className="text-right">APY</div>
             </div>
             {strategies
-              .filter(() => {
-                // For now, show all strategies until category data is available
-                return true;
+              .filter((strategy) => {
+                if (categoryFilter === "all") return true;
+                return strategy.category?.toLowerCase() === categoryFilter;
               })
               .map((strategy: Strategy, index: number) => (
                 <div
@@ -251,9 +249,16 @@ const StrategyDashboardPage = () => {
                       ))}
                   </div>
                   <div className="flex items-center gap-2">
-                    {/* Placeholder categories */}
-                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                      DLMM
+                    <span
+                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                        strategy.category === "LST"
+                          ? "bg-blue-100 text-blue-800"
+                          : strategy.category === "DLMM"
+                          ? "bg-purple-100 text-purple-800"
+                          : "bg-green-100 text-green-800"
+                      }`}
+                    >
+                      {strategy.category}
                     </span>
                   </div>
                   <div className="text-right">
