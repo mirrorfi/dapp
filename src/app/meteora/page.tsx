@@ -272,7 +272,7 @@ export default function MeteoraPage() {
         <div>
             <h1>Meteora</h1>
             <p>Check the console for details.</p>
-            <button onClick={()=}>Fetch Pool</button>
+            <button onClick={() => {}}>Fetch Pool</button>
             <p>.</p>
             <button onClick={getUserPositions}>Get User Positions</button>
             <p>.</p>
@@ -285,4 +285,5 @@ export default function MeteoraPage() {
             <button onClick={meteoraGetAllUserPositions}>Get All User Positions</button>
         </div>
     )
+  }
 }
