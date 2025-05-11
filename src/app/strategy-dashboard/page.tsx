@@ -4,9 +4,10 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import SimplifiedFlow from "@/components/simplified-flow";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Trash2, LayoutGrid, List } from "lucide-react";
+import { Trash2, LayoutGrid, List, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import StrategyModal from "@/components/StrategyModal";
 
 interface Node {
@@ -29,6 +30,8 @@ interface Edge {
   type?: string;
 }
 
+const CATEGORIES = ["LST", "DLMM", "Lending"] as const;
+
 interface Strategy {
   _id: string;
   nodes: Node[];
@@ -36,10 +39,14 @@ interface Strategy {
   name: string;
   user: string;
   __v: number;
+  category?: "LST" | "DLMM" | "Lending";
+  apy?: number;
 }
 
 const StrategyDashboardPage = () => {
+  const router = useRouter();
   const [strategies, setStrategies] = useState<Strategy[]>([]);
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedStrategy, setSelectedStrategy] = useState<Strategy | null>(
@@ -51,6 +58,9 @@ const StrategyDashboardPage = () => {
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const { connected, publicKey } = useWallet();
 
+  const getCategoryCount = (category: string) =>
+    strategies.filter((s) => s.category === category).length;
+
   useEffect(() => {
     const fetchStrategies = async () => {
       try {
@@ -59,8 +69,14 @@ const StrategyDashboardPage = () => {
           throw new Error("Failed to fetch strategies");
         }
         const data = await response.json();
-        setStrategies(data);
-        console.log("Fetched strategies:", data);
+        // Use actual category and APY values from fetched strategies, but provide defaults if missing
+        const dataWithCategories = data.map((strategy: Strategy) => ({
+          ...strategy,
+          category: strategy.category || CATEGORIES[0], // Default to first category if missing
+          apy: strategy.apy ?? 0, // Default to 0 if APY is missing
+        }));
+        setStrategies(dataWithCategories);
+        console.log("Fetched strategies:", dataWithCategories);
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "Failed to load strategies"
@@ -104,80 +120,78 @@ const StrategyDashboardPage = () => {
       <main className="p-6">
         <div className="mb-8 flex items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-sm">
-            <button
-              onClick={() => setCategoryFilter("all")}
-              className={`h-8 px-4 rounded-full border-gray-600 border-2 bg-card transition-colors ${
-                categoryFilter === "all"
-                  ? "bg-primary text-primary-foreground"
-                  : ""
-              }`}
-            >
-              All ({strategies.length})
-            </button>
-            <button
-              onClick={() => setCategoryFilter("lst")}
-              className={`h-8 px-4 rounded-full border-gray-600 border-2 bg-card transition-colors ${
-                categoryFilter === "lst"
-                  ? "bg-primary text-primary-foreground"
-                  : ""
-              }`}
-            >
-              LST
-            </button>
-            <button
-              onClick={() => setCategoryFilter("dlmm")}
-              className={`h-8 px-4 rounded-full border-gray-600 border-2 bg-card transition-colors ${
-                categoryFilter === "dlmm"
-                  ? "bg-primary text-primary-foreground"
-                  : ""
-              }`}
-            >
-              DLMM
-            </button>
-            <button
-              onClick={() => setCategoryFilter("lending")}
-              className={`h-8 px-4 rounded-full border-gray-600 border-2 bg-card transition-colors ${
-                categoryFilter === "lending"
-                  ? "bg-primary text-primary-foreground"
-                  : ""
-              }`}
-            >
-              Lending
-            </button>
+            <>
+              <button
+                onClick={() => setCategoryFilter("all")}
+                className={`h-8 px-3 rounded-full border-gray-600 border-2 bg-card transition-colors ${
+                  categoryFilter === "all"
+                    ? "bg-primary text-primary-foreground"
+                    : ""
+                }`}
+              >
+                All ({strategies.length})
+              </button>
+              {CATEGORIES.map((category) => (
+                <button
+                  key={category}
+                  onClick={() => setCategoryFilter(category.toLowerCase())}
+                  className={`h-8 px-3 rounded-full border-gray-600 border-2 bg-card transition-colors ${
+                    categoryFilter === category.toLowerCase()
+                      ? "bg-primary text-primary-foreground"
+                      : ""
+                  }`}
+                >
+                  {category} ({getCategoryCount(category)})
+                </button>
+              ))}
+            </>
           </div>
-          <div className="inline-flex h-8 items-center rounded-full border-gray-600 border-2 bg-card text-card-foreground">
-            <div
-              className={`flex h-full items-center justify-center rounded-l-full px-3 transition-colors ${
-                viewMode === "grid" ? "bg-primary text-primary-foreground" : ""
-              }`}
-            >
-              <button
-                onClick={() => setViewMode("grid")}
-                className="flex items-center justify-center"
+          <div className="flex items-center gap-4">
+            <div className="inline-flex h-8 items-center rounded-full border-gray-600 border-2 bg-card text-card-foreground">
+              <div
+                className={`flex h-full items-center justify-center rounded-l-full px-3 transition-colors ${
+                  viewMode === "grid"
+                    ? "bg-primary text-primary-foreground"
+                    : ""
+                }`}
               >
-                <LayoutGrid className="h-5 w-5" />
-              </button>
-            </div>
-            <div
-              className={`flex h-full items-center justify-center rounded-r-full px-3 transition-colors ${
-                viewMode === "list" ? "bg-primary text-primary-foreground" : ""
-              }`}
-            >
-              <button
-                onClick={() => setViewMode("list")}
-                className="flex items-center justify-center"
+                <button
+                  onClick={() => setViewMode("grid")}
+                  className="flex items-center justify-center"
+                >
+                  <LayoutGrid className="h-5 w-5" />
+                </button>
+              </div>
+              <div
+                className={`flex h-full items-center justify-center rounded-r-full px-3 transition-colors ${
+                  viewMode === "list"
+                    ? "bg-primary text-primary-foreground"
+                    : ""
+                }`}
               >
-                <List className="h-5 w-5" />
-              </button>
+                <button
+                  onClick={() => setViewMode("list")}
+                  className="flex items-center justify-center"
+                >
+                  <List className="h-5 w-5" />
+                </button>
+              </div>
             </div>
+            <Button
+              onClick={() => router.push("/create-strategy")}
+              className="h-8 px-3 rounded-full border-gray-600 border-2 flex items-center gap-1 bg-primary text-primary-foreground hover:bg-primary/90"
+            >
+              <Plus className="h-4 w-4" />
+              Create Strategy
+            </Button>
           </div>
         </div>
         {viewMode === "grid" ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {strategies
-              .filter(() => {
-                // For now, show all strategies until category data is available
-                return true;
+              .filter((strategy) => {
+                if (categoryFilter === "all") return true;
+                return strategy.category?.toLowerCase() === categoryFilter;
               })
               .map((strategy: Strategy) => (
                 <Card
@@ -221,13 +235,30 @@ const StrategyDashboardPage = () => {
               <div>Strategy Name</div>
               <div>Tokens</div>
               <div>Categories</div>
-              <div className="text-right">APY</div>
+              <div className="text-right flex items-center justify-end gap-2">
+                <button
+                  onClick={() =>
+                    setSortDirection((prev) =>
+                      prev === "asc" ? "desc" : "asc"
+                    )
+                  }
+                  className="cursor-pointer hover:text-primary focus:outline-none"
+                >
+                  {sortDirection === "asc" ? "↑" : "↓"}
+                </button>
+                <span>APY</span>
+              </div>
             </div>
             {strategies
-              .filter(() => {
-                // For now, show all strategies until category data is available
-                return true;
+              .filter((strategy) => {
+                if (categoryFilter === "all") return true;
+                return strategy.category?.toLowerCase() === categoryFilter;
               })
+              .sort((a, b) =>
+                sortDirection === "asc"
+                  ? (a.apy || 0) - (b.apy || 0)
+                  : (b.apy || 0) - (a.apy || 0)
+              )
               .map((strategy: Strategy, index: number) => (
                 <div
                   key={strategy._id}
@@ -251,13 +282,22 @@ const StrategyDashboardPage = () => {
                       ))}
                   </div>
                   <div className="flex items-center gap-2">
-                    {/* Placeholder categories */}
-                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                      DLMM
+                    <span
+                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                        strategy.category === "LST"
+                          ? "bg-blue-100 text-blue-800"
+                          : strategy.category === "DLMM"
+                          ? "bg-purple-100 text-purple-800"
+                          : "bg-green-100 text-green-800"
+                      }`}
+                    >
+                      {strategy.category}
                     </span>
                   </div>
                   <div className="text-right">
-                    <span className="font-medium">12.5%</span>
+                    <span className="font-medium">
+                      {strategy.apy?.toFixed(2)}%
+                    </span>
                   </div>
                 </div>
               ))}

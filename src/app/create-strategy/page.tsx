@@ -148,6 +148,74 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
     [nodes, setNodes, nodeToConnect, setEdges]
   );
 
+  const handleCreateMeteoraNode = useCallback(
+    (
+      nodeData: {
+        label: string;
+        description: string;
+        nodeType: "protocol" | "token" | "lst";
+      },
+      otherNode: Node | null
+    ) => {
+      if (!nodeToConnect || !otherNode) return;
+  
+      const positions = nodes.map((node) => node.position);
+      const x = nodeToConnect ? nodeToConnect.position.x + 400: Math.random() * 300 + 200;
+      let y = nodeToConnect ? nodeToConnect.position.y: Math.random() * 300 + 50;
+
+      let factor = 0;
+
+      while (nodeToConnect && positions.some((pos) => pos.x === x && pos.y === y)) {
+        factor += 1;
+        y = nodeToConnect.position.y + (-1) ** factor * 200 * Math.ceil(factor / 2)
+      }
+  
+      const newNode: Node = {
+        id: `${nodes.length + 1}-${Date.now()}`,
+        type: "customNode",
+        data: nodeData,
+        position: {
+          x: x,
+          y: y,
+        },
+      };
+  
+      // Add the new node
+      setNodes((nds) => [...nds, newNode]);
+  
+      // Create edges connecting nodeToConnect and otherNode to the new node
+      const newEdges: Edge[] = [
+        {
+          id: `e${nodeToConnect.id}-${newNode.id}`,
+          source: nodeToConnect.id,
+          target: newNode.id,
+          animated: true,
+          style: { strokeDasharray: "5, 5" },
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+          },
+        },
+        {
+          id: `e${otherNode.id}-${newNode.id}`,
+          source: otherNode.id,
+          target: newNode.id,
+          animated: true,
+          style: { strokeDasharray: "5, 5" },
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+          },
+        },
+      ];
+  
+      // Add the new edges
+      setEdges((eds) => [...eds, ...newEdges]);
+  
+      // Reset nodeToConnect
+      setNodeToConnect(null);
+    },
+    [nodes, setNodes, setEdges, nodeToConnect]
+  );
+
   const handleDeleteNode = (nodeId: string) => {
     // Helper function to recursively find all child nodes
     const findChildNodes = (parentId: string, edges: Edge[], nodes: Node[]): string[] => {
@@ -192,6 +260,7 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
           />
           <CreateNodeDialog
             onCreateNode={handleCreateNode}
+            onCreateMeteoraNode={handleCreateMeteoraNode}
             selectedNode={nodeToConnect}
             isOpen={open}
             onClose={() => setOpen(false)}
@@ -216,6 +285,7 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
             onConnect={onConnect}
             onNodeClick={onNodeClick}
             nodeTypes={nodeTypes}
+            nodesConnectable={true}
             proOptions={{ hideAttribution: true }}
             panOnDrag={false}
             zoomOnDoubleClick={false}
@@ -234,15 +304,6 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
             >
               <Save />
               Save Strategy
-            </Button>
-            <Button
-              variant="ghost"
-              onClick={() => {
-                console.log("Test API clicked");
-              }}
-            >
-              <Bot />
-              Test API
             </Button>
           </div>
         </main>
