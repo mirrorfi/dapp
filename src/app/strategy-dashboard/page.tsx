@@ -39,10 +39,12 @@ interface Strategy {
   user: string;
   __v: number;
   category?: "LST" | "DLMM" | "Lending";
+  apy?: number;
 }
 
 const StrategyDashboardPage = () => {
   const [strategies, setStrategies] = useState<Strategy[]>([]);
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedStrategy, setSelectedStrategy] = useState<Strategy | null>(
@@ -66,12 +68,35 @@ const StrategyDashboardPage = () => {
         }
         const data = await response.json();
         // Assign random categories to strategies that don't have one
-        const dataWithCategories = data.map((strategy: Strategy) => ({
-          ...strategy,
-          category:
+        const dataWithCategories = data.map((strategy: Strategy) => {
+          const category =
             strategy.category ||
-            CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)],
-        }));
+            CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)];
+          let apyRange;
+          switch (category) {
+            case "LST":
+              apyRange = { min: 4, max: 8 };
+              break;
+            case "DLMM":
+              apyRange = { min: 10, max: 20 };
+              break;
+            case "Lending":
+              apyRange = { min: 5, max: 12 };
+              break;
+            default:
+              apyRange = { min: 4, max: 20 };
+          }
+          return {
+            ...strategy,
+            category,
+            apy: Number(
+              (
+                Math.random() * (apyRange.max - apyRange.min) +
+                apyRange.min
+              ).toFixed(2)
+            ),
+          };
+        });
         setStrategies(dataWithCategories);
         console.log("Fetched strategies:", dataWithCategories);
       } catch (err) {
@@ -219,13 +244,30 @@ const StrategyDashboardPage = () => {
               <div>Strategy Name</div>
               <div>Tokens</div>
               <div>Categories</div>
-              <div className="text-right">APY</div>
+              <div className="text-right flex items-center justify-end gap-2">
+                <button
+                  onClick={() =>
+                    setSortDirection((prev) =>
+                      prev === "asc" ? "desc" : "asc"
+                    )
+                  }
+                  className="cursor-pointer hover:text-primary focus:outline-none"
+                >
+                  {sortDirection === "asc" ? "↑" : "↓"}
+                </button>
+                <span>APY</span>
+              </div>
             </div>
             {strategies
               .filter((strategy) => {
                 if (categoryFilter === "all") return true;
                 return strategy.category?.toLowerCase() === categoryFilter;
               })
+              .sort((a, b) =>
+                sortDirection === "asc"
+                  ? (a.apy || 0) - (b.apy || 0)
+                  : (b.apy || 0) - (a.apy || 0)
+              )
               .map((strategy: Strategy, index: number) => (
                 <div
                   key={strategy._id}
@@ -262,7 +304,9 @@ const StrategyDashboardPage = () => {
                     </span>
                   </div>
                   <div className="text-right">
-                    <span className="font-medium">12.5%</span>
+                    <span className="font-medium">
+                      {strategy.apy?.toFixed(2)}%
+                    </span>
                   </div>
                 </div>
               ))}
