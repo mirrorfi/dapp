@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { PlusCircle, Trash2, Wallet } from "lucide-react"
+import { Plus, PlusCircle, Trash2, Wallet } from "lucide-react"
 import Image from "next/image"
 import { useState, useEffect } from "react"
 import type { Node } from "reactflow"
@@ -116,7 +116,7 @@ export function NodeModal({
             ) : null}
             {node.data?.nodeType !== "protocol" ? (
               <Button onClick={handleCreate} variant={"outline"} className="">
-                <PlusCircle />
+                <Plus />
               </Button>
             ) : null}
           </DialogFooter>
