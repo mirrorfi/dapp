@@ -285,7 +285,7 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
             onConnect={onConnect}
             onNodeClick={onNodeClick}
             nodeTypes={nodeTypes}
-            nodesConnectable={false}
+            nodesConnectable={true}
             proOptions={{ hideAttribution: true }}
             panOnDrag={false}
             zoomOnDoubleClick={false}
@@ -304,15 +304,6 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
             >
               <Save />
               Save Strategy
-            </Button>
-            <Button
-              variant="ghost"
-              onClick={() => {
-                console.log("Test API clicked");
-              }}
-            >
-              <Bot />
-              Test API
             </Button>
           </div>
         </main>

@@ -229,7 +229,6 @@ export function CreateNodeDialog({ onCreateNode, onCreateMeteoraNode ,selectedNo
                   className={` ${otherSelectedOption === token ? "bg-accent text-accent-foreground" : "" } ${selectedNode?.data?.label.toLowerCase() === token.toLowerCase() ? "hidden" : ""}`}
                   onClick={() => {
                     setOtherSelectedOption((prev) => (prev === token ? null : token));
-                    setNodeType("token");
                   }}
                 >
                   <div className="flex items-center gap-2">

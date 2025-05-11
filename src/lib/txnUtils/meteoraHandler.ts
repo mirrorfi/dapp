@@ -102,8 +102,8 @@ export const handleMeteoraProtocol = async (agent: SolanaAgentKit, currentNode: 
       return;
     }
     
-    const tokenX_initialAmount = new BN(currentNode.params[pool.mint_x] * (10 ** tokenX_decimals));
-    const tokenY_initialAmount = new BN(currentNode.params[pool.mint_y] * (10 ** tokenY_decimals));
+    const tokenX_initialAmount = new BN(currentNode.params[pool.mint_x]);
+    const tokenY_initialAmount = new BN(currentNode.params[pool.mint_y]);
 
     console.log("Initial X Amount:", tokenX_initialAmount.toString());
     console.log("Initial Y Amount:", tokenY_initialAmount.toString());
