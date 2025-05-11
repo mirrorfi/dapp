@@ -33,9 +33,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <WalletProviderWrapper>
-        <header className="h-16 sticky top-0 z-50">
+        <div className="h-16 sticky top-0 z-50">
           <Navbar />
-        </header>
+        </div>
         <body
           className={`h-screen antialiased ${satoshi.variable} ${univaNova.variable}`}
         >
