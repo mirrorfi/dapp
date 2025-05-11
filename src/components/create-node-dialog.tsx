@@ -39,7 +39,7 @@ interface CreateNodeDialogProps {
 }
 
 export function CreateNodeDialog({ onCreateNode, onCreateMeteoraNode ,selectedNode, isOpen, onClose, nodes }: CreateNodeDialogProps) {
-  const userTokenOptions = nodes.filter((node) => node.data.nodeType === "token").map((node) => node.data.label)
+  const userTokenOptions = nodes.filter((node) => node.data.nodeType !== "protocol" && node.data.label !== "Wallet").map((node) => node.data.label)
   const selectedNodeType = selectedNode?.data?.nodeType
   const [nodeType, setNodeType] = useState<"protocol" | "token" | "lst" | null>(null)
   const [selectedOption, setSelectedOption] = useState<string | null>(null)
