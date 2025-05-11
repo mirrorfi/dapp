@@ -24,6 +24,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 
 import { NodeModal } from "@/components/node-dialog";
 import { Menu, Save, Trash2, X } from "lucide-react";
+import { CreatePageSidebar } from "@/components/create-page-sidebar";
 
 // Define node types
 const nodeTypes = {
@@ -302,7 +303,7 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
         </main>
       </div>
       {/* Sidebar */}
-      <div
+      {/* <div
         className={`${
           isSidebarOpen ? "w-64" : "w-16"
         } bg-gray-900 text-white transition-all duration-300 flex flex-col`}
@@ -312,7 +313,7 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
           {isSidebarOpen && (
         <ul className="space-y-4">
           {/* User guide on how to create node */}
-          <li>
+          {/* <li>
             <h3 className="text-sm font-semibold">How to create a node:</h3>
             <p className="text-xs text-gray-400">
               Click on any node to open the node's details and click on the + button to create a new node.
@@ -364,7 +365,9 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
         </ul>
           )}
         </div>
-      </div>
+      </div> */}
+
+      <CreatePageSidebar onSaveClick={() => setSaveOpen(true)} />
 
     </div>
   );
