@@ -55,8 +55,12 @@ const initialEdges: Edge[] = [];
 const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
   const { publicKey } = useWallet();
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(nodeList.length > 0 ? nodeList : initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(edgeList.length > 0 ? edgeList : initialEdges);
+  const [nodes, setNodes, onNodesChange] = useNodesState(
+    nodeList.length > 0 ? nodeList : initialNodes
+  );
+  const [edges, setEdges, onEdgesChange] = useEdgesState(
+    edgeList.length > 0 ? edgeList : initialEdges
+  );
   const [open, setOpen] = useState(false);
   const [saveOpen, setSaveOpen] = useState(false);
   const [nodeOpen, setNodeOpen] = useState(false);
@@ -95,17 +99,28 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
       nodeType: "protocol" | "token" | "lst";
     }) => {
       const positions = nodes.map((node) => node.position);
-      const x = nodeToConnect ? nodeToConnect.position.x + 400: Math.random() * 300 + 200;
-      let y = nodeToConnect ? nodeToConnect.position.y: Math.random() * 300 + 50;
+      const x = nodeToConnect
+        ? nodeToConnect.position.x + 400
+        : Math.random() * 300 + 200;
+      let y = nodeToConnect
+        ? nodeToConnect.position.y
+        : Math.random() * 300 + 50;
 
       let factor = 0;
 
-      while (nodeToConnect && positions.some((pos) => pos.x === x && pos.y === y)) {
+      while (
+        nodeToConnect &&
+        positions.some((pos) => pos.x === x && pos.y === y)
+      ) {
         factor += 1;
-        y = nodeToConnect.position.y + (-1) ** factor * 200 * Math.ceil(factor / 2)
+        y =
+          nodeToConnect.position.y +
+          (-1) ** factor * 200 * Math.ceil(factor / 2);
       }
 
-      let connectionCount = nodeToConnect ? nodeToConnect.data.connectionCount : 0;
+      let connectionCount = nodeToConnect
+        ? nodeToConnect.data.connectionCount
+        : 0;
 
       const newNode: Node = {
         id: `${nodes.length + 1}-${Date.now()}`,
@@ -160,18 +175,27 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
       otherNode: Node | null
     ) => {
       if (!nodeToConnect || !otherNode) return;
-  
+
       const positions = nodes.map((node) => node.position);
-      const x = nodeToConnect ? nodeToConnect.position.x + 400: Math.random() * 300 + 200;
-      let y = nodeToConnect ? nodeToConnect.position.y: Math.random() * 300 + 50;
+      const x = nodeToConnect
+        ? nodeToConnect.position.x + 400
+        : Math.random() * 300 + 200;
+      let y = nodeToConnect
+        ? nodeToConnect.position.y
+        : Math.random() * 300 + 50;
 
       let factor = 0;
 
-      while (nodeToConnect && positions.some((pos) => pos.x === x && pos.y === y)) {
+      while (
+        nodeToConnect &&
+        positions.some((pos) => pos.x === x && pos.y === y)
+      ) {
         factor += 1;
-        y = nodeToConnect.position.y + (-1) ** factor * 200 * Math.ceil(factor / 2)
+        y =
+          nodeToConnect.position.y +
+          (-1) ** factor * 200 * Math.ceil(factor / 2);
       }
-  
+
       const newNode: Node = {
         id: `${nodes.length + 1}-${Date.now()}`,
         type: "customNode",
@@ -181,10 +205,10 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
           y: y,
         },
       };
-  
+
       // Add the new node
       setNodes((nds) => [...nds, newNode]);
-  
+
       // Create edges connecting nodeToConnect and otherNode to the new node
       const newEdges: Edge[] = [
         {
@@ -208,10 +232,10 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
           },
         },
       ];
-  
+
       // Add the new edges
       setEdges((eds) => [...eds, ...newEdges]);
-  
+
       // Reset nodeToConnect
       setNodeToConnect(null);
     },
@@ -220,22 +244,32 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
 
   const handleDeleteNode = (nodeId: string) => {
     // Helper function to recursively find all child nodes
-    const findChildNodes = (parentId: string, edges: Edge[], nodes: Node[]): string[] => {
+    const findChildNodes = (
+      parentId: string,
+      edges: Edge[],
+      nodes: Node[]
+    ): string[] => {
       const childNodes = edges
         .filter((edge) => edge.source === parentId)
         .map((edge) => edge.target);
-  
+
       return childNodes.reduce(
-        (acc, childId): string[] => [...acc, childId, ...findChildNodes(childId, edges, nodes)],
+        (acc, childId): string[] => [
+          ...acc,
+          childId,
+          ...findChildNodes(childId, edges, nodes),
+        ],
         [] as string[]
       );
     };
-  
+
     // Find all child nodes of the node to be deleted
     const childNodeIds = findChildNodes(nodeId, edges, nodes);
-  
+
     // Remove the node, its children, and their associated edges
-    setNodes((nds) => nds.filter((node) => ![nodeId, ...childNodeIds].includes(node.id)));
+    setNodes((nds) =>
+      nds.filter((node) => ![nodeId, ...childNodeIds].includes(node.id))
+    );
     setEdges((eds) =>
       eds.filter(
         (edge) =>
@@ -250,9 +284,8 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
     setNodeOpen(true);
   }, []);
 
-
   return (
-    <div className="flex h-screen bg-background text-foreground">
+    <div className="flex h-[90vh] bg-background text-foreground">
       {/* Main Content */}
       <div className="flex-1 flex flex-col" style={{ width: "80%" }}>
         <main className="flex-1">
@@ -308,58 +341,68 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
           isSidebarOpen ? "w-64" : "w-16"
         } bg-gray-900 text-white transition-all duration-300 flex flex-col`}
       >
-
         <div className="flex-1 overflow-y-auto p-4">
           {isSidebarOpen && (
-        <ul className="space-y-4">
-          {/* User guide on how to create node */}
-          <li>
-            <h3 className="text-sm font-semibold">How to create strategy:</h3>
-            <p className="text-xs text-gray-400">
-              Click a node and click "+" button to specify its next action.
-              <br />
-              <br />
-              1. Click wallet and select which tokens to use.<br />
-              2. Specify next actions using the token<br />
-              <br />
-              {"*Supported Actions: (Swap (Jupiter), LST (Sanctum), Meteora"}<br />
-              <br />
-              {/*- Protocol nodes, can't create any new nodes.<br />*/}
-            </p>
-          </li>
+            <ul className="space-y-4">
+              {/* User guide on how to create node */}
+              <li>
+                <h3 className="text-sm font-semibold">
+                  How to create strategy:
+                </h3>
+                <p className="text-xs text-gray-400">
+                  Click a node and click "+" button to specify its next action.
+                  <br />
+                  <br />
+                  1. Click wallet and select which tokens to use.
+                  <br />
+                  2. Specify next actions using the token
+                  <br />
+                  <br />
+                  {
+                    "*Supported Actions: (Swap (Jupiter), LST (Sanctum), Meteora"
+                  }
+                  <br />
+                  <br />
+                  {/*- Protocol nodes, can't create any new nodes.<br />*/}
+                </p>
+              </li>
 
-          <li>
-          <h3 className="text-sm font-semibold">Deleting a node:</h3>
-            <p className="text-xs text-gray-400 flex">
-              Click on a node and click on 🗑️ button to remove it.
+              <li>
+                <h3 className="text-sm font-semibold">Deleting a node:</h3>
+                <p className="text-xs text-gray-400 flex">
+                  Click on a node and click on 🗑️ button to remove it.
+                  <br />
+                  <br />
+                  - Deleting a node will also delete the next actions from it.
+                  <br />
+                  <br />
+                  <br />
+                  - You can't delete the Wallet node.
+                  <br />
+                  <br />
+                  <br />
+                </p>
+              </li>
 
-              <br />
-              <br />
-              - Deleting a node will also delete the next actions from it.<br />
-              <br />
-              <br />
-              - You can't delete the Wallet node.<br />
-              <br />
-              <br />
-            </p>
-          </li>
-
-          <li>
-          <h3 className="text-sm font-semibold">Now that you know the basics, good luck and have fun creating your own strategies 😁!!</h3>
-          <br />
-          <br />
-          </li>
-          <li>
-            <Button
-              variant="outline"
-          className="w-full text-left p-2 rounded-md hover:bg-accent"
-          onClick={() => setSaveOpen(true)}
-            >
-              <Save className="mr-2" />
-              Save Strategy
-            </Button>
-          </li>
-        </ul>
+              <li>
+                <h3 className="text-sm font-semibold">
+                  Now that you know the basics, good luck and have fun creating
+                  your own strategies 😁!!
+                </h3>
+                <br />
+                <br />
+              </li>
+              <li>
+                <Button
+                  variant="outline"
+                  className="w-full text-left p-2 rounded-md hover:bg-accent"
+                  onClick={() => setSaveOpen(true)}
+                >
+                  <Save className="mr-2" />
+                  Save Strategy
+                </Button>
+              </li>
+            </ul>
           )}
         </div>
       </div>
@@ -368,7 +411,6 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
       Wrong Function Calling cause error
       <CreatePageSidebar onSaveClick={() => setSaveOpen(true)} />
       */}
-
     </div>
   );
 };

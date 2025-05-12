@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { APYVals } from "@/lib/plugin/sanctum/tools/apyVals";
 import StrategyModal from "@/components/StrategyModal";
+import Moralis from "moralis";
 import { StrategyDashboardHeader } from "@/components/strategy-dashboard/StrategyDashboardHeader";
 import { StrategyGridView } from "@/components/strategy-dashboard/StrategyGridView";
 import { StrategyListView } from "@/components/strategy-dashboard/StrategyListView";
@@ -70,6 +71,12 @@ const StrategyDashboardPage = () => {
       }
     };
 
+    // Initialize Moralis
+    Moralis.start({
+      apiKey: process.env.NEXT_PUBLIC_MORALIS_API_KEY,
+    });
+
+    
     if (Object.keys(apyValues).length > 0) {
       fetchStrategies();
     }

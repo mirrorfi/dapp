@@ -8,6 +8,8 @@ import { handleSanctumProtocols } from "./sanctumSwapHandler";
 import { handleLuloProtocols } from "./luloHandler";
 import { handleOrcaProtocols } from "./orcaHandler";
 import { handleMeteoraProtocol } from "./meteoraHandler";
+import { TransactionFailedStyle } from "@/components/ui/wallet-toast-style";
+import Moralis from "moralis";
 
 const RPC_LINK = process.env.NEXT_PUBLIC_RPC_LINK || "https://api.mainnet-beta.solana.com/";
 const connection = new Connection(RPC_LINK);
@@ -66,7 +68,7 @@ export const nodeSamples: Record<string, TreeNode> = {
     },
   };
 
-export const generateTree = (nodes: any[], edges: any[], initialSolanaDeposit: number): Record<string, TreeNode> => {
+export const generateTree = async(nodes: any[], edges: any[], initialAmounts: Record<string, string>): Record<string, TreeNode> => {
   const treeNodes: Record<string, TreeNode> = {};
 
   // Initialize all nodes
@@ -86,24 +88,6 @@ export const generateTree = (nodes: any[], edges: any[], initialSolanaDeposit: n
     };
   });
 
-  // Set the first node's inputToken and inputAmount
-  treeNodes["1"].inputToken = "SOL"; //
-  treeNodes["1"].inputAmount = initialSolanaDeposit; // Set initial deposit amount
-  treeNodes["1"].amount = initialSolanaDeposit; // Set initial deposit amount
-  treeNodes["1"].token = "SOL"; // Set token type for the first node
-
-  // // Set the root's child nodes tokens and amounts
-  // const rootNode = treeNodes["1"]; // Assuming node1 is the root node
-  // for (const childId of rootNode.children) {
-  //   const childNode = treeNodes[childId];
-  //   if (childNode) {
-  //     const amountPerChildNode = Math.floor((rootNode.amount || 0) / rootNode.children.length);
-  //     childNode.inputToken = rootNode.token; // Set the input token for child nodes
-  //     childNode.inputAmount = amountPerChildNode; // Set the input amount for child nodes
-  //     childNode.amount = amountPerChildNode; // Set the amount for child nodes
-  //   }
-  // }
-
   // Map edges to establish parent-child relationships
   edges.forEach((edge) => {
     const sourceNode = treeNodes[edge.source];
@@ -115,6 +99,42 @@ export const generateTree = (nodes: any[], edges: any[], initialSolanaDeposit: n
     }
   });
 
+  // Set the input amounts and amount for lvl 1 nodes
+  for (const [nodeId, amount] of Object.entries(initialAmounts)) {
+    const treeNode = treeNodes[nodeId];
+    treeNode.inputAmount = Number(amount); // Set the input token for the node
+    treeNode.amount = Number(amount); // Set the amount for the node
+  }
+
+  // Set the lvl 1's child nodes tokens and amounts
+  const rootNode = treeNodes["1"]; // Assuming node1 is the root node
+  // Iterate through root's children
+  for (const firstLayerNodeId of rootNode.children) {
+    const firstLayerNode = treeNodes[firstLayerNodeId];
+
+    // Iterated through root's grandchildren
+    for (const secondLayerNodeId of firstLayerNode.children) {
+      const secondLayerNode = treeNodes[secondLayerNodeId];
+      const amountPerChildNode = Math.floor((firstLayerNode.amount || 0) / firstLayerNode.children.length);
+
+      if (secondLayerNode.label === "Meteora") {
+        if (!secondLayerNode.params) {
+          secondLayerNode.params = {};
+        }
+        
+        if (firstLayerNode.nodeType === "token") {
+          secondLayerNode.params[tokenMintAddresses[firstLayerNode.token]] = amountPerChildNode;
+        }
+        if (firstLayerNode.nodeType === "lst") {
+          secondLayerNode.params[LSTMintAddresses[firstLayerNode.token]] = amountPerChildNode;
+        }
+        
+      } else {
+        secondLayerNode.inputToken = firstLayerNode.token; // Set the input token for child nodes
+        secondLayerNode.inputAmount = amountPerChildNode; // Set the input amount for child nodes
+      }
+    }
+  }
   return treeNodes;
 }
 
@@ -123,43 +143,45 @@ export const executeTree = async (nodes: Record<string, TreeNode>, agent: any, s
   const executed: Set<string> = new Set(); // Track executed nodes
 
   console.log("Initializing starting conditions")
-  toast({
-    description: `Initializing starting conditions...`,
-  })
   // First level simply pushes the children of the root node to the queue
-  const currentNode = nodes["1"]; // Assuming node1 is the root node
-  if (!currentNode) {
+  const rootNode = nodes["1"]; // Assuming node1 is the root node
+  if (!rootNode) {
       console.error("Root node does not exist in nodes.");
       return;
   }
-  console.log("Current node:", currentNode);
-  if (!currentNode?.amount) {
-      console.error("Root node amount does not exist in nodes.");
-      return;
-  }
-  for (const childId of currentNode.children) {
-      const childNode = nodes[childId];
-      if (childNode) {
-        const amountPerChildNode = Math.floor(((currentNode.amount)) / currentNode.children.length);
-          childNode.inputToken = currentNode.token; // Set the input token for child nodes
-          childNode.inputAmount = amountPerChildNode; // Set the input amount for child nodes
-          console.log(childNode);
-          queue.push(childId);
-      } else {
-          console.error(`Child node with ID ${childId} does not exist in nodes.`);
+  console.log("Root node:", rootNode);
+
+  // Queue the root's grandchildren
+  for (const firstLayerNodeId of rootNode.children) {
+    const firstLayerNode = nodes[firstLayerNodeId];
+
+    // Iterated through root's grandchildren
+    for (const secondLayerNodeId of firstLayerNode.children) {
+      const secondLayerNode = nodes[secondLayerNodeId];
+      if (secondLayerNode) {
+        queue.push(secondLayerNodeId);
       }
+    }
   }
+
   
   // Process nodes using BFS
   while (queue.length > 0) {
     const currentNodeId = queue.shift()!;
     const currentNode = nodes[currentNodeId];
 
+    if (currentNode.executed) {
+      console.log(`Node ${currentNode.nodeId} already executed`);
+      continue
+    }
+
     // Execute the node's function
     try {
       console.log(`Processing node: ${currentNode.nodeId} (${nodes[currentNode.parents[0]]?.token} -> ${currentNode.token})`);
       toast({
-        description: `Processing node: ${currentNode.nodeId} (${nodes[currentNode.parents[0]]?.token} -> ${currentNode.token})`,
+        description: `Processing: ${nodes[currentNode.parents[0]]?.token} -> ${currentNode.token}`,
+        variant: "wallet",
+        className: "bg-[#121212] border-[#1e1e1e] text-white",
       })
       let retryCount = 0;
       const maxRetries = 2;
@@ -228,15 +250,11 @@ export const executeTree = async (nodes: Record<string, TreeNode>, agent: any, s
       await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for 1 second before moving onto next node
       
     } catch (error) {
-      
-      toast({
-        variant: "destructive",
-        title: "Uh oh! Something went wrong.",
-        description: error,
-      })
+      toast(TransactionFailedStyle(String(error)))
       console.error(`Error executing node ${currentNode.nodeId}:`, error);
     }
 
     console.log("Executed nodes:", nodes)
   }
-};
+}
+

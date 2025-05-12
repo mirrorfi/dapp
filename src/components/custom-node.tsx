@@ -11,6 +11,7 @@ export type NodeData = {
   nodeType?: "protocol" | "token" | "lst"
   percentage?: string
   connectionCount: number
+  parentAddresses?: string[]
 }
 
 export function CustomNode({ data, isConnectable }: NodeProps<NodeData>) {
@@ -18,6 +19,7 @@ export function CustomNode({ data, isConnectable }: NodeProps<NodeData>) {
 
     // State to store APY values
     const [apyValues, setApyValues] = useState<Record<string, number>>({});
+    const [meteoraAPY, setMeteoraAPY] = useState<number | null>(null);
   
     // Fetch APY values when the component mounts
     useEffect(() => {
@@ -29,9 +31,31 @@ export function CustomNode({ data, isConnectable }: NodeProps<NodeData>) {
           console.error("Failed to fetch APY values:", error);
         }
       };
-      fetchAPYValues();
-    }
-    , []);
+
+      if (data.nodeType === "lst") {
+        fetchAPYValues();
+      }
+
+
+      const fetchMeteoraAPY = async () => {
+        try {
+          console.log("Data:", data);
+          // Anas pls modify your node processing somehow to also pass in the parent addresses, order doesnt matter
+          const tokenX_address = parentAddresses[0];
+          const tokenY_address = parentAddresses[1];
+          const apy = await getMeteoraPoolAPY(tokenX_address, tokenY_address);
+
+          setMeteoraAPY(apy);
+        } catch (error) {
+          console.error("Failed to fetch meteora APY values:", error);
+        }
+      };
+
+      if (data.label.toLowerCase() === "meteora") {
+        fetchMeteoraAPY();
+      }
+
+    }, []);
 
   return (
     <div className={nodeClass}>
@@ -44,10 +68,16 @@ export function CustomNode({ data, isConnectable }: NodeProps<NodeData>) {
       />) : (
         <Wallet/>)}
       {data.label}
-      {data.nodeType === "lst" && (
-        <div className="custom-node-content text-green-300 ml-4">
-          {apyValues[data.label] ? Math.round((apyValues[data.label])*10000)/100 : "N/A"}% APY
-        </div>
+      {(data.nodeType === "lst" || data.label.toLowerCase() === "meteora") && (
+        (data.nodeType === "lst") ? (
+          <div className="custom-node-content text-green-300 ml-4">
+            {apyValues[data.label] ? Math.round((apyValues[data.label])*10000)/100 : "N/A"}% APY
+          </div>
+        ) : (
+          <div className="custom-node-content text-green-300 ml-4">
+            {meteoraAPY ? meteoraAPY : "N/A"}% APY
+          </div>
+        )
       )}
       </div>
       <Handle type="source" position={Position.Right} isConnectable={isConnectable} />
