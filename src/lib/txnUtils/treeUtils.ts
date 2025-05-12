@@ -170,6 +170,11 @@ export const executeTree = async (nodes: Record<string, TreeNode>, agent: any, s
     const currentNodeId = queue.shift()!;
     const currentNode = nodes[currentNodeId];
 
+    if (currentNode.executed) {
+      console.log(`Node ${currentNode.nodeId} already executed`);
+      continue
+    }
+
     // Execute the node's function
     try {
       console.log(`Processing node: ${currentNode.nodeId} (${nodes[currentNode.parents[0]]?.token} -> ${currentNode.token})`);

@@ -39,7 +39,7 @@ export default function RootLayout({
             <Navbar />
           </header>
           <body
-            className={`h-screen antialiased ${satoshi.variable} ${univaNova.variable}`}
+            className={`h-[80vh] antialiased ${satoshi.variable} ${univaNova.variable}`}
           >
             <ThemeProvider
               attribute="class"

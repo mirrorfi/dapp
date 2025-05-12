@@ -9,7 +9,7 @@ export const CreatePageSidebar = (onSaveClick : void) => {
         <div
         className={`${
           isSidebarOpen ? "w-64" : "w-16"
-        } bg-gray-900 text-white transition-all duration-300 flex flex-col`}
+        } bg-gray-900 h-screen text-white transition-all duration-300 flex flex-col`}
       >
 
         <div className="flex-1 overflow-y-auto p-4 mt-10">
