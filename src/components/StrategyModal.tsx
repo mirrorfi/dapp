@@ -165,13 +165,13 @@ const StrategyModal: FC<StrategyModalProps> = ({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-6xl border-0 border-none">
-        <DialogHeader>
+        <DialogHeader className="-mt-8">
           <DialogTitle className="text-2xl font-bold">
             Mirror Strategy
           </DialogTitle>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 -mt-4">
           {/* Left side: Strategy flow visualization */}
           <div className="rounded-lg p-6 min-h-[400px] h-[500px] col-span-2 relative">
             <InteractiveFlow
