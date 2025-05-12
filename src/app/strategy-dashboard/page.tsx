@@ -194,50 +194,60 @@ const StrategyDashboardPage = () => {
               .map((strategy: Strategy) => (
                 <Card
                   key={strategy._id}
-                  className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border-none backdrop-blur-sm relative min-h-[300px] cursor-pointer"
+                  className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border-none backdrop-blur-sm relative min-h-[300px] cursor-pointer group"
                   onClick={() => handleCardClick(strategy)}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-transparent h-32 z-10">
-                    <CardHeader className="flex flex-col mt-3 px-5">
-                      <div className="flex items-center justify-between w-full">
-                        <CardTitle className="text-lg font-bold text-white">
-                          {strategy.name}
-                        </CardTitle>
-                        <div className="flex items-center gap-1">
-                          <span className="text-xs text-gray-300">APY</span>
-                          <span className="text-lg font-bold text-white">
-                            {strategy.apy?.toFixed(2)}%
+                  {/* Blur effects container */}
+                  <div className="absolute inset-0">
+                    {/* Left edge blur */}
+                    <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-black/15 via-black/5 to-transparent z-10" />
+                    {/* Right edge blur */}
+                    <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-black/15 via-black/5 to-transparent z-10" />
+                    {/* Bottom edge blur */}
+                    <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-black/15 via-black/5 to-transparent z-10" />
+                    {/* Top info section with gradient */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/25 to-transparent h-32 z-10">
+                      <CardHeader className="flex flex-col space-y-2 mt-3 px-5">
+                        <div className="flex items-center justify-between w-full">
+                          <CardTitle className="text-lg font-bold text-white">
+                            {strategy.name}
+                          </CardTitle>
+                          <div className="flex items-center gap-1">
+                            <span className="text-xs text-gray-300">APY</span>
+                            <span className="text-lg font-bold text-white">
+                              {strategy.apy?.toFixed(2)}%
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-1">
+                            {strategy.nodes
+                              .filter((node) => node.data.nodeType === "token")
+                              .map((node) => (
+                                <Image
+                                  key={node.id}
+                                  src={`/PNG/${node.data.label.toLowerCase()}-logo.png`}
+                                  alt={node.data.label}
+                                  width={24}
+                                  height={24}
+                                  className="rounded-full border border-gray-500"
+                                />
+                              ))}
+                          </div>
+                          <span
+                            className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                              strategy.category === "LST"
+                                ? "bg-blue-100 text-blue-800"
+                                : strategy.category === "DLMM"
+                                ? "bg-purple-100 text-purple-800"
+                                : "bg-green-100 text-green-800"
+                            }`}
+                          >
+                            {strategy.category}
                           </span>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-1">
-                          {strategy.nodes
-                            .filter((node) => node.data.nodeType === "token")
-                            .map((node) => (
-                              <Image
-                                key={node.id}
-                                src={`/PNG/${node.data.label.toLowerCase()}-logo.png`}
-                                alt={node.data.label}
-                                width={24}
-                                height={24}
-                                className="rounded-full border border-gray-500"
-                              />
-                            ))}
-                        </div>
-                        <span
-                          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                            strategy.category === "LST"
-                              ? "bg-blue-100 text-blue-800"
-                              : strategy.category === "DLMM"
-                              ? "bg-purple-100 text-purple-800"
-                              : "bg-green-100 text-green-800"
-                          }`}
-                        >
-                          {strategy.category}
-                        </span>
-                      </div>
-                    </CardHeader>
+                      </CardHeader>
+                    </div>
                   </div>
                   <div className="absolute inset-x-0 top-[60px] bottom-0">
                     <SimplifiedFlow
