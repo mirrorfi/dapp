@@ -17,6 +17,7 @@ export const StrategyGridView = ({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {strategies
+        .sort((a, b) => (b.apy || 0) - (a.apy || 0))
         .filter((strategy) => {
           if (categoryFilter === "all") return true;
           return strategy.category?.toLowerCase() === categoryFilter;
