@@ -199,11 +199,11 @@ const StrategyDashboardPage = () => {
                 >
                   {/* Blur effects container */}
                   <div className="absolute inset-0">
-                    {/* Left edge blur */}
+                    {/* Left edge darken */}
                     <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-black/15 via-black/5 to-transparent z-10" />
-                    {/* Right edge blur */}
+                    {/* Right edge darken */}
                     <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-black/15 via-black/5 to-transparent z-10" />
-                    {/* Bottom edge blur */}
+                    {/* Bottom edge darken */}
                     <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-black/15 via-black/5 to-transparent z-10" />
                     {/* Top info section with gradient */}
                     <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/25 to-transparent h-32 z-10">

@@ -4,7 +4,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation"; // Import usePathname
+import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   NavigationMenu,
@@ -12,12 +12,12 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
 } from "@/components/ui/navigation-menu";
-// import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
-import dynamic from 'next/dynamic'
+import dynamic from "next/dynamic";
 
 const WalletMultiButtonDynamic = dynamic(
-    async () => (await import('@solana/wallet-adapter-react-ui')).WalletMultiButton,
-    { ssr: false }
+  async () =>
+    (await import("@solana/wallet-adapter-react-ui")).WalletMultiButton,
+  { ssr: false }
 );
 
 export function Navbar() {
@@ -31,13 +31,6 @@ export function Navbar() {
 
   // Get the current pathname
   const pathname = usePathname();
-
-  // Map pathnames to titles
-  const pageTitles: { [key: string]: string } = {
-    "/strategy-dashboard": "Strategy Dashboard",
-    "/create-strategy": "Create Yield Strategy",
-    "/profile": "User Profile",
-  };
 
   // Determine the title based on the current pathname
   const title = "MirrorFi"; //pageTitles[pathname] || "MirrorFi";
@@ -73,7 +66,13 @@ export function Navbar() {
             <NavigationMenuList>
               <NavigationMenuItem>
                 <Link href="/strategy-dashboard" legacyBehavior passHref>
-                  <NavigationMenuLink className={`text-sm font-medium ${pathname === "/strategy-dashboard" ? "text-primary": "text-foreground"}  hover:text-primary`}>
+                  <NavigationMenuLink
+                    className={`text-sm font-medium ${
+                      pathname === "/strategy-dashboard"
+                        ? "text-primary"
+                        : "text-foreground"
+                    }  hover:text-primary`}
+                  >
                     Strategy Dashboard
                   </NavigationMenuLink>
                 </Link>
@@ -84,7 +83,13 @@ export function Navbar() {
 
               <NavigationMenuItem>
                 <Link href="/create-strategy" legacyBehavior passHref>
-                  <NavigationMenuLink className={`text-sm font-medium ${pathname === "/create-strategy" ? "text-primary": "text-foreground"} hover:text-primary`}>
+                  <NavigationMenuLink
+                    className={`text-sm font-medium ${
+                      pathname === "/create-strategy"
+                        ? "text-primary"
+                        : "text-foreground"
+                    } hover:text-primary`}
+                  >
                     Create Strategy
                   </NavigationMenuLink>
                 </Link>
@@ -94,7 +99,13 @@ export function Navbar() {
 
               <NavigationMenuItem>
                 <Link href="/profile" legacyBehavior passHref>
-                  <NavigationMenuLink className={`text-sm font-medium ${pathname === "/profile" ? "text-primary": "text-foreground"}  hover:text-primary`}>
+                  <NavigationMenuLink
+                    className={`text-sm font-medium ${
+                      pathname === "/profile"
+                        ? "text-primary"
+                        : "text-foreground"
+                    }  hover:text-primary`}
+                  >
                     Portfolio
                   </NavigationMenuLink>
                 </Link>
@@ -114,7 +125,7 @@ export function Navbar() {
           <h1 className="text-xl font-semibold">{title}</h1>
         </div>
 
-        <div className="flex h-16 justify-around items-center px-6">
+        <div className="flex h-16 justify-around items-center">
           <WalletMultiButtonDynamic />
         </div>
       </div>
