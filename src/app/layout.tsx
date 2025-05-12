@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Toaster } from "@/components/ui/toaster"
+import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { WalletProviderWrapper } from "@/components/WalletProviderWrapper";
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -16,7 +16,7 @@ const satoshi = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "MirrorFi",
+  title: "MirrorFi - Copy Yield Farming on Solana",
   description:
     "Share/Mirror the best Yield Strategies across multiple protocols",
 };
