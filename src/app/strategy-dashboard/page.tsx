@@ -59,7 +59,7 @@ const StrategyDashboardPage = () => {
             apy: totalAPY * 100, // Convert to percentage
           };
         });
-
+        console.log(dataWithCategories);
         setStrategies(dataWithCategories);
       } catch (err) {
         setError(

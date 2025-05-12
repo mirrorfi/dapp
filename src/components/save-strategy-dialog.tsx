@@ -59,7 +59,7 @@ export function SaveStrategyDialog({ nodeList, edgeList, userAddress, isOpen, on
             const categories:string[] = [];
             sanitizedNodes.forEach((node) => {
                 console.log(node);
-                if (node.data.name === "Meteora"){
+                if (node.data.label === "Meteora"){
                     categories.push("DLMM");
                 }
                 if (node.data.nodeType === "lst"){
