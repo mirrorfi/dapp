@@ -44,7 +44,7 @@ export function Navbar() {
 
   return (
     <div className="border-b border-[#1a1b29] bg-[#0a0b14]">
-      <div className="flex h-16 justify-around items-center px-6">
+      <div className="flex h-20 justify-around items-center px-6">
         <div className="flex items-center space-x-4">
           <Image
             src="/SVG/MirrorFi-Logo-Blue.svg"

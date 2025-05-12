@@ -12,7 +12,7 @@ export const CreatePageSidebar = (onSaveClick : void) => {
         } bg-gray-900 text-white transition-all duration-300 flex flex-col`}
       >
 
-        <div className="flex-1 overflow-y-auto p-4">
+        <div className="flex-1 overflow-y-auto p-4 mt-10">
           {isSidebarOpen && (
         <ul className="space-y-4">
           {/* User guide on how to create node */}
@@ -38,11 +38,8 @@ export const CreatePageSidebar = (onSaveClick : void) => {
           <h3 className="text-sm font-semibold">How to delete a node:</h3>
             <p className="text-xs text-gray-400 flex">
               Click on any node to open the node's details and click on the 🗑️ button to delete the node.
-
               <br />
-              <br />
-              - Deleting a node will also delete all the nodes that are connected from it.<br />
-              <br />
+              - Deleting a node will also delete all the nodes that are connected from it.
               <br />
               - You can't delete the Wallet node.<br />
               <br />

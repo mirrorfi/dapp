@@ -11,6 +11,12 @@ export async function getPool(tokenXAddress: string, tokenYAddress: string) {
     return data.groups[0];
 }
 
+// Get the APY of a Meteora Position
+export async function getMeteoraPoolAPY(tokenXAddress: string, tokenYAddress: string) {
+    const pool = await getPool(tokenXAddress, tokenYAddress);
+    
+    return pool.apr * 365;
+}
 
 // Get all the user positions
 export async function getAllUserPositions(userPublicKey: PublicKey) {
@@ -73,7 +79,7 @@ export async function getAllUserPositions(userPublicKey: PublicKey) {
             userPortfolio.push({
                 pairName: `${tokenX_symbol}-${tokenY_symbol}`,
                 pairAddress: position.publicKey.toBase58(),
-                apy: pairStats.apy,
+                apy: pairStats.apr*365,
                 apr: pairStats.apr,
                 yield_24h: pairStats.apr,
                 fees_24h: pairStats.fees_24h,
