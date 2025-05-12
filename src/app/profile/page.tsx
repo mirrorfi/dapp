@@ -11,6 +11,20 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { PortfolioChart } from "@/components/PortfolioChart";
 import { PortfolioValueCard } from "@/components/PortfolioValueCard";
 import SimplifiedFlow from "@/components/simplified-flow";
+import { PoolPortfolioCard } from "@/components/PoolPortfolioCard";
+import { LSTPortfolioCard } from "@/components/LSTPortfolioCard";
+import { getAllUserPositions } from "@/lib/meteora";
+import { PublicKey } from "@solana/web3.js";
+import Image from "next/image";
+import StrategyModal from "@/components/StrategyModal";
+
+export const LSTMintAddresses = [
+  "jupSoLaHXQiZZTSfEWMTRRgpnyFm8f6sZdosWBjx93v",
+  "J1toso1uCk3RLmjorhTtrVwY9HJ7X8V9yYac6Y7kGCPn",
+  "BNso1VUJnh4zcfpZa6986Ea66P6TCp59hvtNJ8b1X85",
+  "mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So",
+  "Bybit2vBJGhPF52GBdNaQfUJ6ZpThSgHBobjWZpLPb4B"]
+
 
 
 interface Strategy {
@@ -52,7 +66,23 @@ export default function Home() {
   const [topAssets, setTopAssets] = useState<any[]>([]);
   const [assets, setAssets] = useState<[string, number][]>([]); // Typed assets for clarity
   const [strategies, setStrategies] = useState<Strategy[]>([]);
-  const [solBalance, setSolBalance] = useState<String>("");
+  const [solBalance, setSolBalance] = useState<string>("");
+  const [pools, setPools] = useState<any[]>([]);
+  const [userPositions, setUserPositions] = useState<any[]>([]);
+  const [selectedStrategy, setSelectedStrategy] = useState<Strategy | null>(
+      null
+    );
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setSelectedStrategy(null);
+  };
+
+  const handleCardClick = (strategy: Strategy) => {
+    setSelectedStrategy(strategy);
+    setModalOpen(true);
+  };
 
   useEffect(() => {
     const fetchStrategies = async () => {
@@ -75,6 +105,19 @@ export default function Home() {
 
     fetchStrategies();
   }, []);
+
+  const fetchUserPositions = async () => {
+        try {
+          setLoading(true);
+          const response = await getAllUserPositions(new PublicKey(address || ""));
+          console.log("User positions: ", response);
+          setUserPositions(response);
+        } catch (error) {
+          console.error("Error fetching user positions: ", error);
+        } finally {
+
+        }
+      }
 
   useEffect(() => {
     // Initialize the connection and Moralis API when the component mounts
@@ -119,7 +162,7 @@ export default function Home() {
       setPortfolioUSDChange(0);
       setLoading(true); // For fetchWalletData
       fetchWalletData(); // Fetch wallet data when address changes
-      getSolBalance();
+      fetchUserPositions();
     } else {
       // Clear all data if address is removed
       setTokens([]);
@@ -146,26 +189,46 @@ export default function Home() {
   }, [tokens]);
 
   const fetchWalletData = async () => {
-    if (!connection) return; // Ensure connection is available before fetching
+    if (!connection) return;
 
     setLoading(true);
     setError(null);
 
-    // Fetch portfolio data
     try {
+      // First get the SOL balance
+      const solResponse = await Moralis.SolApi.account.getBalance({
+        "network": "mainnet",
+        "address": address,
+      });
+      
+      console.log("Acquired Sol Balance is ", solResponse.raw);
+      const solBalanceValue = solResponse.raw.solana;
+      setSolBalance(solBalanceValue);
+
+      // Then fetch SPL tokens
       const response = await Moralis.SolApi.account.getSPL({
         network: "mainnet",
         address,
       });
 
       const data = response.toJSON();
-      setTokens(data);
       console.log("Tokens:", data);
+      
+      // Add SOL to the data array with the correct balance already set
+      const dataWithSOL = [...data, {
+        amount: solBalanceValue, // Set the actual SOL balance right away
+        logo: "https://cdn.jsdelivr.net/gh/saber-hq/spl-token-icons@master/icons/101/So11111111111111111111111111111111111111112.png",
+        symbol: "SOL",
+        decimals: 9,
+        name: "Solana",
+        mint: "So11111111111111111111111111111111111111112",
+      }];
+      
+      // Set tokens state with the complete array including SOL with balance
+      setTokens(dataWithSOL);
     } catch (err) {
       setError("Invalid address or unable to fetch data.");
       console.error("Error in fetchWalletData:", err);
-    } finally {
-      
     }
   };
 
@@ -188,20 +251,6 @@ export default function Home() {
     }
   };
 
-  const getSolBalance = async () => {
-    try {
-    const response = await Moralis.SolApi.account.getBalance({
-    "network": "mainnet",
-    "address": address,
-  });
-
-      console.log("Acquired Sol Balance is ", response.raw);
-      setSolBalance(response.raw.solana);
-    } catch (e) {
-      console.error(e);
-    }
-    }
-
   const fetchPortfolioUSDBalance = async () => {
     if (tokens.length > 0) {
       // Reset portfolioUSDBalance and tokenPrices before fetching new set
@@ -223,10 +272,16 @@ export default function Home() {
       const newAssetsCalculated: [string, number][] = [];
 
       tokens.forEach((token) => {
+        if(token.symbol === "SOL") {
+          console.log("I SHOULD BE FUCKING CALCULATED WHAT THE FUCK BRO")
+        }
         // Find the corresponding price info using mint
         const priceInfo = tokenPrices.find(p => p.mint === token.mint && !p.error);
 
         if (priceInfo) {
+          if(token.symbol === "SOL") {
+            console.log("i should have a price info here")
+          }
           newPortfolioUSDChange += (priceInfo.usdPrice24hrUsdChange ?? 0) * token.amount;
           newAssetsCalculated.push([token.symbol, (token.amount * (priceInfo.usdPrice ?? 0))]);
         }
@@ -296,30 +351,108 @@ export default function Home() {
   }
 
   return (
-    <main className="flex min-h-screen h-screen p-6 bg-gradient-to-br from-gray-900 via-black to-gray-800 text-foreground overflow-hidden items-center justify-center">
+    <main className="flex min-h-screen h-[calc(100vh+500px)] p-6 bg-gradient-to-br from-gray-900 via-black to-gray-800 text-foreground overflow-hidden items-center justify-center">
       {!loading ? (
         <div className="w-[80%] h-full flex flex-col gap-6">
           {/* Portfolio Summary */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
-            <PortfolioValueCard totalValue = {portfolioUSDBalance} totalChange={portfolioUSDChange} topAssets = {topAssets} solBalance={solBalance} />
+            <PortfolioValueCard totalValue = {portfolioUSDBalance} totalChange={portfolioUSDChange} topAssets = {topAssets} userPositions={userPositions} />
 
             <PortfolioChart currentValue = {portfolioUSDBalance} valueChange24h={portfolioUSDChange} />
           </div>
 
           {/* Main Content */}
           <div className="flex flex-col lg:flex-row gap-6 h-[calc(100%-130px)] overflow-hidden">
-            {/* Portfolio Section */}
+            {/* Combined Portfolio Section */}
             <Card className="w-full lg:w-[60%] h-full bg-[#0F1218] border-[#2D3748]/30 flex flex-col">
-              <CardHeader className="pb-2">
+              <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-xl text-white">Portfolio</CardTitle>
                 </div>
               </CardHeader>
+
               <CardContent className="flex-1 overflow-y-auto pt-4 pb-6 pr-2 h-full">
-                <div className="space-y-3">
-                  {tokens.map((token, index) => (
-                    <TokenPortfolioCard key={index} tokenData={token} tokenPrices={tokenPrices} />
-                  ))}
+                {/* Meteora Section */}
+                <div className="mb-6">
+                  <div className="flex items-center gap-2 w-full h-fit mb-4">
+                    <Image src="/PNG/meteora-logo.png" alt="Meteora Logo" className="h-5 w-5" width={20} height={20} />
+                    <h3 className="text-lg font-semibold text-white">Meteora</h3>
+                  </div>
+                  <div className="space-y-3">
+                      {userPositions.map((position, index) => (
+                        <PoolPortfolioCard key={index} positionInfo = {
+                          {
+                            tokenXMint: position.tokenXMint,
+                            tokenYMint: position.tokenYMint,
+                            pairAddress: position.pairAddress,
+                            apy: position.apy,
+                            apr: position.apr,
+                            fees_24h: position.fees_24h,
+                            reserveX: position.reserveX,
+                            reserveXUSD: position.reserveXUSD,
+                            reserveY: position.reserveY,
+                            volume_24h: position.volume_24h,
+                            pairName: position.pairName,
+                            tokenXLogo: position.tokenXLogo,
+                            tokenYLogo: position.tokenYLogo,
+                            tokenXPrice: position.tokenXPrice,
+                            tokenYPrice: position.tokenYPrice,
+                            tokenXSymbol: position.tokenXSymbol,
+                            tokenYSymbol: position.tokenYSymbol,
+                            tokenXDecimal: position.tokenXDecimal,
+                            tokenYDecimal: position.tokenYDecimal,
+                            positionX: position.positionX,
+                            positionY: position.positionY,
+                            positionXUSD: position.positionXUSD,
+                            positionYUSD: position.positionYUSD,
+                            profitY: position.profitY,
+                            profitYUSD: position.profitYUSD,
+                            reserveYUSD: position.reserveYUSD,
+                            yield_24h: position.yield_24h,
+                            profitX: position.profitX,
+                            profitXUSD: position.profitXUSD,
+                          }
+                        } />
+                      ))}
+                  </div>
+                </div>
+
+                <div className="mb-6">
+                    <div className="flex items-center gap-2 w-full h-fit mb-4">
+                      <Image src="/PNG/sanctum-logo.png" alt="Sanctum Logo" className="h-5 w-5" width={20} height={20} />
+                      <h3 className="text-lg font-semibold text-white">LSTs</h3>
+                    </div>
+                  <div className="space-y-3">
+                    {tokens
+                      .filter(token => LSTMintAddresses.includes(token.mint))
+                      .map((token, index) => (
+                        <LSTPortfolioCard key={index} tokenData={token} tokenPrices={tokenPrices} />
+                      ))}
+                  </div>
+                </div>
+
+                {/* Portfolio Section */}
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-4">Tokens</h3>
+                  <div className="space-y-3">
+                      <TokenPortfolioCard tokenData={
+                        {
+                          amount: solBalance,
+                          logo: "https://cdn.jsdelivr.net/gh/saber-hq/spl-token-icons@master/icons/101/So11111111111111111111111111111111111111112.png",
+                          symbol: "SOL",
+                          decimals: 6,
+                          name: "Solana",
+                          mint: "So11111111111111111111111111111111111111112",
+                        }
+                      }
+                      tokenPrices={tokenPrices} />
+
+                    {tokens
+                      .filter(token => !LSTMintAddresses.includes(token.mint) && token.symbol !== "SOL")
+                      .map((token, index) => (
+                        <TokenPortfolioCard key={index} tokenData={token} tokenPrices={tokenPrices} />
+                      ))}
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -335,6 +468,7 @@ export default function Home() {
                     <Card
                   key={strategy._id}
                   className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border-none backdrop-blur-sm relative min-h-[300px] cursor-pointer"
+                  onClick ={() => handleCardClick(strategy)}
                 >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0">
                     <CardTitle className="text-lg font-bold">
@@ -402,6 +536,15 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      {selectedStrategy && (
+              <StrategyModal
+                strategy={selectedStrategy}
+                isOpen={modalOpen}
+                onClose={closeModal}
+              />
+            )}
+            
     </main>
   );
 }

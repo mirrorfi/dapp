@@ -14,6 +14,8 @@ import { Input } from "./ui/input"
 import { connectToDatabase } from "@/lib/database"
 import { createStrategy } from "@/lib/database/db_actions/test-actions"
 import { Edge, Node } from "reactflow"
+import { nodeSamples } from "@/lib/txnUtils/treeUtils"
+import { notEqual } from "assert"
 
 interface StrategyProps {
     nodeList: Node[]
@@ -54,14 +56,27 @@ export function SaveStrategyDialog({ nodeList, edgeList, userAddress, isOpen, on
                 },
             }));
 
+            const categories:string[] = [];
+            sanitizedNodes.forEach((node) => {
+                console.log(node);
+                if (node.data.name === "Meteora"){
+                    categories.push("DLMM");
+                }
+                if (node.data.nodeType === "lst"){
+                    categories.push("LST");
+                }
+            });
+            console.log("Categories:", categories);
+
             const strategy = {
             nodes: sanitizedNodes,
             edges: edgeList,
             name: strategyName,
             user: userAddress, // Use the user address passed as a prop
             description: description, // Use the description from the input field
-
+            categories: categories,
             };
+            console.log("Strategy object:", strategy);
 
             createStrategy(strategy)
             .then((response) => {

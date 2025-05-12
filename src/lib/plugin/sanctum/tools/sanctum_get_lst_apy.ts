@@ -8,7 +8,7 @@ import { SANCTUM_STAT_API_URI } from "../constants";
 
 export async function sanctumGetLSTAPY(
   inputs: string[],
-): Promise<{ apys: Record<string, number> }> {
+): Promise<Record<string, number>> {
   try {
     const client = axios.create({
       baseURL: SANCTUM_STAT_API_URI,

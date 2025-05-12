@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Image from "next/image"
 import {
   Dialog,
@@ -14,8 +14,8 @@ import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { protocolOptions, tokenOptions, LSToptions } from "../constants/nodeOptions";
 import { Node } from "reactflow"
-import { TooltipArrow } from "@radix-ui/react-tooltip"
 import { ComingSoonDialog } from "./coming-soon-dialog"
+import { APYVals } from "@/lib/plugin/sanctum/tools/apyVals"
 
 interface CreateNodeDialogProps {
   onCreateNode: (nodeData: {
@@ -39,11 +39,30 @@ interface CreateNodeDialogProps {
 }
 
 export function CreateNodeDialog({ onCreateNode, onCreateMeteoraNode ,selectedNode, isOpen, onClose, nodes }: CreateNodeDialogProps) {
-  const userTokenOptions = nodes.filter((node) => node.data.nodeType === "token").map((node) => node.data.label)
+  const userTokenOptions = nodes.filter((node) => node.data.nodeType !== "protocol" && node.data.label !== "Wallet").map((node) => node.data.label)
   const selectedNodeType = selectedNode?.data?.nodeType
   const [nodeType, setNodeType] = useState<"protocol" | "token" | "lst" | null>(null)
   const [selectedOption, setSelectedOption] = useState<string | null>(null)
   const [otherSelectedOption, setOtherSelectedOption] = useState<string | null>(null)
+
+  // State to store APY values
+  const [apyValues, setApyValues] = useState<Record<string, number>>({});
+
+  // Fetch APY values when the component mounts
+  useEffect(() => {
+    const fetchAPYValues = async () => {
+      try {
+        const values = await APYVals();
+        setApyValues(values);
+      } catch (error) {
+        console.error("Failed to fetch APY values:", error);
+      }
+    };
+
+    fetchAPYValues();
+  }, []);
+
+  console.log("APY Values:", apyValues);
 
   // Reset state when the dialog is closed
   const handleClose = () => {
@@ -188,7 +207,7 @@ export function CreateNodeDialog({ onCreateNode, onCreateMeteoraNode ,selectedNo
                       <div className="flex items-center text-xs font-medium">
                         <Image src={`/PNG/${token.toLowerCase()}-logo.png`} alt={`${token} logo`} width={24} height={24} className="mr-2" /> {token}
                       </div>
-                      <div className="ml-auto p-1 text-[10px] text-blue-300 outline outline-blue-400 bg-blue-950 px-2 py-1 rounded-md">7.25% APY</div>
+                      <div className="ml-auto p-1 text-[10px] text-green-300 px-2 py-1 rounded-md">{Math.round((apyValues[token] || 0) * 10000) / 100}% APY</div>
                     </Button>
                   )
                 })}

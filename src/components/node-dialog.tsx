@@ -94,16 +94,13 @@ export function NodeModal({
 
           <DialogDescription className="mb-4">
             <div className="items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-200">
-                Node Description
-              </h2>
               {/* Input from the user */}
               <input
-                type="text"
-                value={desc}
-                onChange={(e) => setDesc(e.target.value)}
-                className="mt-2 w-full rounded-md border-gray-600 bg-gray-800 p-2 text-gray-200 focus:border-blue-500 focus:ring focus:ring-blue-500"
-                placeholder="Enter node description"
+              type="text"
+              value={desc}
+              onChange={(e) => setDesc(e.target.value)}
+              className="mt-2 w-full rounded-md border-gray-600 bg-gray-800 p-2 text-gray-200 focus:outline-none"
+              placeholder="Enter node description"
               />
             </div>
           </DialogDescription>

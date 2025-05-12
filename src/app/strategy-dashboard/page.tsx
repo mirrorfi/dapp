@@ -1,10 +1,9 @@
 "use client";
 
-import { useWallet } from "@solana/wallet-adapter-react";
 import SimplifiedFlow from "@/components/simplified-flow";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Trash2, LayoutGrid, List, Plus } from "lucide-react";
+import { LayoutGrid, List, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -57,7 +56,6 @@ const StrategyDashboardPage = () => {
   // const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
-  const { connected, publicKey } = useWallet();
 
   const getCategoryCount = (category: string) =>
     strategies.filter((s) => s.category === category).length;
@@ -203,29 +201,61 @@ const StrategyDashboardPage = () => {
               .map((strategy: Strategy) => (
                 <Card
                   key={strategy._id}
-                  className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border-none backdrop-blur-sm relative min-h-[300px] cursor-pointer"
+                  className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border-none backdrop-blur-sm relative min-h-[300px] cursor-pointer group"
                   onClick={() => handleCardClick(strategy)}
                 >
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                    <CardTitle className="text-lg font-bold">
-                      {strategy.name}
-                    </CardTitle>
-                    {connected &&
-                      publicKey &&
-                      strategy.user === publicKey.toBase58() && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 p-0 hover:text-destructive cursor-pointer"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            // TODO: Implement delete functionality
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      )}
-                  </CardHeader>
+                  {/* Blur effects container */}
+                  <div className="absolute inset-0">
+                    {/* Left edge darken */}
+                    <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-black/15 via-black/5 to-transparent z-10" />
+                    {/* Right edge darken */}
+                    <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-black/15 via-black/5 to-transparent z-10" />
+                    {/* Bottom edge darken */}
+                    <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-black/15 via-black/5 to-transparent z-10" />
+                    {/* Top info section with gradient */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/25 to-transparent h-32 z-10">
+                      <CardHeader className="flex flex-col space-y-2 mt-3 px-5">
+                        <div className="flex items-center justify-between w-full">
+                          <CardTitle className="text-lg font-bold text-white">
+                            {strategy.name}
+                          </CardTitle>
+                          <div className="flex items-center gap-1">
+                            <span className="text-xs text-gray-300">APY</span>
+                            <span className="text-lg font-bold text-white">
+                              {strategy.apy?.toFixed(2)}%
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-1">
+                            {strategy.nodes
+                              .filter((node) => node.data.nodeType === "token")
+                              .map((node) => (
+                                <Image
+                                  key={node.id}
+                                  src={`/PNG/${node.data.label.toLowerCase()}-logo.png`}
+                                  alt={node.data.label}
+                                  width={24}
+                                  height={24}
+                                  className="rounded-full border border-gray-500"
+                                />
+                              ))}
+                          </div>
+                          <span
+                            className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                              strategy.category === "LST"
+                                ? "bg-blue-100 text-blue-800"
+                                : strategy.category === "DLMM"
+                                ? "bg-purple-100 text-purple-800"
+                                : "bg-green-100 text-green-800"
+                            }`}
+                          >
+                            {strategy.category}
+                          </span>
+                        </div>
+                      </CardHeader>
+                    </div>
+                  </div>
                   <div className="absolute inset-x-0 top-[60px] bottom-0">
                     <SimplifiedFlow
                       nodes={strategy.nodes}

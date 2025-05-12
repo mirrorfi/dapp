@@ -35,7 +35,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <WalletProviderWrapper>
         <AgentProvider>
-          <header className="h-16 sticky top-0 z-50">
+          <header className="h-20 sticky top-0 z-50">
             <Navbar />
           </header>
           <body

@@ -23,7 +23,8 @@ import { SaveStrategyDialog } from "@/components/save-strategy-dialog";
 import { useWallet } from "@solana/wallet-adapter-react";
 
 import { NodeModal } from "@/components/node-dialog";
-import { Bot, Save } from "lucide-react";
+import { Menu, Save, Trash2, X } from "lucide-react";
+import { CreatePageSidebar } from "@/components/create-page-sidebar";
 
 // Define node types
 const nodeTypes = {
@@ -60,6 +61,7 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
   const [saveOpen, setSaveOpen] = useState(false);
   const [nodeOpen, setNodeOpen] = useState(false);
   const [nodeToConnect, setNodeToConnect] = useState<Node | null>(null);
+  const [isSidebarOpen] = useState(true);
 
   const { fitView } = useReactFlow(); // Access the fitView method
 
@@ -248,8 +250,11 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
     setNodeOpen(true);
   }, []);
 
+
   return (
-      <div className="flex flex-col h-screen bg-background text-foreground">
+    <div className="flex h-screen bg-background text-foreground">
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col" style={{ width: "80%" }}>
         <main className="flex-1">
           <SaveStrategyDialog
             nodeList={nodes}
@@ -295,19 +300,76 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
           >
             <Background color="#3b82f6" gap={16} size={1} />
           </ReactFlow>
-          <div className="absolute bottom-4 right-4 flex space-x-2">
-            <Button
-              variant="ghost"
-              onClick={() => {
-                setSaveOpen(true);
-              }}
-            >
-              <Save />
-              Save Strategy
-            </Button>
-          </div>
         </main>
       </div>
+      {/* Sidebar */}
+      <div
+        className={`${
+          isSidebarOpen ? "w-64" : "w-16"
+        } bg-gray-900 text-white transition-all duration-300 flex flex-col`}
+      >
+
+        <div className="flex-1 overflow-y-auto p-4">
+          {isSidebarOpen && (
+        <ul className="space-y-4">
+          {/* User guide on how to create node */}
+          <li>
+            <h3 className="text-sm font-semibold">How to create strategy:</h3>
+            <p className="text-xs text-gray-400">
+              Click a node and click "+" button to specify its next action.
+              <br />
+              <br />
+              1. Click wallet and select which tokens to use.<br />
+              2. Specify next actions using the token<br />
+              <br />
+              {"*Supported Actions: (Swap (Jupiter), LST (Sanctum), Meteora"}<br />
+              <br />
+              {/*- Protocol nodes, can't create any new nodes.<br />*/}
+            </p>
+          </li>
+
+          <li>
+          <h3 className="text-sm font-semibold">Deleting a node:</h3>
+            <p className="text-xs text-gray-400 flex">
+              Click on a node and click on 🗑️ button to remove it.
+
+              <br />
+              <br />
+              - Deleting a node will also delete the next actions from it.<br />
+              <br />
+              <br />
+              - You can't delete the Wallet node.<br />
+              <br />
+              <br />
+            </p>
+          </li>
+
+          <li>
+          <h3 className="text-sm font-semibold">Now that you know the basics, good luck and have fun creating your own strategies 😁!!</h3>
+          <br />
+          <br />
+          </li>
+          <li>
+            <Button
+              variant="outline"
+          className="w-full text-left p-2 rounded-md hover:bg-accent"
+          onClick={() => setSaveOpen(true)}
+            >
+              <Save className="mr-2" />
+              Save Strategy
+            </Button>
+          </li>
+        </ul>
+          )}
+        </div>
+      </div>
+
+      {/*
+      Wrong Function Calling cause error
+      <CreatePageSidebar onSaveClick={() => setSaveOpen(true)} />
+      */}
+
+    </div>
   );
 };
 

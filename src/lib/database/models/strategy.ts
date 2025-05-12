@@ -34,6 +34,7 @@ export interface IStrategy {
   name: string;
   user: string;
   description?: string; // Make description optional
+  categories?: string[]; // Add categories field to the schema
 }
 
 const NodeSchema = new Schema<INode>({
@@ -70,6 +71,7 @@ const StrategySchema = new Schema<IStrategy>({
   name: { type: String, required: true },
   user: { type: String, required: true }, // Add user field to the schema
   description: { type: String, required: true }, // Add description field to the schema
+  categories: { type: [String], required: false }, // Add categories field to the schema
 });
 
 const Strategy = models.Strategy || model<IStrategy>('Strategy', StrategySchema);
