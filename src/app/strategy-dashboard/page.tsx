@@ -207,19 +207,21 @@ const StrategyDashboardPage = () => {
                     <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-black/15 via-black/5 to-transparent z-10" />
                     {/* Top info section with gradient */}
                     <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/25 to-transparent h-32 z-10">
-                      <CardHeader className="flex flex-col space-y-2 mt-3 px-5">
+                      <CardHeader className="flex flex-col mt-3 px-5">
                         <div className="flex items-center justify-between w-full">
                           <CardTitle className="text-lg font-bold text-white">
                             {strategy.name}
                           </CardTitle>
                           <div className="flex items-center gap-1">
-                            <span className="text-xs text-gray-300">APY</span>
+                            <span className="text-xs text-gray-300 -mb-1">
+                              APY
+                            </span>
                             <span className="text-lg font-bold text-white">
                               {strategy.apy?.toFixed(2)}%
                             </span>
                           </div>
                         </div>
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2">
                           <div className="flex items-center gap-1">
                             {strategy.nodes
                               .filter((node) => node.data.nodeType === "token")
