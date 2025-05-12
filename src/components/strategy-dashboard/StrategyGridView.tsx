@@ -61,7 +61,7 @@ export const StrategyGridView = ({
                             alt={node.data.label}
                             width={24}
                             height={24}
-                            className="rounded-full border border-gray-500"
+                            className="rounded-full"
                           />
                         ))}
                     </div>
