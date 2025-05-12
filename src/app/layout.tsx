@@ -6,6 +6,7 @@ import { WalletProviderWrapper } from "@/components/WalletProviderWrapper";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Navbar } from "@/components/navbar";
 import localFont from "next/font/local";
+import { AgentProvider } from "@/lib/AgentProvider";
 
 const satoshi = localFont({
   src: "../../public/fonts/Satoshi-Bold.otf",
@@ -33,24 +34,26 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <WalletProviderWrapper>
-        <header className="h-16 sticky top-0 z-50">
-          <Navbar />
-        </header>
-        <body
-          className={`h-screen antialiased ${satoshi.variable} ${univaNova.variable}`}
-        >
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="dark"
-            enableSystem={false}
-            disableTransitionOnChange={false}
+        <AgentProvider>
+          <header className="h-16 sticky top-0 z-50">
+            <Navbar />
+          </header>
+          <body
+            className={`h-screen antialiased ${satoshi.variable} ${univaNova.variable}`}
           >
-            <TooltipProvider>
-              {children}
-              <Toaster richColors />
-            </TooltipProvider>
-          </ThemeProvider>
-        </body>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="dark"
+              enableSystem={false}
+              disableTransitionOnChange={false}
+            >
+              <TooltipProvider>
+                {children}
+                <Toaster richColors />
+              </TooltipProvider>
+            </ThemeProvider>
+          </body>
+        </AgentProvider>
       </WalletProviderWrapper>
     </html>
   );

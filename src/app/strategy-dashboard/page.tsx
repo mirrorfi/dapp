@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import StrategyModal from "@/components/StrategyModal";
+import Moralis from "moralis";
 
 interface Node {
   id: string;
@@ -86,6 +87,12 @@ const StrategyDashboardPage = () => {
       }
     };
 
+    // Initialize Moralis
+    Moralis.start({
+      apiKey: process.env.NEXT_PUBLIC_MORALIS_API_KEY,
+    });
+
+    
     fetchStrategies();
   }, []);
 

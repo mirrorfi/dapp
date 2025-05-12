@@ -1,8 +1,9 @@
 import { Connection } from "@solana/web3.js";
-import { tokenMintAddresses } from "@/constants/nodeOptions";
+import { LSTMintAddresses, tokenMintAddresses } from "@/constants/nodeOptions";
 import { quoteAndBuildSwapInstructions } from "./jupiterSwapWithInstructions";
 import { TreeNode } from "./treeUtils";
 import { SolanaAgentKit } from "solana-agent-kit";
+import { SuccessStyle, WaitingSignStyle, WaitingTrasactionStyle } from "@/components/ui/wallet-toast-style";
 
 const RPC_LINK = process.env.NEXT_PUBLIC_RPC_LINK || "https://api.mainnet-beta.solana.com/";
 
@@ -28,6 +29,7 @@ console.log("Swap parameters:", {
   
   const { transaction: txn } = result; // Destructure the result to get the transaction and output amount
 
+  toast(WaitingSignStyle())
   const signed = await signTransaction(txn); // Sign the transaction
   console.log("Signed:", signed);
   console.log("Tx:", txn);
@@ -39,9 +41,7 @@ console.log("Swap parameters:", {
   console.log("Transaction sent with signature:", signature);
 
   // Wait for transaction to be confirmed
-  toast({
-    description: `Waiting for transaction confirmation...`,
-  })
+  toast(WaitingTrasactionStyle())
   let txData = null;
   while (!txData) {
     console.log("Waiting for transaction...");
@@ -54,11 +54,7 @@ console.log("Swap parameters:", {
   }
   
   console.log("Transaction data:", txData);
-  toast({
-    title: "Transaction Confirmed",
-    description: `Sent with signature ${signature}}`,
-    variant: "success",
-  })
+  toast(SuccessStyle(signature))
 
   // Get balances in terms of lamports
   const postTokenBalance = Number(txData?.meta?.postTokenBalances?.find(
@@ -85,7 +81,12 @@ console.log("Swap parameters:", {
       if (!childNode.params) {
         childNode.params = {};
       }
-      childNode.params[currentNode.token] = amountPerChildNode;
+      if (currentNode.nodeType === "token") {
+        childNode.params[tokenMintAddresses[currentNode.token]] = amountPerChildNode;
+      }
+      if (currentNode.nodeType === "lst") {
+        childNode.params[LSTMintAddresses[currentNode.token]] = amountPerChildNode;
+      }
     }
     else {
       childNode.inputToken = tokenMintAddresses[currentNode.token]; // Set the input token for child nodes

@@ -14,7 +14,10 @@ import { Button } from "@/components/ui/button";
 import InteractiveFlow from "@/components/interactive-flow";
 import type { Node, Edge } from "reactflow";
 import { useToast } from "@/components/ui/use-toast";
-
+import { generateTree, executeTree } from "@/lib/txnUtils/treeUtils";
+import Moralis from "moralis";
+import { LSTMintAddresses, tokenMintAddresses } from "@/constants/nodeOptions";
+import { useAgent } from "@/lib/AgentProvider";
 interface TokenBalance {
   mint: string;
   balance: number;
@@ -45,7 +48,8 @@ const StrategyModal: FC<StrategyModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const { publicKey } = useWallet();
+  const { publicKey, signTransaction } = useWallet();
+  const { agent, isAgentLoading } = useAgent();
   const { connection } = useConnection();
   const [loading, setLoading] = useState(false);
   const [tokenBalances, setTokenBalances] = useState<TokenBalances>({
@@ -146,11 +150,53 @@ const StrategyModal: FC<StrategyModalProps> = ({
         return;
       }
 
+      if (!agent) {
+        console.error("Agent is not available.");
+        return;
+      }
+
+      const nodeIdToAmounts: Record<string, string> = {};
+
+      for (const [nodeId, amount] of Object.entries(nodeAmounts)) {
+        const node = strategy.nodes.find((n) => n.id === nodeId);
+        let nodeTokenAddress = "";
+
+        if (node.data.nodeType === "token") {
+          nodeTokenAddress = tokenMintAddresses[node.data.label];
+        } else if (node.data.nodeType === "lst") {
+          nodeTokenAddress = LSTMintAddresses[node.data.label];
+        }
+
+        const response = await Moralis.SolApi.token.getTokenMetadata({
+          network: "mainnet",
+          address: nodeTokenAddress,
+        });
+
+        console.log("Moralis Response:", response);
+
+        // Access decimals from the public response object
+        // @ts-expect-error: Accessing Moralis response property
+        const decimals = response.jsonResponse.decimals;
+        const tokenAmountAtomic = parseFloat(amount) * 10 ** parseInt(decimals);
+
+        nodeIdToAmounts[nodeId.toString()] = tokenAmountAtomic.toString();
+      }
+
+      console.log("Node ID to Amounts:", nodeIdToAmounts);
+
+      const treeNodes = await generateTree(
+        strategy.nodes,
+        strategy.edges,
+        nodeIdToAmounts
+      );
+
       toast({
         title: "Executing strategy...",
         description: `Mirroring ${strategy.name} with multiple tokens`,
         duration: 5000,
       });
+
+      await executeTree(treeNodes, agent, signTransaction, toast);
 
       onClose();
     };

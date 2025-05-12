@@ -57,5 +57,5 @@ export async function createSolanaAgent(publicKeyString: string) {
       // const tx  = agent.methods.request_faucet_funds()
 
   
-  return { agent };
+  return agent;
 }

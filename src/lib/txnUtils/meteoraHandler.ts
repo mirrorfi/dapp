@@ -5,6 +5,7 @@ import DLMM from "@meteora-ag/dlmm";
 import { autoFillYByStrategy, StrategyType } from "@meteora-ag/dlmm";
 import { SolanaAgentKit } from "solana-agent-kit";
 import { TreeNode } from "./treeUtils";
+import { SuccessStyle, WaitingSignStyle, WaitingTrasactionStyle } from "@/components/ui/wallet-toast-style";
 
 const RPC_LINK = process.env.NEXT_PUBLIC_RPC_LINK || "https://api.mainnet-beta.solana.com/";
 
@@ -96,7 +97,8 @@ export const handleMeteoraProtocol = async (agent: SolanaAgentKit, currentNode: 
       console.log("No parameters found for the current node");
       return;
     }
-
+    
+    console.log("Current Node Params:", currentNode.params);
     if (!currentNode.params[pool.mint_x] || !currentNode.params[pool.mint_y]) {
       console.log("Invalid parameters for token amounts");
       return;
@@ -186,12 +188,33 @@ export const handleMeteoraProtocol = async (agent: SolanaAgentKit, currentNode: 
       createPositionTx.recentBlockhash = recentBlockchash.blockhash;
 
       createPositionTx.partialSign(newBalancePosition);
+
+      toast(WaitingSignStyle())
       const signedTx = await signTransaction(createPositionTx);
       console.log("Sending transaction:");
+      
 
       const rawTx = signedTx.serialize();
-      const txHash = await connection.sendRawTransaction(rawTx);
-      console.log("Signature:", txHash);
+      const signature = await connection.sendRawTransaction(rawTx);
+      console.log("Signature:", signature);
+
+      // Wait for transaction to be confirmed
+      toast(WaitingTrasactionStyle())
+      let txData = null;
+      while (!txData) {
+        console.log("Waiting for transaction...");
+        await new Promise((resolve) => setTimeout(resolve, 2000)); // Wait for 2 seconds
+      
+        txData = await connection.getTransaction(signature, {
+          commitment: "confirmed",
+          maxSupportedTransactionVersion: 0,
+        });
+      }
+      
+      console.log("Transaction data:", txData);
+      toast(SuccessStyle(signature))
+
+
     } catch (error) {
       console.error("Transaction error:", error);
     }
@@ -204,5 +227,5 @@ export const handleMeteoraProtocol = async (agent: SolanaAgentKit, currentNode: 
     console.log("Failed to get pool");
     return;
   }   
-  openPosition(pool);
+  await openPosition(pool);
 }
