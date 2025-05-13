@@ -16,7 +16,12 @@ import type { Node, Edge } from "reactflow";
 import { useToast } from "@/components/ui/use-toast";
 import { generateTree, executeTree } from "@/lib/txnUtils/treeUtils";
 import Moralis from "moralis";
-import { LSTMintAddresses, tokenMintAddresses } from "@/constants/nodeOptions";
+import {
+  LSTLogos,
+  LSTMintAddresses,
+  tokenLogos,
+  tokenMintAddresses,
+} from "@/constants/nodeOptions";
 import { useAgent } from "@/lib/AgentProvider";
 interface TokenBalance {
   mint: string;
@@ -72,11 +77,15 @@ const StrategyModal: FC<StrategyModalProps> = ({
           return {
             id: targetNode.id,
             label: targetNode.data.label,
+            nodeType: targetNode.data.nodeType,
           };
         }
         return null;
       })
-      .filter((node): node is { id: string; label: string } => node !== null);
+      .filter(
+        (node): node is { id: string; label: string; nodeType: string } =>
+          node !== null
+      );
     return requiredTokenNodes;
   };
 
@@ -86,10 +95,8 @@ const StrategyModal: FC<StrategyModalProps> = ({
     return node?.data.label || nodeId;
   };
 
-  const getTokenLogo = (label: string) => {
-    // Convert token label to lowercase for file naming
-    const tokenName = label.toLowerCase();
-    return `/PNG/${tokenName}-logo.png`;
+  const getTokenLogo = (label: string, nodeType: string) => {
+    return nodeType === "lst" ? LSTLogos[label] : tokenLogos[label];
   };
 
   const apy = "25%";
@@ -240,7 +247,7 @@ const StrategyModal: FC<StrategyModalProps> = ({
             </div>
 
             <div className="flex flex-col space-y-4">
-              {getRequiredTokens().map(({ id, label }) => (
+              {getRequiredTokens().map(({ id, label, nodeType }) => (
                 <div
                   key={id}
                   className="rounded-lg bg-slate-900 overflow-hidden"
@@ -249,7 +256,7 @@ const StrategyModal: FC<StrategyModalProps> = ({
                     <div className="flex justify-between items-center mb-2">
                       <div className="flex items-center gap-2">
                         <Image
-                          src={getTokenLogo(label)}
+                          src={getTokenLogo(label, nodeType)}
                           alt={`${label} logo`}
                           width={32}
                           height={32}

@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { protocolOptions, tokenOptions, LSToptions } from "../constants/nodeOptions";
+import { protocolOptions, tokenOptions, LSToptions, LSTLogos, tokenLogos } from "../constants/nodeOptions";
 import { Node } from "reactflow"
 import { ComingSoonDialog } from "./coming-soon-dialog"
 import { APYVals } from "@/lib/plugin/sanctum/tools/apyVals"
@@ -204,7 +204,7 @@ export function CreateNodeDialog({ onCreateNode, onCreateMeteoraNode ,selectedNo
                         setNodeType("lst")
                       } }>
                       <div className="flex items-center text-xs font-medium">
-                        <Image src={`/PNG/${token.toLowerCase()}-logo.png`} alt={`${token} logo`} width={24} height={24} className="mr-2" /> {token}
+                        <Image src={LSTLogos[token]} alt={`${token} logo`} width={24} height={24} className="mr-2" /> {token}
                       </div>
                       <div className="ml-auto p-1 text-[10px] text-green-300 px-2 py-1 rounded-md">{Math.round((apyValues[token] || 0) * 10000) / 100}% APY</div>
                     </Button>
@@ -229,7 +229,7 @@ export function CreateNodeDialog({ onCreateNode, onCreateMeteoraNode ,selectedNo
                       } }
                     >
                       <div className="flex items-center gap-2">
-                        <Image src={`/PNG/${token.toLowerCase()}-logo.png`} alt={`${token} logo`} width={24} height={24} />{token}
+                        <Image src={tokenLogos[token]} alt={`${token} logo`} width={24} height={24} />{token}
                       </div>
                     </Button>
                   ))}

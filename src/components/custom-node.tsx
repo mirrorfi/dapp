@@ -3,7 +3,7 @@ import Image from "next/image"
 import { Wallet } from "lucide-react"
 import { APYVals } from "@/lib/plugin/sanctum/tools/apyVals"
 import { useState, useEffect } from "react"
-import { allAddresses } from "@/constants/nodeOptions"
+import { allAddresses, LSTLogos, tokenLogos } from "@/constants/nodeOptions"
 import { getMeteoraPoolAPY } from "@/lib/meteora"
 
 export type NodeData = {
@@ -72,8 +72,13 @@ export function CustomNode({ data, isConnectable }: NodeProps<NodeData>) {
     <div className={nodeClass}>
       <div className="custom-node-header" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
       {data.label != "Wallet" ? (<Image
-        src={`/PNG/${data.label.toLowerCase()}-logo.png`}
-        alt={`${data.label} logo`}
+        src={
+          data.nodeType === "lst"
+            ? LSTLogos[data.label]
+            : data.nodeType === "token"
+            ? tokenLogos[data.label]
+            : `/PNG/${data.label.toLowerCase()}-logo.png`
+        }        alt={`${data.label} logo`}
         width={24}
         height={24}
       />) : (

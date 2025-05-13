@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { Strategy } from "./types";
+import { tokenLogos } from "@/constants/nodeOptions";
 
 interface StrategyListViewProps {
   strategies: Strategy[];
@@ -59,7 +60,7 @@ export const StrategyListView = ({
                 .map((node) => (
                   <Image
                     key={node.id}
-                    src={`/PNG/${node.data.label.toLowerCase()}-logo.png`}
+                    src={tokenLogos[node.data.label]}
                     alt={node.data.label}
                     width={24}
                     height={24}

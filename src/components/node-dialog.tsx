@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { LSTLogos, tokenLogos } from "@/constants/nodeOptions"
 import { Plus, PlusCircle, Trash2, Wallet } from "lucide-react"
 import Image from "next/image"
 import { useState, useEffect } from "react"
@@ -78,7 +79,7 @@ export function NodeModal({
                 <Wallet className="mr-2" />
               ) : (
                 <Image
-                  src={`/PNG/${node.data.label.toLowerCase()}-logo.png`}
+                  src={node.data.nodeType === "lst" ? LSTLogos[node.data.label] : tokenLogos[node.data.label]}
                   alt={`${node.data.label} logo`}
                   className="mr-2"
                   width={24}

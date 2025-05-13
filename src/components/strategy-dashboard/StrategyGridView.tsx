@@ -2,6 +2,7 @@ import SimplifiedFlow from "@/components/simplified-flow";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
 import { Strategy } from "./types";
+import { tokenLogos } from "@/constants/nodeOptions";
 
 interface StrategyGridViewProps {
   strategies: Strategy[];
@@ -57,7 +58,7 @@ export const StrategyGridView = ({
                         .map((node) => (
                           <Image
                             key={node.id}
-                            src={`/PNG/${node.data.label.toLowerCase()}-logo.png`}
+                            src={tokenLogos[node.data.label]}
                             alt={node.data.label}
                             width={24}
                             height={24}
