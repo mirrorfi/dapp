@@ -194,7 +194,6 @@ export function CreateNodeDialog({ onCreateNode, onCreateMeteoraNode ,selectedNo
               <h3 className="text-sm font-medium text-muted-foreground mb-2">Stake LSTs</h3>
               <div className="max-h-48 overflow-y-auto grid grid-cols-2 gap-4">
                 {LSToptions.map((token) => {
-
                   return (
                     <Button
                       key={token}
