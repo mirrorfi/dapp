@@ -113,6 +113,34 @@ const StrategyModal: FC<StrategyModalProps> = ({
     fetchBalances();
   }, [connection, publicKey]);
 
+  const [updatedNodes, setUpdatedNodes] = useState<Node[]>([]);
+
+  useEffect(() => {
+    // Update the nodes in the strategy with their parent labels
+    const nodesWithParents = strategy.nodes.map((node) => {
+      if (node.data.label === "Meteora") {
+        const parentLabels = strategy.edges
+          .filter((edge) => edge.target === node.id)
+          .map((edge) => {
+            const parentNode = strategy.nodes.find(
+              (n) => n.id === edge.source
+            );
+            return parentNode ? parentNode.data.label : null;
+          })
+          .filter((label): label is string => label !== null);
+        return {
+          ...node,
+          data: {
+            ...node.data,
+            parentLabels,
+          },
+        };
+      }
+      return node;
+    });
+    setUpdatedNodes(nodesWithParents);
+  }, [strategy.nodes, strategy.edges]);
+
   const getMaxAmount = (tokenLabel: string) => {
     if (tokenLabel === "SOL") {
       return tokenBalances.sol;
@@ -221,7 +249,7 @@ const StrategyModal: FC<StrategyModalProps> = ({
           {/* Left side: Strategy flow visualization */}
           <div className="rounded-lg p-6 min-h-[400px] h-[500px] col-span-2 relative">
             <InteractiveFlow
-              nodes={strategy.nodes}
+              nodes={updatedNodes}
               edges={strategy.edges}
               className="absolute inset-6"
             />

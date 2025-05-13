@@ -11,6 +11,8 @@ import { StrategyDashboardHeader } from "@/components/strategy-dashboard/Strateg
 import { StrategyGridView } from "@/components/strategy-dashboard/StrategyGridView";
 import { StrategyListView } from "@/components/strategy-dashboard/StrategyListView";
 import { Strategy } from "@/components/strategy-dashboard/types";
+import { allAddresses } from "@/constants/nodeOptions";
+import { getMeteoraPoolAPY } from "@/lib/meteora";
 
 const StrategyDashboardPage = () => {
   const [strategies, setStrategies] = useState<Strategy[]>([]);
@@ -40,6 +42,12 @@ const StrategyDashboardPage = () => {
 
   // Fetch strategies and calculate total APY
   useEffect(() => {
+    // Initialize Moralis
+    Moralis.start({
+      apiKey: process.env.NEXT_PUBLIC_MORALIS_API_KEY,
+    });
+  }, []);
+  useEffect(() => {
     const fetchStrategies = async () => {
       try {
         const response = await fetch("/api/get-strategies");
@@ -48,22 +56,61 @@ const StrategyDashboardPage = () => {
         }
         const data = await response.json();
 
-        const dataWithCategories = data.map((strategy: Strategy) => {
+        const dataWithCategories = await Promise.all(data.map(async (strategy: Strategy) => {
           // Calculate total APY from LST nodes
-          const totalAPY = strategy.nodes
-            .filter((node) => node.data.nodeType === "lst")
-            .reduce((sum, node) => {
-              const nodeAPY = apyValues[node.data.label] || 0;
-              return sum + nodeAPY;
-            }, 0);
+          // const totalAPY = (strategy.nodes
+          //   .filter((node) => node.data.nodeType === "lst")
+          //   .reduce((sum, node) => {
+          //     const nodeAPY = apyValues[node.data.label] || 0;
+          //     return sum + nodeAPY;
+          //   }, 0));
 
+          const meteoraAPYs = await Promise.all(
+            strategy.nodes
+              .filter((node) => node.data.label === "Meteora")
+              .map(async (node) => {
+                // Find the parent nodes of the Meteora node
+                const parentLabels = strategy.edges
+                  .filter((edge) => edge.target === node.id)
+                  .map((edge) => {
+                    const parentNode = strategy.nodes.find(
+                      (n) => n.id === edge.source
+                    );
+                    return parentNode ? parentNode.data.label : null;
+                  })
+                  .filter((label): label is string => label !== null);
+
+                // Get the addresses of the parent nodes
+                const tokenX_label = parentLabels[0];
+                const tokenX_address = allAddresses[tokenX_label];
+                const tokenY_label = parentLabels[1];
+                const tokenY_address = allAddresses[tokenY_label];
+                // Get the APY for the Meteora node
+                const meteoraAPY = await getMeteoraPoolAPY(
+                  tokenX_address,
+                  tokenY_address
+                );
+                return (meteoraAPY/100) || 0;
+              })
+          );
+
+          const totalAPY =
+            strategy.nodes
+              .filter((node) => node.data.nodeType === "lst")
+              .reduce((sum, node) => {
+                const nodeAPY = apyValues[node.data.label] || 0;
+                return sum + (nodeAPY);
+              }, 0) +
+            meteoraAPYs.reduce((sum, apy) => sum + apy, 0);
+          
+          console.log("Total APY:", totalAPY);
           return {
             ...strategy,
             category: strategy.category || "LST",
             apy: totalAPY * 100, // Convert to percentage
           };
-        });
-        console.log(dataWithCategories);
+        }));
+        console.log("Fuck is this??", dataWithCategories);
         setStrategies(dataWithCategories);
       } catch (err) {
         setError(
@@ -73,11 +120,6 @@ const StrategyDashboardPage = () => {
         setLoading(false);
       }
     };
-
-    // Initialize Moralis
-    Moralis.start({
-      apiKey: process.env.NEXT_PUBLIC_MORALIS_API_KEY,
-    });
 
     if (Object.keys(apyValues).length > 0) {
       fetchStrategies();
@@ -93,7 +135,7 @@ const StrategyDashboardPage = () => {
     setModalOpen(false);
     setSelectedStrategy(null);
   };
-
+  console.log("Strategies:", strategies);
   if (loading) {
     return (
       <div className="flex flex-col min-h-screen bg-gradient-to-br from-background via-background/95 to-blue-950/20 text-foreground">
