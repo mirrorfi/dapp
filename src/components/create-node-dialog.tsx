@@ -29,7 +29,7 @@ interface CreateNodeDialogProps {
     label: string
     description: string
     nodeType: "protocol" | "token" | "lst"
-    connectionCount: number
+    parentLabels: string[]
   }, otherNode: Node | null) => void
 
   selectedNode: Node | null
@@ -79,7 +79,7 @@ export function CreateNodeDialog({ onCreateNode, onCreateMeteoraNode ,selectedNo
         label: selectedOption,
         description: `Protocol: ${selectedOption}`,
         nodeType,
-        connectionCount: 0,
+        parentLabels: [selectedNode?.data.label, otherSelectedOption || ""],
       }, nodes.find((node) => node.data.label === otherSelectedOption) || null)
     }
     else {

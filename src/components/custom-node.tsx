@@ -3,7 +3,8 @@ import Image from "next/image"
 import { Wallet } from "lucide-react"
 import { APYVals } from "@/lib/plugin/sanctum/tools/apyVals"
 import { useState, useEffect } from "react"
-import { LSTMintAddresses } from "@/constants/nodeOptions"
+import { allAddresses } from "@/constants/nodeOptions"
+import { getMeteoraPoolAPY } from "@/lib/meteora"
 
 export type NodeData = {
   label: string
@@ -11,7 +12,7 @@ export type NodeData = {
   nodeType?: "protocol" | "token" | "lst"
   percentage?: string
   connectionCount: number
-  parentAddresses?: string[]
+  parentLabels?: string[]
 }
 
 export function CustomNode({ data, isConnectable }: NodeProps<NodeData>) {
@@ -41,11 +42,21 @@ export function CustomNode({ data, isConnectable }: NodeProps<NodeData>) {
         try {
           console.log("Data:", data);
           // Anas pls modify your node processing somehow to also pass in the parent addresses, order doesnt matter
-          const tokenX_address = parentAddresses[0];
-          const tokenY_address = parentAddresses[1];
+          if (data.parentLabels?.length !== 2) {
+            console.error("Meteora node must have exactly 2 parent labels");
+            return;
+          } 
+          const tokenX_label = data.parentLabels[0];
+          const tokenX_address = allAddresses[tokenX_label];  
+          const tokenY_label = data.parentLabels[1];
+          const tokenY_address = allAddresses[tokenY_label];  
+
+          console.log("Token X Address:", tokenX_address);
+          console.log("Token Y Address:", tokenY_address);
           const apy = await getMeteoraPoolAPY(tokenX_address, tokenY_address);
 
           setMeteoraAPY(apy);
+          console.log("Meteora APY:", apy);
         } catch (error) {
           console.error("Failed to fetch meteora APY values:", error);
         }
@@ -75,7 +86,7 @@ export function CustomNode({ data, isConnectable }: NodeProps<NodeData>) {
           </div>
         ) : (
           <div className="custom-node-content text-green-300 ml-4">
-            {meteoraAPY ? meteoraAPY : "N/A"}% APY
+            {meteoraAPY ? Math.round(meteoraAPY*100)/100 : 0}% APY
           </div>
         )
       )}
