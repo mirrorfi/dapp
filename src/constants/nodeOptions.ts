@@ -57,7 +57,7 @@ export const LSTLogos: Record<string, string> = {
     "mSOL": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So/logo.png",
     "bbSOL": "https://static.bymj.io/web3/staking/bbsol/bbsol2.png",
     "INF": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/5oVNBeEEQvYi1cX3ir8Dx5n1P7pdxydbGF2X4TxVusJm/logo.png",
-    "vSOL": "https://cloudflare-ipfs.com/ipfs/bafkreig55mf3lazzbgndiqyqvdmchdsykvvebww7cqlws6ywgog5xfdzta",
+    "vSOL": "https://statics.solscan.io/cdn/imgs/s60?ref=68747470733a2f2f676174657761792e697279732e78797a2f4454427073366177724a576563746942684d7562596b653454426e45396b6b567179435650344d4234697242",
     "dSOL": "https://drift-public.s3.eu-central-1.amazonaws.com/dSOL.svg",
     "bSOL": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/bSo13r4TkiE4KumL71LsHTPpL2euBYLFx6h9HP3piy1/logo.png",
     "hSOL": "https://raw.githubusercontent.com/igneous-labs/lst-offchain-metadata/master/hSOL/hSOL.png",
