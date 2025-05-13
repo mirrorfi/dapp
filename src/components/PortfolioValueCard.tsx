@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ArrowUpRight, ArrowDownRight, TrendingUp, TrendingDown, Clock } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
 import { useEffect, useState } from "react"
+import { trusted } from "mongoose"
 
 interface PortfolioValueCardProps {
   totalValue: number
@@ -135,7 +136,7 @@ export function PortfolioValueCard({ totalValue, totalChange, topAssets, userPos
             </div>
             <div className="flex flex-col justify-center h-fit">
               <p className="text-xs text-gray-400">Total Yield Gained</p>
-              <div className={`text-sm font-medium ${isPositive ? "text-green-500" : "text-red-500"} flex items-center`}>
+              <div className={`text-sm font-medium ${totalProfit > 0 ? "text-green-500" : "text-red-500"} flex items-center`}>
               {isPositive ? "+" : ""}
               ${totalProfit.toFixed(2)}
               </div>
