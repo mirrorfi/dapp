@@ -8,12 +8,13 @@ const connection = new Connection(RPC_LINK);
 export async function getPool(tokenXAddress: string, tokenYAddress: string) {
     const response = await fetch(`https://dlmm-api.meteora.ag/pair/all_by_groups?include_pool_token_pairs=${tokenXAddress}-${tokenYAddress}`);
     const data = await response.json();
-    console.log("Pool Data:", data);
+    //console.log("Pool Data:", data);
     return data.groups[0];
 }
 
 // Get the APY of a Meteora Position
 export async function getMeteoraPoolAPY(tokenXAddress: string, tokenYAddress: string) {
+    console.log("Fetching Meteora Pool APY...");
     const pool = await getPool(tokenXAddress, tokenYAddress);
     console.log("Inner Pool Data:", pool);
     return pool.pairs[0].apr * 365;

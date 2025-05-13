@@ -10,7 +10,9 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { autoFillYByStrategy, StrategyType } from '@meteora-ag/dlmm';
 import {getAllUserPositions} from '@/lib/meteora';
 
-import { create } from 'domain';
+import { getPool, getMeteoraPoolAPY } from "@/lib/meteora";
+import { tokenMintAddresses, allAddresses } from "@/constants/nodeOptions"; 
+import { getTokenBalances } from "@/lib/balances";
 
 const RPC_LINK =
   process.env.NEXT_PUBLIC_RPC_LINK || "https://api.mainnet-beta.solana.com";
@@ -223,6 +225,37 @@ export default function MeteoraPage() {
     //   return;
     // }
 
+    async function getPair() {
+      const tokenA = allAddresses["zBTC"];
+      console.log("Token A:", tokenA);
+      const tokenB = allAddresses["SOL"];
+      console.log("Token B:", tokenB);
+
+      const pool = await getPool(tokenA, tokenB);
+      console.log("Pool:", pool);
+    }
+
+    async function getPairAPY(){
+      const tokenA = allAddresses["zBTC"];
+      console.log("Token A:", tokenA);
+      const tokenB = allAddresses["SOL"];
+      console.log("Token B:", tokenB);
+      const apy = await getMeteoraPoolAPY(tokenA, tokenB);
+      console.log("APY:", apy);
+    }
+
+    async function getBalances(){
+      if(!connected || !publicKey || !signTransaction) {
+        console.log("Wallet not connected or public key not available");
+        return;
+      }
+      const tokenBalances = await getTokenBalances(publicKey.toBase58(), [
+        allAddresses["USDC"],
+        allAddresses["JitoSOL"],
+      ]);
+      console.log("Token Balances:", tokenBalances);
+    }
+
     async function meteoraGetAllUserPositions(){
         if(!connected || !publicKey || !signTransaction) {
             console.log("Wallet not connected or public key not available");
@@ -284,6 +317,12 @@ export default function MeteoraPage() {
             <button onClick={getPoolData}>Get Pool Data</button>
             <p>.</p>
             <button onClick={meteoraGetAllUserPositions}>Get All User Positions</button>
+            <p>.</p>
+            <button onClick={getPair}>Get Pair</button>
+            <p>.</p>
+            <button onClick={getPairAPY}>Get Pair APY</button>
+            <p>.</p>
+            <button onClick={getBalances}>Get Balances</button>
         </div>
     )
 }
