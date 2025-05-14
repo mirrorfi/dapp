@@ -40,6 +40,7 @@ interface Strategy {
   description?: string;
   nodes: Node[];
   edges: Edge[];
+  apy?: number;
 }
 
 interface StrategyModalProps {
@@ -54,7 +55,7 @@ const StrategyModal: FC<StrategyModalProps> = ({
   onClose,
 }) => {
   const { publicKey, signTransaction } = useWallet();
-  const { agent, isAgentLoading } = useAgent();
+  const { agent } = useAgent();
   const { connection } = useConnection();
   const [loading, setLoading] = useState(false);
   const [tokenBalances, setTokenBalances] = useState<TokenBalances>({
@@ -99,7 +100,6 @@ const StrategyModal: FC<StrategyModalProps> = ({
     return nodeType === "lst" ? LSTLogos[label] : tokenLogos[label];
   };
 
-  const apy = "25%";
   const { toast } = useToast();
 
   useEffect(() => {
@@ -129,9 +129,7 @@ const StrategyModal: FC<StrategyModalProps> = ({
         const parentLabels = strategy.edges
           .filter((edge) => edge.target === node.id)
           .map((edge) => {
-            const parentNode = strategy.nodes.find(
-              (n) => n.id === edge.source
-            );
+            const parentNode = strategy.nodes.find((n) => n.id === edge.source);
             return parentNode ? parentNode.data.label : null;
           })
           .filter((label): label is string => label !== null);
@@ -194,8 +192,12 @@ const StrategyModal: FC<StrategyModalProps> = ({
 
       for (const [nodeId, amount] of Object.entries(nodeAmounts)) {
         const node = strategy.nodes.find((n) => n.id === nodeId);
-        let nodeTokenAddress = "";
+        if (!node) {
+          console.error(`Node not found for ID: ${nodeId}`);
+          return;
+        }
 
+        let nodeTokenAddress = "";
         if (node.data.nodeType === "token") {
           nodeTokenAddress = tokenMintAddresses[node.data.label];
         } else if (node.data.nodeType === "lst") {
@@ -266,7 +268,9 @@ const StrategyModal: FC<StrategyModalProps> = ({
           <div className="flex flex-col justify-between">
             <div>
               <h3 className="text-xl font-bold mb-1">{strategy.name}</h3>
-              <p className="text-muted-foreground mb-2">APY: {apy} (?)</p>
+              <p className="text-muted-foreground mb-2">
+                APY: {strategy.apy ? `${strategy.apy.toFixed(2)}%` : "0%"} (?)
+              </p>
               {strategy.description && (
                 <p className="text-sm text-gray-400 mb-3">
                   Description: {strategy.description}
