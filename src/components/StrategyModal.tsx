@@ -75,6 +75,8 @@ const StrategyModal: FC<StrategyModalProps> = ({
   onClose,
 }) => {
   const { publicKey, signTransaction } = useWallet();
+  const [isLiked, setIsLiked] = useState(false);
+  const [localLikes, setLocalLikes] = useState(strategy.likes || 0);
   const { agent } = useAgent();
   const [loading, setLoading] = useState(false);
   const [tokenBalances, setTokenBalances] = useState<TokenBalances>({
@@ -515,17 +517,30 @@ const StrategyModal: FC<StrategyModalProps> = ({
 
         {/* Social interaction features */}
         <div className="absolute bottom-6 left-6 flex items-center gap-6">
-          <div className="flex items-center gap-1.5 text-white hover:text-emerald-400 transition-colors cursor-pointer">
-            <HeartIcon className="w-5 h-5 stroke-2" />
-            <span className="text-sm font-medium">{strategy.likes || 0}</span>
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsLiked(!isLiked);
+              setLocalLikes((prev) => (isLiked ? prev - 1 : prev + 1));
+            }}
+            className={`flex items-center gap-1.5 ${
+              isLiked
+                ? "text-secondary hover:text-secondary/80"
+                : "text-white hover:text-secondary/80"
+            } transition-colors cursor-pointer`}
+          >
+            <HeartIcon
+              className={`w-5 h-5 ${isLiked ? "fill-current" : ""} stroke-2`}
+            />
+            <span className="text-sm font-medium">{localLikes}</span>
           </div>
-          <div className="flex items-center gap-1.5 text-white hover:text-emerald-400 transition-colors cursor-pointer">
+          <div className="flex items-center gap-1.5 text-white hover:text-secondary transition-colors cursor-pointer">
             <ChatBubbleOvalLeftIcon className="w-5 h-5 stroke-2" />
             <span className="text-sm font-medium">
               {strategy.comments || 0}
             </span>
           </div>
-          <div className="flex items-center gap-1.5 text-white hover:text-emerald-400 transition-colors cursor-pointer">
+          <div className="flex items-center gap-1.5 text-white hover:text-secondary transition-colors cursor-pointer">
             <ShareIcon className="w-5 h-5 stroke-2" />
             <span className="text-sm font-medium">{strategy.shares || 0}</span>
           </div>
