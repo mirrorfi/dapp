@@ -390,7 +390,6 @@ const StrategyModal: FC<StrategyModalProps> = ({
                 <span className="text-emerald-400">
                   {strategy.apy ? `${strategy.apy.toFixed(2)}%` : "0%"}
                 </span>{" "}
-                (?)
               </p>
               {strategy.description && (
                 <p className="text-sm text-gray-400 mb-2">
