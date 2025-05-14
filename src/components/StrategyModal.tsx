@@ -2,6 +2,11 @@ import { useState, useEffect } from "react";
 import type { FC } from "react";
 import Image from "next/image";
 import { useWallet } from "@solana/wallet-adapter-react";
+import {
+  HeartIcon,
+  ChatBubbleOvalLeftIcon,
+  ShareIcon,
+} from "@heroicons/react/24/outline";
 import { Input } from "@/components/ui/input";
 import {
   Dialog,
@@ -53,6 +58,9 @@ interface Strategy {
   edges: Edge[];
   apy?: number;
   categories?: StrategyCategory[];
+  likes?: number;
+  comments?: number;
+  shares?: number;
 }
 
 interface StrategyModalProps {
@@ -502,6 +510,24 @@ const StrategyModal: FC<StrategyModalProps> = ({
                 Exit Strategy
               </Button>
             </div>
+          </div>
+        </div>
+
+        {/* Social interaction features */}
+        <div className="absolute bottom-6 left-6 flex items-center gap-6">
+          <div className="flex items-center gap-1.5 text-white hover:text-emerald-400 transition-colors cursor-pointer">
+            <HeartIcon className="w-5 h-5 stroke-2" />
+            <span className="text-sm font-medium">{strategy.likes || 0}</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-white hover:text-emerald-400 transition-colors cursor-pointer">
+            <ChatBubbleOvalLeftIcon className="w-5 h-5 stroke-2" />
+            <span className="text-sm font-medium">
+              {strategy.comments || 0}
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5 text-white hover:text-emerald-400 transition-colors cursor-pointer">
+            <ShareIcon className="w-5 h-5 stroke-2" />
+            <span className="text-sm font-medium">{strategy.shares || 0}</span>
           </div>
         </div>
       </DialogContent>

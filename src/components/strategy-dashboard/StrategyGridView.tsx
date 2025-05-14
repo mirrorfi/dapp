@@ -93,17 +93,23 @@ export const StrategyGridView = ({
               <SimplifiedFlow nodes={strategy.nodes} edges={strategy.edges} />
               {/* Interaction features */}
               <div className="absolute bottom-3 left-4 flex items-center gap-3 z-20">
-                <div className="flex items-center gap-1 text-white hover:text-emerald-400 transition-colors cursor-pointer">
+                <div className="flex items-center gap-1 text-white">
                   <HeartIcon className="w-5 h-5 stroke-2" />
-                  <span className="text-sm font-medium">42</span>
+                  <span className="text-sm font-medium">
+                    {strategy.likes || 0}
+                  </span>
                 </div>
-                <div className="flex items-center gap-1 text-white hover:text-emerald-400 transition-colors cursor-pointer">
+                <div className="flex items-center gap-1 text-white">
                   <ChatBubbleOvalLeftIcon className="w-5 h-5 stroke-2" />
-                  <span className="text-sm font-medium">12</span>
+                  <span className="text-sm font-medium">
+                    {strategy.comments || 0}
+                  </span>
                 </div>
-                <div className="flex items-center gap-1 text-white hover:text-emerald-400 transition-colors cursor-pointer">
+                <div className="flex items-center gap-1 text-white">
                   <ShareIcon className="w-5 h-5 stroke-2" />
-                  <span className="text-sm font-medium">8</span>
+                  <span className="text-sm font-medium">
+                    {strategy.shares || 0}
+                  </span>
                 </div>
               </div>
             </div>
