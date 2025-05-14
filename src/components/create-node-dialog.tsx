@@ -38,6 +38,15 @@ interface CreateNodeDialogProps {
   nodes: Node[]
 }
 
+function getTokenImage(token: string) {
+  if (Object.keys(tokenLogos).includes(token)) {
+    return tokenLogos[token]
+  } else if (Object.keys(LSTLogos).includes(token)) {
+    return LSTLogos[token]
+  }
+  return ""
+}
+
 export function CreateNodeDialog({ onCreateNode, onCreateMeteoraNode ,selectedNode, isOpen, onClose, nodes }: CreateNodeDialogProps) {
   const userTokenOptions = nodes.filter((node) => node.data.nodeType !== "protocol" && node.data.label !== "Wallet").map((node) => node.data.label)
   const selectedNodeType = selectedNode?.data?.nodeType
@@ -250,7 +259,7 @@ export function CreateNodeDialog({ onCreateNode, onCreateMeteoraNode ,selectedNo
                   }}
                 >
                   <div className="flex items-center gap-2">
-                  <Image src={`/PNG/${token.toLowerCase()}-logo.png`} alt={`${token} logo`} width={24} height={24} />{token}
+                  <Image src={getTokenImage(token)} alt={`${token} logo`} width={24} height={24} />{token}
                   </div>
                 </Button>
               ))}
