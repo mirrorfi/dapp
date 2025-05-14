@@ -17,6 +17,10 @@ import { useToast } from "@/components/ui/use-toast";
 import { generateTree, executeTree } from "@/lib/txnUtils/treeUtils";
 import Moralis from "moralis";
 import {
+  StrategyCategory,
+  getCategoryStyle,
+} from "@/components/strategy-dashboard/types";
+import {
   LSTLogos,
   LSTMintAddresses,
   tokenLogos,
@@ -41,6 +45,7 @@ interface Strategy {
   nodes: Node[];
   edges: Edge[];
   apy?: number;
+  categories?: StrategyCategory[];
 }
 
 interface StrategyModalProps {
@@ -265,17 +270,29 @@ const StrategyModal: FC<StrategyModalProps> = ({
           </div>
 
           {/* Right side: Strategy details */}
-          <div className="flex flex-col justify-between">
+          <div className="flex flex-col justify-between -mt-4">
             <div>
               <h3 className="text-xl font-bold mb-1">{strategy.name}</h3>
               <p className="text-muted-foreground mb-2">
                 APY: {strategy.apy ? `${strategy.apy.toFixed(2)}%` : "0%"} (?)
               </p>
               {strategy.description && (
-                <p className="text-sm text-gray-400 mb-3">
+                <p className="text-sm text-gray-400 mb-2">
                   Description: {strategy.description}
                 </p>
               )}
+              <div className="flex gap-1 flex-wrap mb-3">
+                {strategy.categories?.map((category, index) => (
+                  <span
+                    key={index}
+                    className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getCategoryStyle(
+                      category
+                    )}`}
+                  >
+                    {category}
+                  </span>
+                ))}
+              </div>
             </div>
 
             <div className="flex flex-col space-y-4">
