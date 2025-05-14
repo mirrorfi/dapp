@@ -83,7 +83,7 @@ export const StrategyListView = ({
               ))}
             </div>
             <div className="text-right">
-              <span className="font-medium">{strategy.apy?.toFixed(2)}%</span>
+              <span className="font-medium text-green-400">{strategy.apy?.toFixed(2)}%</span>
             </div>
           </div>
         ))}

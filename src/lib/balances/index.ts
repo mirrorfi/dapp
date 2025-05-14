@@ -38,7 +38,6 @@ export async function getTokenBalance(pubKey:string, tokenMint: string){
         if(!res.ok){
             throw new Error(`Failed to fetch: ${res.status}`);
         }
-        
         const data = await res.json();
         console.log(data);
         const balance = data.tokenAmount.uiAmountString;

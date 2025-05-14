@@ -14,22 +14,22 @@ export async function getPool(tokenXAddress: string, tokenYAddress: string) {
 
 // Get the APY of a Meteora Position
 export async function getMeteoraPoolAPY(tokenXAddress: string, tokenYAddress: string) {
-    console.log("Fetching Meteora Pool APY...");
+    // console.log("Fetching Meteora Pool APY...");
     const pool = await getPool(tokenXAddress, tokenYAddress);
-    console.log("Inner Pool Data:", pool);
+    //console.log("Inner Pool Data:", pool);
     return pool.pairs[0].apr * 365;
 }
 
 // Get all the user positions
 export async function getAllUserPositions(userPublicKey: PublicKey) {
     const positions = await DLMM.getAllLbPairPositionsByUser(connection, userPublicKey);
-    console.log("All User Positions:", positions);
+    //console.log("All User Positions:", positions);
 
     const userPortfolio: any = [];
 
     positions.forEach(async (position: any) => {
-        console.log(position);
-        console.log("Pair Public Key:", position.publicKey.toBase58());
+        //console.log(position);
+        //console.log("Pair Public Key:", position.publicKey.toBase58());
 
         const pairAddress = position.publicKey.toBase58();
         const pairStatRes = await fetch(`https://dlmm-api.meteora.ag/pair/${pairAddress}`);
@@ -43,8 +43,8 @@ export async function getAllUserPositions(userPublicKey: PublicKey) {
         const tokenY_info_json = await tokenY_info_res.json();
         const tokenX_info = tokenX_info_json.result.data;
         const tokenY_info = tokenY_info_json.result.data;
-        console.log("Token X Info:", tokenX_info);
-        console.log("Token Y Info:", tokenY_info);
+        //console.log("Token X Info:", tokenX_info);
+        //console.log("Token Y Info:", tokenY_info);
 
         const tokenX_symbol = tokenX_info.symbol === "wSOL" ? "SOL" : tokenX_info.symbol;
         const tokenY_symbol = tokenY_info.symbol === "wSOL" ? "SOL" : tokenY_info.symbol;
@@ -54,8 +54,8 @@ export async function getAllUserPositions(userPublicKey: PublicKey) {
         const priceX = Number(price_data.data[tokenX.mint.address.toString()].price);
         const priceY = Number(price_data.data[tokenY.mint.address.toString()].price);
 
-        console.log("Price X:", priceX);
-        console.log("Price Y:", priceY);
+        //console.log("Price X:", priceX);
+        //console.log("Price Y:", priceY);
 
 
         const positionsData = position.lbPairPositionsData;
