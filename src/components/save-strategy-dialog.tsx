@@ -57,15 +57,19 @@ export function SaveStrategyDialog({ nodeList, edgeList, userAddress, isOpen, on
             }));
 
             const categories:string[] = [];
+            let isMeteora = false;
+            let isLST = false;
             sanitizedNodes.forEach((node) => {
                 console.log(node);
                 if (node.data.label === "Meteora"){
-                    categories.push("DLMM");
+                    isMeteora = true;
                 }
                 if (node.data.nodeType === "lst"){
-                    categories.push("LST");
+                    isLST = true;
                 }
             });
+            if(isMeteora){categories.push("DLMM");}
+            if(isLST){categories.push("LST");}
             console.log("Categories:", categories);
 
             const strategy = {
