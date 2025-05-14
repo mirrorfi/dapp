@@ -365,7 +365,7 @@ const StrategyModal: FC<StrategyModalProps> = ({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-6xl border-0 border-none">
-        <DialogHeader className="-mt-8">
+        <DialogHeader className="-mt-8 w-fit">
           <DialogTitle className="text-2xl font-bold">
             Mirror Strategy
           </DialogTitle>
@@ -386,7 +386,11 @@ const StrategyModal: FC<StrategyModalProps> = ({
             <div>
               <h3 className="text-xl font-bold mb-1">{strategy.name}</h3>
               <p className="text-muted-foreground mb-2">
-                APY: {strategy.apy ? `${strategy.apy.toFixed(2)}%` : "0%"} (?)
+                APY:{" "}
+                <span className="text-emerald-400">
+                  {strategy.apy ? `${strategy.apy.toFixed(2)}%` : "0%"}
+                </span>{" "}
+                (?)
               </p>
               {strategy.description && (
                 <p className="text-sm text-gray-400 mb-2">
