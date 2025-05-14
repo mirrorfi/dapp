@@ -1,7 +1,7 @@
 import SimplifiedFlow from "@/components/simplified-flow";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
-import { Strategy } from "./types";
+import { Strategy, getCategoryStyle } from "./types";
 import { tokenLogos } from "@/constants/nodeOptions";
 
 interface StrategyGridViewProps {
@@ -72,13 +72,9 @@ export const StrategyGridView = ({
                       {strategy.categories?.map((category, index) => (
                         <span
                           key={index}
-                          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                            category === "LST"
-                              ? "bg-blue-100 text-blue-800"
-                              : category === "DLMM"
-                              ? "bg-purple-100 text-purple-800"
-                              : "bg-green-100 text-green-800"
-                          }`}
+                          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getCategoryStyle(
+                            category
+                          )}`}
                         >
                           {category}
                         </span>

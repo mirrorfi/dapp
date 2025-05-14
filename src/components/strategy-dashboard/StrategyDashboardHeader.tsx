@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { LayoutGrid, List, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-import { Strategy } from "./types";
+import { Strategy, STRATEGY_CATEGORIES, StrategyCategory } from "./types";
 
 interface StrategyDashboardHeaderProps {
   strategies: Strategy[];
@@ -11,8 +11,6 @@ interface StrategyDashboardHeaderProps {
   viewMode: "grid" | "list";
   setViewMode: (mode: "grid" | "list") => void;
 }
-
-const CATEGORIES = ["LST", "DLMM", "Lending"] as const;
 
 export const StrategyDashboardHeader = ({
   strategies,
@@ -23,7 +21,7 @@ export const StrategyDashboardHeader = ({
 }: StrategyDashboardHeaderProps) => {
   const router = useRouter();
 
-  const getCategoryCount = (category: "LST" | "DLMM" | "Lending") =>
+  const getCategoryCount = (category: StrategyCategory) =>
     strategies.filter((s) => s.categories?.includes(category)).length;
 
   return (
@@ -40,7 +38,7 @@ export const StrategyDashboardHeader = ({
           >
             All ({strategies.length})
           </button>
-          {CATEGORIES.map((category) => (
+          {STRATEGY_CATEGORIES.map((category: StrategyCategory) => (
             <button
               key={category}
               onClick={() => setCategoryFilter(category.toLowerCase())}
