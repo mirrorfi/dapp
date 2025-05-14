@@ -12,7 +12,7 @@ import {getAllUserPositions} from '@/lib/meteora';
 
 import { getPool, getMeteoraPoolAPY } from "@/lib/meteora";
 import { tokenMintAddresses, allAddresses } from "@/constants/nodeOptions"; 
-import { getTokenBalances } from "@/lib/balances";
+import { getTokenBalance } from "@/lib/balances";
 
 const RPC_LINK =
   process.env.NEXT_PUBLIC_RPC_LINK || "https://api.mainnet-beta.solana.com";
@@ -249,10 +249,11 @@ export default function MeteoraPage() {
         console.log("Wallet not connected or public key not available");
         return;
       }
-      const tokenBalances = await getTokenBalances(publicKey.toBase58(), [
-        allAddresses["USDC"],
-        allAddresses["JitoSOL"],
-      ]);
+      // const tokenBalances = await getTokenBalance(publicKey.toBase58(), [
+      //   allAddresses["USDC"],
+      //   allAddresses["JitoSOL"],
+      // ]);
+      const tokenBalances = await getTokenBalance(publicKey.toString(), allAddresses["USDC"]);
       console.log("Token Balances:", tokenBalances);
     }
 
