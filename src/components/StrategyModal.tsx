@@ -393,7 +393,7 @@ const StrategyModal: FC<StrategyModalProps> = ({
               </p>
               {strategy.description && (
                 <p className="text-sm text-gray-400 mb-2">
-                  Description: {strategy.description}
+                  {strategy.description}
                 </p>
               )}
               <div className="flex gap-1 flex-wrap mb-3">
