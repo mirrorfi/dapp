@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import type { FC } from "react";
 import Image from "next/image";
-import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { getTokenBalances } from "@/lib/solana";
+import { useWallet } from "@solana/wallet-adapter-react";
 import { Input } from "@/components/ui/input";
 import {
   Dialog,
@@ -27,15 +26,23 @@ import {
   tokenMintAddresses,
 } from "@/constants/nodeOptions";
 import { useAgent } from "@/lib/AgentProvider";
-interface TokenBalance {
+
+interface TokenAccountData {
+  isNative: boolean;
   mint: string;
-  balance: number;
-  decimals: number;
+  owner: string;
+  state: string;
+  tokenAmount: {
+    amount: string;
+    decimals: number;
+    uiAmount: number;
+    uiAmountString: string;
+  };
 }
 
 interface TokenBalances {
-  tokens: TokenBalance[];
-  sol: number;
+  tokens: TokenAccountData[];
+  sol: number; // TODO: Handle SOL balance separately if needed
 }
 
 interface Strategy {
@@ -61,7 +68,6 @@ const StrategyModal: FC<StrategyModalProps> = ({
 }) => {
   const { publicKey, signTransaction } = useWallet();
   const { agent } = useAgent();
-  const { connection } = useConnection();
   const [loading, setLoading] = useState(false);
   const [tokenBalances, setTokenBalances] = useState<TokenBalances>({
     tokens: [],
@@ -71,6 +77,14 @@ const StrategyModal: FC<StrategyModalProps> = ({
     {}
   );
 
+  const getTokenMintAddress = (label: string, nodeType?: string) => {
+    return label === "SOL"
+      ? "So11111111111111111111111111111111111111112"
+      : nodeType === "lst"
+      ? LSTMintAddresses[label]
+      : tokenMintAddresses[label];
+  };
+
   // Get required input tokens from strategy graph
   const getRequiredTokens = () => {
     const sourceEdges = strategy.edges.filter((edge) => edge.source === "1");
@@ -79,7 +93,12 @@ const StrategyModal: FC<StrategyModalProps> = ({
         const targetNode = strategy.nodes.find(
           (node) => node.id === edge.target
         );
-        if (targetNode && targetNode.data.nodeType === "token") {
+        // Include both regular tokens and SOL nodes
+        if (
+          targetNode &&
+          (targetNode.data.nodeType === "token" ||
+            targetNode.data.label === "SOL")
+        ) {
           return {
             id: targetNode.id,
             label: targetNode.data.label,
@@ -107,23 +126,100 @@ const StrategyModal: FC<StrategyModalProps> = ({
 
   const { toast } = useToast();
 
+  const fetchTokenBalance = async (
+    publicKeyStr: string,
+    tokenMint: string,
+    label: string
+  ): Promise<TokenAccountData | null> => {
+    try {
+      console.log(`Fetching balance for ${label} (${tokenMint})...`);
+      const response = await fetch(
+        `/api/balances?pubKey=${publicKeyStr}&tokenMint=${tokenMint}`
+      );
+      if (!response.ok) {
+        console.error(
+          `Failed to fetch balance for ${label}: ${response.statusText}`
+        );
+        return null;
+      }
+      const data = await response.json();
+      console.log(`Balance data for ${label}:`, data);
+
+      // Check for API error response
+      if (data.error) {
+        console.error(`API error for ${label}:`, data.error);
+        return null;
+      }
+
+      if (!data || !data.tokenAmount) {
+        // For new token accounts that haven't been created yet, return a zero balance
+        return {
+          isNative: false,
+          mint: tokenMint,
+          owner: publicKeyStr,
+          state: "initialized",
+          tokenAmount: {
+            amount: "0",
+            decimals: 9,
+            uiAmount: 0,
+            uiAmountString: "0",
+          },
+        };
+      }
+      return data;
+    } catch (error) {
+      console.error(`Error fetching balance for ${label}:`, error);
+      return null;
+    }
+  };
+
   useEffect(() => {
     const fetchBalances = async () => {
       if (!publicKey) return;
 
       try {
         setLoading(true);
-        const balances = await getTokenBalances(connection, publicKey);
-        setTokenBalances(balances);
+        const requiredTokens = getRequiredTokens();
+        const pubKeyStr = publicKey.toString();
+        const balancePromises = requiredTokens.map(
+          async ({ label, nodeType }) => {
+            const tokenMintAddress = getTokenMintAddress(label, nodeType);
+            if (!tokenMintAddress) {
+              console.error(`No mint address found for ${label}`);
+              return null;
+            }
+            return await fetchTokenBalance(pubKeyStr, tokenMintAddress, label);
+          }
+        );
+
+        const balanceResults = await Promise.all(balancePromises);
+        const validBalances = balanceResults.filter(
+          (balance): balance is TokenAccountData => balance !== null
+        );
+
+        // All balances including SOL are now handled in the tokens array
+        setTokenBalances({
+          tokens: validBalances,
+          sol: 0,
+        });
       } catch (error) {
         console.error("Failed to fetch token balances:", error);
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : "Failed to load token balances";
+        toast({
+          title: "Error",
+          description: `${errorMessage}. Please try again.`,
+          variant: "destructive",
+        });
       } finally {
         setLoading(false);
       }
     };
 
     fetchBalances();
-  }, [connection, publicKey]);
+  }, [publicKey]);
 
   const [updatedNodes, setUpdatedNodes] = useState<Node[]>([]);
 
@@ -151,19 +247,32 @@ const StrategyModal: FC<StrategyModalProps> = ({
     setUpdatedNodes(nodesWithParents);
   }, [strategy.nodes, strategy.edges]);
 
-  const getMaxAmount = (tokenLabel: string) => {
-    if (tokenLabel === "SOL") {
-      return tokenBalances.sol;
-    }
-    const token = tokenBalances.tokens.find((t) => t.mint === tokenLabel);
-    return token?.balance || 0;
+  const getFormattedBalance = (label: string, nodeType?: string) => {
+    // For all tokens including SOL, find the token by mint address in the tokens array
+    const tokenMintAddress = getTokenMintAddress(label, nodeType);
+    const token = tokenBalances.tokens.find((t) => t.mint === tokenMintAddress);
+    console.log(`Balance for ${label}:`, token?.tokenAmount);
+    return token?.tokenAmount.uiAmountString || "0";
+  };
+
+  const getMaxAmount = (label: string, nodeType?: string) => {
+    const tokenMintAddress = getTokenMintAddress(label, nodeType);
+    const token = tokenBalances.tokens.find((t) => t.mint === tokenMintAddress);
+    console.log(
+      `Max amount for ${label} (${tokenMintAddress}):`,
+      token?.tokenAmount
+    );
+    return token?.tokenAmount.uiAmount || 0;
   };
 
   const handleMaxAmount = (nodeId: string) => {
-    const tokenLabel = getTokenLabel(nodeId);
+    const node = strategy.nodes.find((n) => n.id === nodeId);
+    if (!node) return;
+
+    const tokenLabel = node.data.label;
     setNodeAmounts((prev) => ({
       ...prev,
-      [nodeId]: getMaxAmount(tokenLabel).toString(),
+      [nodeId]: getMaxAmount(tokenLabel, node.data.nodeType).toString(),
     }));
   };
 
@@ -202,11 +311,14 @@ const StrategyModal: FC<StrategyModalProps> = ({
           return;
         }
 
-        let nodeTokenAddress = "";
-        if (node.data.nodeType === "token") {
-          nodeTokenAddress = tokenMintAddresses[node.data.label];
-        } else if (node.data.nodeType === "lst") {
-          nodeTokenAddress = LSTMintAddresses[node.data.label];
+        const nodeTokenAddress = getTokenMintAddress(
+          node.data.label,
+          node.data.nodeType
+        );
+
+        if (!nodeTokenAddress) {
+          console.error(`Token address not found for ${node.data.label}`);
+          return;
         }
 
         const response = await Moralis.SolApi.token.getTokenMetadata({
@@ -315,12 +427,7 @@ const StrategyModal: FC<StrategyModalProps> = ({
                       </div>
                       <div className="flex items-center space-x-4">
                         <p className="font-medium text-sm text-gray-500">
-                          {label === "SOL"
-                            ? tokenBalances.sol.toFixed(4)
-                            : tokenBalances.tokens
-                                .find((t) => t.mint === label)
-                                ?.balance.toFixed(4) || "0"}{" "}
-                          {label}
+                          {getFormattedBalance(label, nodeType)} {label}
                         </p>
                         <div className="flex space-x-2">
                           <Button
@@ -330,7 +437,9 @@ const StrategyModal: FC<StrategyModalProps> = ({
                             onClick={() =>
                               setNodeAmounts((prev) => ({
                                 ...prev,
-                                [id]: (getMaxAmount(label) / 2).toString(),
+                                [id]: (
+                                  getMaxAmount(label, nodeType) / 2
+                                ).toString(),
                               }))
                             }
                           >
