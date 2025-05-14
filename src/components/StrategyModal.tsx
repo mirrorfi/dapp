@@ -372,7 +372,7 @@ const StrategyModal: FC<StrategyModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-6xl border-0 border-none">
+      <DialogContent className="sm:max-w-6xl border-0 border-none bg-background/65 backdrop-blur-md">
         <DialogHeader className="-mt-8 w-fit">
           <DialogTitle className="text-2xl font-bold">
             Mirror Strategy
