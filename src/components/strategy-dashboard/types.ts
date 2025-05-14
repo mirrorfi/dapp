@@ -25,6 +25,6 @@ export interface Strategy {
   name: string;
   user: string;
   __v: number;
-  category?: "LST" | "DLMM" | "Lending";
+  categories?: ("LST" | "DLMM" | "Lending")[];
   apy?: number;
 }

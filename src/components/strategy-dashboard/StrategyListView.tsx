@@ -39,7 +39,9 @@ export const StrategyListView = ({
       {strategies
         .filter((strategy) => {
           if (categoryFilter === "all") return true;
-          return strategy.category?.toLowerCase() === categoryFilter;
+          return strategy.categories?.some(
+            (category) => category.toLowerCase() === categoryFilter
+          );
         })
         .sort((a, b) =>
           sortDirection === "asc"
@@ -68,18 +70,21 @@ export const StrategyListView = ({
                   />
                 ))}
             </div>
-            <div className="flex items-center gap-2">
-              <span
-                className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                  strategy.category === "LST"
-                    ? "bg-blue-100 text-blue-800"
-                    : strategy.category === "DLMM"
-                    ? "bg-purple-100 text-purple-800"
-                    : "bg-green-100 text-green-800"
-                }`}
-              >
-                {strategy.category}
-              </span>
+            <div className="flex items-center gap-1 flex-wrap">
+              {strategy.categories?.map((category, index) => (
+                <span
+                  key={index}
+                  className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                    category === "LST"
+                      ? "bg-blue-100 text-blue-800"
+                      : category === "DLMM"
+                      ? "bg-purple-100 text-purple-800"
+                      : "bg-green-100 text-green-800"
+                  }`}
+                >
+                  {category}
+                </span>
+              ))}
             </div>
             <div className="text-right">
               <span className="font-medium">{strategy.apy?.toFixed(2)}%</span>

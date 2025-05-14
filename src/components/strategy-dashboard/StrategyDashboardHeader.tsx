@@ -23,8 +23,8 @@ export const StrategyDashboardHeader = ({
 }: StrategyDashboardHeaderProps) => {
   const router = useRouter();
 
-  const getCategoryCount = (category: string) =>
-    strategies.filter((s) => s.category === category).length;
+  const getCategoryCount = (category: "LST" | "DLMM" | "Lending") =>
+    strategies.filter((s) => s.categories?.includes(category)).length;
 
   return (
     <div className="mb-8 flex items-center justify-between gap-4">

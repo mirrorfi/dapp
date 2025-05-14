@@ -10,6 +10,7 @@ import Moralis from "moralis";
 import { StrategyDashboardHeader } from "@/components/strategy-dashboard/StrategyDashboardHeader";
 import { StrategyGridView } from "@/components/strategy-dashboard/StrategyGridView";
 import { StrategyListView } from "@/components/strategy-dashboard/StrategyListView";
+import { StrategyDashboardSkeleton } from "@/components/strategy-dashboard/StrategyDashboardSkeleton";
 import { Strategy } from "@/components/strategy-dashboard/types";
 import { allAddresses } from "@/constants/nodeOptions";
 import { getMeteoraPoolAPY } from "@/lib/meteora";
@@ -47,6 +48,7 @@ const StrategyDashboardPage = () => {
       apiKey: process.env.NEXT_PUBLIC_MORALIS_API_KEY,
     });
   }, []);
+
   useEffect(() => {
     const fetchStrategies = async () => {
       try {
@@ -56,60 +58,61 @@ const StrategyDashboardPage = () => {
         }
         const data = await response.json();
 
-        const dataWithCategories = await Promise.all(data.map(async (strategy: Strategy) => {
-          // Calculate total APY from LST nodes
-          // const totalAPY = (strategy.nodes
-          //   .filter((node) => node.data.nodeType === "lst")
-          //   .reduce((sum, node) => {
-          //     const nodeAPY = apyValues[node.data.label] || 0;
-          //     return sum + nodeAPY;
-          //   }, 0));
+        const dataWithCategories = await Promise.all(
+          data.map(async (strategy: Strategy) => {
+            // Calculate total APY from LST nodes
+            // const totalAPY = (strategy.nodes
+            //   .filter((node) => node.data.nodeType === "lst")
+            //   .reduce((sum, node) => {
+            //     const nodeAPY = apyValues[node.data.label] || 0;
+            //     return sum + nodeAPY;
+            //   }, 0));
 
-          const meteoraAPYs = await Promise.all(
-            strategy.nodes
-              .filter((node) => node.data.label === "Meteora")
-              .map(async (node) => {
-                // Find the parent nodes of the Meteora node
-                const parentLabels = strategy.edges
-                  .filter((edge) => edge.target === node.id)
-                  .map((edge) => {
-                    const parentNode = strategy.nodes.find(
-                      (n) => n.id === edge.source
-                    );
-                    return parentNode ? parentNode.data.label : null;
-                  })
-                  .filter((label): label is string => label !== null);
+            const meteoraAPYs = await Promise.all(
+              strategy.nodes
+                .filter((node) => node.data.label === "Meteora")
+                .map(async (node) => {
+                  // Find the parent nodes of the Meteora node
+                  const parentLabels = strategy.edges
+                    .filter((edge) => edge.target === node.id)
+                    .map((edge) => {
+                      const parentNode = strategy.nodes.find(
+                        (n) => n.id === edge.source
+                      );
+                      return parentNode ? parentNode.data.label : null;
+                    })
+                    .filter((label): label is string => label !== null);
 
-                // Get the addresses of the parent nodes
-                const tokenX_label = parentLabels[0];
-                const tokenX_address = allAddresses[tokenX_label];
-                const tokenY_label = parentLabels[1];
-                const tokenY_address = allAddresses[tokenY_label];
-                // Get the APY for the Meteora node
-                const meteoraAPY = await getMeteoraPoolAPY(
-                  tokenX_address,
-                  tokenY_address
-                );
-                return (meteoraAPY/100) || 0;
-              })
-          );
+                  // Get the addresses of the parent nodes
+                  const tokenX_label = parentLabels[0];
+                  const tokenX_address = allAddresses[tokenX_label];
+                  const tokenY_label = parentLabels[1];
+                  const tokenY_address = allAddresses[tokenY_label];
+                  // Get the APY for the Meteora node
+                  const meteoraAPY = await getMeteoraPoolAPY(
+                    tokenX_address,
+                    tokenY_address
+                  );
+                  return meteoraAPY / 100 || 0;
+                })
+            );
 
-          const totalAPY =
-            strategy.nodes
-              .filter((node) => node.data.nodeType === "lst")
-              .reduce((sum, node) => {
-                const nodeAPY = apyValues[node.data.label] || 0;
-                return sum + (nodeAPY);
-              }, 0) +
-            meteoraAPYs.reduce((sum, apy) => sum + apy, 0);
-          
-          console.log("Total APY:", totalAPY);
-          return {
-            ...strategy,
-            category: strategy.category || "LST",
-            apy: totalAPY * 100, // Convert to percentage
-          };
-        }));
+            const totalAPY =
+              strategy.nodes
+                .filter((node) => node.data.nodeType === "lst")
+                .reduce((sum, node) => {
+                  const nodeAPY = apyValues[node.data.label] || 0;
+                  return sum + nodeAPY;
+                }, 0) + meteoraAPYs.reduce((sum, apy) => sum + apy, 0);
+
+            console.log("Total APY:", totalAPY);
+            return {
+              ...strategy,
+              categories: strategy.categories || ["LST"],
+              apy: totalAPY * 100, // Convert to percentage
+            };
+          })
+        );
         console.log("Fuck is this??", dataWithCategories);
         setStrategies(dataWithCategories);
       } catch (err) {
@@ -136,80 +139,9 @@ const StrategyDashboardPage = () => {
     setSelectedStrategy(null);
   };
   console.log("Strategies:", strategies);
-  if (loading) {
-    return (
-      <div className="flex flex-col min-h-screen bg-gradient-to-br from-background via-background/95 to-blue-950/20 text-foreground">
-        <main className="p-6">
-          {/* Header Skeleton */}
-          <div className="mb-8 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="h-8 w-24">
-                  <div className="h-full rounded-full border-gray-600 border-2 bg-card overflow-hidden">
-                    <div className="w-full h-full animate-pulse bg-muted" />
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="h-8 w-20">
-                <div className="h-full rounded-full border-gray-600 border-2 bg-card overflow-hidden">
-                  <div className="w-full h-full animate-pulse bg-muted" />
-                </div>
-              </div>
-              <div className="h-8 w-32">
-                <div className="h-full rounded-full border-gray-600 border-2 bg-card overflow-hidden">
-                  <div className="w-full h-full animate-pulse bg-muted" />
-                </div>
-              </div>
-            </div>
-          </div>
 
-          {/* Grid View Skeleton */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div
-                key={i}
-                className="overflow-hidden border-none backdrop-blur-sm relative min-h-[300px] rounded-lg bg-card"
-              >
-                <div className="absolute inset-0">
-                  <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/25 to-transparent h-32">
-                    <div className="flex flex-col mt-3 px-5">
-                      <div className="flex items-center justify-between w-full mb-4">
-                        <div className="h-6 w-32 rounded-md overflow-hidden">
-                          <div className="w-full h-full animate-pulse bg-muted" />
-                        </div>
-                        <div className="h-6 w-20 rounded-md overflow-hidden">
-                          <div className="w-full h-full animate-pulse bg-muted" />
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-1">
-                          {[1, 2, 3].map((j) => (
-                            <div
-                              key={j}
-                              className="w-6 h-6 rounded-full overflow-hidden"
-                            >
-                              <div className="w-full h-full animate-pulse bg-muted" />
-                            </div>
-                          ))}
-                        </div>
-                        <div className="h-6 w-16 rounded-full overflow-hidden">
-                          <div className="w-full h-full animate-pulse bg-muted" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="absolute inset-x-0 top-[60px] bottom-0">
-                  <div className="w-full h-full animate-pulse bg-muted/20" />
-                </div>
-              </div>
-            ))}
-          </div>
-        </main>
-      </div>
-    );
+  if (loading) {
+    return <StrategyDashboardSkeleton />;
   }
 
   if (error) {
