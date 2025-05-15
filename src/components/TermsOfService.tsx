@@ -11,7 +11,10 @@ export const TermsOfService: FC<TermsOfServiceProps> = ({ onSign }) => {
   const { wallet, connected, publicKey, signMessage } = useWallet();
   const [error, setError] = useState<string | null>(null);
 
-  const TERMS_OF_SERVICE = `By signing this message, I agree to the following terms:
+  const TERMS_OF_SERVICE = `WARNING! This is an initial demo of MirrorFi!
+PLEASE USE IT AT YOUR OWN RISK!
+
+By signing this message, I agree to the following terms:
 
 1. I understand that using this platform involves financial risks
 2. I am responsible for securing my wallet and private keys
@@ -54,7 +57,7 @@ export const TermsOfService: FC<TermsOfServiceProps> = ({ onSign }) => {
 
   return (
     <div className="max-w-2xl mx-auto p-6 space-y-6">
-      <h2 className="text-2xl font-bold">Terms of Service</h2>
+      <h2 className="text-center text-3xl font-bold">Terms of Service</h2>
       <pre className="whitespace-pre-wrap bg-card p-4 rounded-lg">
         {TERMS_OF_SERVICE}
       </pre>

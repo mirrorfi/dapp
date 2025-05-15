@@ -372,10 +372,7 @@ const CreateStrategyPage = (nodeList: Node[] = [], edgeList: Edge[] = []) => {
                 <p className="text-xs text-gray-400 flex">
                   Click on a node and click on 🗑️ button to remove it.
                   <br />
-                  <br />
                   - Deleting a node will also delete the next actions from it.
-                  <br />
-                  <br />
                   <br />
                   - You can't delete the Wallet node.
                   <br />

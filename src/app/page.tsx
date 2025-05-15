@@ -5,7 +5,13 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useEffect, useState } from "react";
 import StrategyDashboardPage from "./strategy-dashboard/page";
 
-export default function Home() {
+
+type Props = {
+  searchParams: { id?: string }
+}
+
+
+export default function Home({ searchParams }: Props) {
   const { connected, publicKey } = useWallet();
   const [hasSignedTerms, setHasSignedTerms] = useState(false);
   const [checking, setChecking] = useState(true);
@@ -47,5 +53,5 @@ export default function Home() {
     );
   }
 
-  return <StrategyDashboardPage />;
+  return <StrategyDashboardPage searchParams={searchParams}/>;
 }
