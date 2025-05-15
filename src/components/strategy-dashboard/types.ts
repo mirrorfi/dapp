@@ -33,7 +33,7 @@ export interface Edge {
 }
 
 export interface Strategy {
-  _id: string;
+  _id?: string;
   name: string;
   creator?: string;
   description?: string;
@@ -42,6 +42,6 @@ export interface Strategy {
   apy?: number;
   categories?: StrategyCategory[];
   likes?: number;
-  comments?: number;
+  mirrors?: number;
   shares?: number;
 }

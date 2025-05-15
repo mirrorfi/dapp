@@ -3,8 +3,8 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
 import {
   HeartIcon,
-  ChatBubbleOvalLeftIcon,
   ShareIcon,
+  DocumentDuplicateIcon,
 } from "@heroicons/react/24/outline";
 import { Strategy, getCategoryStyle } from "./types";
 import { tokenLogos } from "@/constants/nodeOptions";
@@ -100,9 +100,9 @@ export const StrategyGridView = ({
                   </span>
                 </div>
                 <div className="flex items-center gap-1 text-white">
-                  <ChatBubbleOvalLeftIcon className="w-5 h-5 stroke-2" />
+                  <DocumentDuplicateIcon className="w-5 h-5 stroke-2" />
                   <span className="text-sm font-medium">
-                    {strategy.comments || 0}
+                    {strategy.mirrors || 0}
                   </span>
                 </div>
                 <div className="flex items-center gap-1 text-white">

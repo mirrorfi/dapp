@@ -4,8 +4,8 @@ import Image from "next/image";
 import { useWallet } from "@solana/wallet-adapter-react";
 import {
   HeartIcon,
-  ChatBubbleOvalLeftIcon,
   ShareIcon,
+  DocumentDuplicateIcon,
 } from "@heroicons/react/24/outline";
 import { Input } from "@/components/ui/input";
 import {
@@ -59,7 +59,7 @@ interface Strategy {
   apy?: number;
   categories?: StrategyCategory[];
   likes?: number;
-  comments?: number;
+  mirrors?: number;
   shares?: number;
 }
 
@@ -535,10 +535,8 @@ const StrategyModal: FC<StrategyModalProps> = ({
             <span className="text-sm font-medium">{localLikes}</span>
           </div>
           <div className="flex items-center gap-1.5 text-white hover:text-secondary transition-colors cursor-pointer">
-            <ChatBubbleOvalLeftIcon className="w-5 h-5 stroke-2" />
-            <span className="text-sm font-medium">
-              {strategy.comments || 0}
-            </span>
+            <DocumentDuplicateIcon className="w-5 h-5 stroke-2" />
+            <span className="text-sm font-medium">{strategy.mirrors || 0}</span>
           </div>
           <div className="flex items-center gap-1.5 text-white hover:text-secondary transition-colors cursor-pointer">
             <ShareIcon className="w-5 h-5 stroke-2" />
