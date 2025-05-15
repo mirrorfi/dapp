@@ -18,14 +18,8 @@ import { PublicKey } from "@solana/web3.js";
 import Image from "next/image";
 import StrategyModal from "@/components/StrategyModal";
 
-export const LSTMintAddresses = [
-  "jupSoLaHXQiZZTSfEWMTRRgpnyFm8f6sZdosWBjx93v",
-  "J1toso1uCk3RLmjorhTtrVwY9HJ7X8V9yYac6Y7kGCPn",
-  "BNso1VUJnh4zcfpZa6986Ea66P6TCp59hvtNJ8b1X85",
-  "mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So",
-  "Bybit2vBJGhPF52GBdNaQfUJ6ZpThSgHBobjWZpLPb4B"]
-
-
+import { LSTMintAddressesList } from "@/constants/nodeOptions";
+const LSTMintAddresses = LSTMintAddressesList;
 
 interface Strategy {
   _id: string;
@@ -145,8 +139,8 @@ export default function Home() {
     } else {
       console.log("Wallet Connected!");
       console.log("Anchor Wallet:", anchorWallet.publicKey?.toString());
-      // setAddress(anchorWallet.publicKey?.toString() || "");
-      setAddress("H1ZpCkCHJR9HxwLQSGYdCDt7pkqJAuZx5FhLHzWHdiEw");
+      setAddress(anchorWallet.publicKey?.toString() || "");
+      //setAddress("H1ZpCkCHJR9HxwLQSGYdCDt7pkqJAuZx5FhLHzWHdiEw");
     }
   }, [anchorWallet]);
 

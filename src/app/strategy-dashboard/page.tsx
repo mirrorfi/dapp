@@ -15,7 +15,11 @@ import { Strategy } from "@/components/strategy-dashboard/types";
 import { allAddresses } from "@/constants/nodeOptions";
 import { getMeteoraPoolAPY } from "@/lib/meteora";
 
-const StrategyDashboardPage = () => {
+type Props = {
+  searchParams: { id?: string }
+}
+
+const StrategyDashboardPage = ({ searchParams }: Props) => {
   const [strategies, setStrategies] = useState<Strategy[]>([]);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [loading, setLoading] = useState(true);
@@ -115,6 +119,16 @@ const StrategyDashboardPage = () => {
         );
         console.log("Fuck is this??", dataWithCategories);
         setStrategies(dataWithCategories);
+        const id = searchParams.id;
+        if(id){
+          dataWithCategories.forEach((strategy:Strategy)=>{
+            if(strategy._id.toString() === id){
+              console.log("Matching Strategy Found")
+              setSelectedStrategy(strategy)
+              setModalOpen(true)
+            }
+          })
+        }
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "Failed to load strategies"
