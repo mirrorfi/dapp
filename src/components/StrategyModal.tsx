@@ -4,8 +4,8 @@ import Image from "next/image";
 import { useWallet } from "@solana/wallet-adapter-react";
 import {
   HeartIcon,
-  ChatBubbleOvalLeftIcon,
   ShareIcon,
+  DocumentDuplicateIcon,
 } from "@heroicons/react/24/outline";
 import { Input } from "@/components/ui/input";
 import {
@@ -59,7 +59,7 @@ interface Strategy {
   apy?: number;
   categories?: StrategyCategory[];
   likes?: number;
-  comments?: number;
+  mirrors?: number;
   shares?: number;
 }
 
@@ -368,10 +368,6 @@ const StrategyModal: FC<StrategyModalProps> = ({
     executeStrategy();
   };
 
-  const handleExit = () => {
-    onClose();
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-6xl border-0 border-none bg-background/65 backdrop-blur-md">
@@ -395,14 +391,14 @@ const StrategyModal: FC<StrategyModalProps> = ({
           <div className="flex flex-col justify-between -mt-4">
             <div>
               <h3 className="text-xl font-bold mb-1">{strategy.name}</h3>
-              <p className="text-muted-foreground mb-2">
+              <p className="text-muted-foreground mb-3">
                 APY:{" "}
                 <span className="text-emerald-400">
                   {strategy.apy ? `${strategy.apy.toFixed(2)}%` : "0%"}
                 </span>{" "}
               </p>
               {strategy.description && (
-                <p className="text-sm text-gray-400 mb-2">
+                <p className="text-sm text-gray-400 mb-3">
                   {strategy.description}
                 </p>
               )}
@@ -504,13 +500,6 @@ const StrategyModal: FC<StrategyModalProps> = ({
               >
                 Confirm Mirror
               </Button>
-              <Button
-                onClick={handleExit}
-                variant="ghost"
-                className="w-full cursor-pointer"
-              >
-                Exit Strategy
-              </Button>
             </div>
           </div>
         </div>
@@ -535,10 +524,8 @@ const StrategyModal: FC<StrategyModalProps> = ({
             <span className="text-sm font-medium">{localLikes}</span>
           </div>
           <div className="flex items-center gap-1.5 text-white hover:text-secondary transition-colors cursor-pointer">
-            <ChatBubbleOvalLeftIcon className="w-5 h-5 stroke-2" />
-            <span className="text-sm font-medium">
-              {strategy.comments || 0}
-            </span>
+            <DocumentDuplicateIcon className="w-5 h-5 stroke-2" />
+            <span className="text-sm font-medium">{strategy.mirrors || 0}</span>
           </div>
           <div className="flex items-center gap-1.5 text-white hover:text-secondary transition-colors cursor-pointer">
             <ShareIcon className="w-5 h-5 stroke-2" />
