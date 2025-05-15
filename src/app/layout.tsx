@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { Navbar } from "@/components/navbar";
 import localFont from "next/font/local";
 import { AgentProvider } from "@/lib/AgentProvider";
+import { Analytics } from "@vercel/analytics/next"
 
 const satoshi = localFont({
   src: "../../public/fonts/Satoshi-Bold.otf",
@@ -49,6 +50,7 @@ export default function RootLayout({
             >
               <TooltipProvider>
                 {children}
+                <Analytics />
                 <Toaster richColors />
               </TooltipProvider>
             </ThemeProvider>
