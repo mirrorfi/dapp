@@ -16,8 +16,8 @@ export const TermsOfService: FC<TermsOfServiceProps> = ({ onSign }) => {
 1. I understand that using this platform involves financial risks
 2. I am responsible for securing my wallet and private keys
 3. I accept that transactions cannot be reversed
-4. I will not use this platform for any illegal activities
-5. I understand that the platform is not responsible for any losses`;
+4. I understand that the platform is not responsible for any losses
+5. I accept that the platform is not liable for any damages or losses incurred`;
 
   const handleSignMessage = async () => {
     if (!wallet || !connected || !publicKey || !signMessage) {

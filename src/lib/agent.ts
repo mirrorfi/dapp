@@ -41,7 +41,7 @@ export async function createSolanaAgent(publicKeyString: string) {
             return tx
         },
       },
-      process.env.NEXT_PUBLIC_RPC_URL,
+      process.env.NEXT_PUBLIC_RPC_LINK,
       {}
     )
       .use(TokenPlugin)
