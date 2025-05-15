@@ -121,9 +121,13 @@ const StrategyDashboardPage = ({ searchParams }: Props) => {
         setStrategies(dataWithCategories);
         const id = searchParams.id;
         if(id){
-          console.log("Opening Strategy with ID:", id);
-          setSelectedStrategy(dataWithCategories[0])
-          setModalOpen(true)
+          dataWithCategories.forEach((strategy:Strategy)=>{
+            if(strategy._id.toString() === id){
+              console.log("Matching Strategy Found")
+              setSelectedStrategy(strategy)
+              setModalOpen(true)
+            }
+          })
         }
       } catch (err) {
         setError(
