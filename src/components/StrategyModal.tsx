@@ -2,6 +2,11 @@ import { useState, useEffect } from "react";
 import type { FC } from "react";
 import Image from "next/image";
 import { useWallet } from "@solana/wallet-adapter-react";
+import {
+  HeartIcon,
+  ChatBubbleOvalLeftIcon,
+  ShareIcon,
+} from "@heroicons/react/24/outline";
 import { Input } from "@/components/ui/input";
 import {
   Dialog,
@@ -53,6 +58,9 @@ interface Strategy {
   edges: Edge[];
   apy?: number;
   categories?: StrategyCategory[];
+  likes?: number;
+  comments?: number;
+  shares?: number;
 }
 
 interface StrategyModalProps {
@@ -67,6 +75,8 @@ const StrategyModal: FC<StrategyModalProps> = ({
   onClose,
 }) => {
   const { publicKey, signTransaction } = useWallet();
+  const [isLiked, setIsLiked] = useState(false);
+  const [localLikes, setLocalLikes] = useState(strategy.likes || 0);
   const { agent } = useAgent();
   const [loading, setLoading] = useState(false);
   const [tokenBalances, setTokenBalances] = useState<TokenBalances>({
@@ -364,7 +374,7 @@ const StrategyModal: FC<StrategyModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-6xl border-0 border-none">
+      <DialogContent className="sm:max-w-6xl border-0 border-none bg-background/65 backdrop-blur-md">
         <DialogHeader className="-mt-8 w-fit">
           <DialogTitle className="text-2xl font-bold">
             Mirror Strategy
@@ -502,6 +512,37 @@ const StrategyModal: FC<StrategyModalProps> = ({
                 Exit Strategy
               </Button>
             </div>
+          </div>
+        </div>
+
+        {/* Social interaction features */}
+        <div className="absolute bottom-6 left-6 flex items-center gap-6">
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsLiked(!isLiked);
+              setLocalLikes((prev) => (isLiked ? prev - 1 : prev + 1));
+            }}
+            className={`flex items-center gap-1.5 ${
+              isLiked
+                ? "text-secondary hover:text-secondary/80"
+                : "text-white hover:text-secondary/80"
+            } transition-colors cursor-pointer`}
+          >
+            <HeartIcon
+              className={`w-5 h-5 ${isLiked ? "fill-current" : ""} stroke-2`}
+            />
+            <span className="text-sm font-medium">{localLikes}</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-white hover:text-secondary transition-colors cursor-pointer">
+            <ChatBubbleOvalLeftIcon className="w-5 h-5 stroke-2" />
+            <span className="text-sm font-medium">
+              {strategy.comments || 0}
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5 text-white hover:text-secondary transition-colors cursor-pointer">
+            <ShareIcon className="w-5 h-5 stroke-2" />
+            <span className="text-sm font-medium">{strategy.shares || 0}</span>
           </div>
         </div>
       </DialogContent>

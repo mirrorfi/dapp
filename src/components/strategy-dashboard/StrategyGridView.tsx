@@ -1,6 +1,11 @@
 import SimplifiedFlow from "@/components/simplified-flow";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
+import {
+  HeartIcon,
+  ChatBubbleOvalLeftIcon,
+  ShareIcon,
+} from "@heroicons/react/24/outline";
 import { Strategy, getCategoryStyle } from "./types";
 import { tokenLogos } from "@/constants/nodeOptions";
 
@@ -38,9 +43,9 @@ export const StrategyGridView = ({
               {/* Right edge darken */}
               <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-black/15 via-black/5 to-transparent z-10" />
               {/* Bottom edge darken */}
-              <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-black/15 via-black/5 to-transparent z-10" />
+              <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-black/70 via-black/40 to-black/5 z-10" />
               {/* Top info section with gradient */}
-              <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/25 to-transparent h-32 z-10">
+              <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-black/5 h-48 z-10">
                 <CardHeader className="flex flex-col mt-3 px-5">
                   <div className="flex items-center justify-between w-full">
                     <CardTitle className="text-lg font-bold text-white">
@@ -86,6 +91,27 @@ export const StrategyGridView = ({
             </div>
             <div className="absolute inset-x-0 top-[60px] bottom-0">
               <SimplifiedFlow nodes={strategy.nodes} edges={strategy.edges} />
+              {/* Interaction features */}
+              <div className="absolute bottom-3 left-4 flex items-center gap-3 z-20">
+                <div className="flex items-center gap-1 text-white">
+                  <HeartIcon className="w-5 h-5 stroke-2" />
+                  <span className="text-sm font-medium">
+                    {strategy.likes || 0}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 text-white">
+                  <ChatBubbleOvalLeftIcon className="w-5 h-5 stroke-2" />
+                  <span className="text-sm font-medium">
+                    {strategy.comments || 0}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 text-white">
+                  <ShareIcon className="w-5 h-5 stroke-2" />
+                  <span className="text-sm font-medium">
+                    {strategy.shares || 0}
+                  </span>
+                </div>
+              </div>
             </div>
           </Card>
         ))}

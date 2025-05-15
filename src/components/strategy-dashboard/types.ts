@@ -34,11 +34,14 @@ export interface Edge {
 
 export interface Strategy {
   _id: string;
+  name: string;
+  creator?: string;
+  description?: string;
   nodes: Node[];
   edges: Edge[];
-  name: string;
-  user: string;
-  __v: number;
-  categories?: StrategyCategory[];
   apy?: number;
+  categories?: StrategyCategory[];
+  likes?: number;
+  comments?: number;
+  shares?: number;
 }
