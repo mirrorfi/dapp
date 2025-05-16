@@ -31,6 +31,7 @@ import {
   tokenMintAddresses,
 } from "@/constants/nodeOptions";
 import { useAgent } from "@/lib/AgentProvider";
+import { shareToTwitter, createStrategyShareConfig } from "@/lib/shareUtils";
 
 interface TokenAccountData {
   isNative: boolean;
@@ -516,19 +517,12 @@ const StrategyModal: FC<StrategyModalProps> = ({
           </div>
           <div
             onClick={() => {
-              const tweetText = encodeURIComponent(
-                `I've just discovered an amazing strategy on MirrorFi "${
-                  strategy.name
-                }" with ${strategy.apy?.toFixed(
-                  2
-                )}% APY! #JustMirrorIt\n\nCheck out this strategy at https://app.mirrorfi.xyz/strategy-dashboard/${
-                  strategy._id
-                }`
+              const shareConfig = createStrategyShareConfig(
+                strategy.name,
+                strategy._id,
+                strategy.apy || 0
               );
-              window.open(
-                `https://x.com/intent/post?text=${tweetText}`,
-                "_blank"
-              );
+              shareToTwitter(shareConfig);
             }}
             className="flex items-center gap-1.5 text-white hover:text-secondary transition-colors cursor-pointer"
           >

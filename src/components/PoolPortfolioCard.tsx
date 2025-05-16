@@ -4,8 +4,6 @@ import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import { useEffect, useState } from "react";
 import CryptoPoolModal from "./PoolModal";
-import { getAllUserPositions } from "@/lib/meteora";
-import { PublicKey } from "@solana/web3.js";
 import { TrendingDown, TrendingUp } from "lucide-react";
 
 interface positionData {
@@ -58,21 +56,20 @@ export function PoolPortfolioCard({ positionInfo }: PoolPortfolioCardProps) {
   const [totalProfit, setTotalProfit] = useState(0);
 
   const calculateTotalLockedValue = () => {
-      setTotalLockedValue(
-        (positionInfo?.positionXUSD ?? 0) +
+    setTotalLockedValue(
+      (positionInfo?.positionXUSD ?? 0) +
         (positionInfo?.positionYUSD ?? 0) +
         (positionInfo?.profitXUSD ?? 0) +
         (positionInfo?.profitYUSD ?? 0)
-      )
-      setTotalProfit(
-        (positionInfo?.profitXUSD ?? 0) +
-        (positionInfo?.profitYUSD ?? 0)
-      )
-    }
+    );
+    setTotalProfit(
+      (positionInfo?.profitXUSD ?? 0) + (positionInfo?.profitYUSD ?? 0)
+    );
+  };
 
   useEffect(() => {
-    calculateTotalLockedValue()
-  }, [])
+    calculateTotalLockedValue();
+  }, []);
 
   return (
     <>
@@ -113,45 +110,43 @@ export function PoolPortfolioCard({ positionInfo }: PoolPortfolioCardProps) {
                   />
                 )}
               </div>
-            <h3 className="font-bold text-lg text-white tracking-wide flex">
-              {positionInfo?.pairName}
-            </h3>
+              <h3 className="font-bold text-lg text-white tracking-wide flex">
+                {positionInfo?.pairName}
+              </h3>
             </div>
 
-
-          <div className="w-fit h-[20%] p-2 bg-transparent text-green-500 text-lg flex">
+            <div className="w-fit h-[20%] p-2 bg-transparent text-green-500 text-lg flex">
               {positionInfo?.apy.toFixed(2)}% APY
             </div>
 
-        <div className="ml-auto text-right">
-          <p className="font-semibold text-lg text-white tracking-wide font">
-            ${totalLockedValue.toFixed(2)}
-          </p>
+            <div className="ml-auto text-right">
+              <p className="font-semibold text-lg text-white tracking-wide font">
+                ${totalLockedValue.toFixed(2)}
+              </p>
 
-          <div className="flex items-center justify-end">
-            {totalProfit > 0 ? (
-              <TrendingUp className="h-3.5 w-3.5 mr-1 text-green-500" />
-            ) : (
-              <TrendingDown className="h-3.5 w-3.5 mr-1 text-red-500" />
-            )}
-            <p
-              className={`text-sm ${
-          totalProfit > 0
-            ? "text-green-500"
-            : "text-red-500"
-              }`}
-            >
-              {totalProfit > 0 ? "+" : "-"}${totalProfit.toFixed(2)}
-            </p>
-          </div>
-        </div>
-
+              <div className="flex items-center justify-end">
+                {totalProfit > 0 ? (
+                  <TrendingUp className="h-3.5 w-3.5 mr-1 text-green-500" />
+                ) : (
+                  <TrendingDown className="h-3.5 w-3.5 mr-1 text-red-500" />
+                )}
+                <p
+                  className={`text-sm ${
+                    totalProfit > 0 ? "text-green-500" : "text-red-500"
+                  }`}
+                >
+                  {totalProfit > 0 ? "+" : "-"}${totalProfit.toFixed(2)}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </Card>
       {/* Render modal outside the Card to prevent event bubbling */}
       {positionInfo && (
-        <CryptoPoolModal open={openModal} setOpen={setOpenModal}
+        <CryptoPoolModal
+          open={openModal}
+          setOpen={setOpenModal}
           positionInfo={{
             apy: positionInfo.apy,
             apr: positionInfo.apr,
