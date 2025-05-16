@@ -23,10 +23,10 @@ export default function Home({ searchParams }: Props) {
         return;
       }
 
-      const storedSignatures = localStorage.getItem("termsSignatures") || "{}";
-      const signatures = JSON.parse(storedSignatures);
-      setHasSignedTerms(!!signatures[publicKey.toBase58()]);
-      //   setHasSignedTerms(false);
+      // const storedSignatures = localStorage.getItem("termsSignatures") || "{}";
+      // const signatures = JSON.parse(storedSignatures);
+      // setHasSignedTerms(!!signatures[publicKey.toBase58()]);
+      setHasSignedTerms(false);
       setChecking(false);
     };
 

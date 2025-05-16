@@ -136,8 +136,8 @@ export default function Home() {
     } else {
       console.log("Wallet Connected!");
       console.log("Anchor Wallet:", anchorWallet.publicKey?.toString());
-      //   setAddress(anchorWallet.publicKey?.toString() || "");
-      setAddress("H1ZpCkCHJR9HxwLQSGYdCDt7pkqJAuZx5FhLHzWHdiEw");
+      setAddress(anchorWallet.publicKey?.toString() || "");
+      // setAddress("H1ZpCkCHJR9HxwLQSGYdCDt7pkqJAuZx5FhLHzWHdiEw");
     }
   }, [anchorWallet]);
 
