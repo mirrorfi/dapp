@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Moralis from "moralis";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { APYVals } from "@/lib/plugin/sanctum/tools/apyVals";
@@ -30,6 +31,13 @@ const StrategyDashboardPage = ({ searchParams }: Props) => {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [apyValues, setApyValues] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    // Initialize Moralis
+    Moralis.start({
+      apiKey: process.env.NEXT_PUBLIC_MORALIS_API_KEY,
+    });
+  }, []);
 
   // Fetch APY values
   useEffect(() => {
