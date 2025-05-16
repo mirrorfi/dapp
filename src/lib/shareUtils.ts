@@ -4,7 +4,7 @@ interface ShareConfig {
 }
 
 export const shareToTwitter = ({ text, url }: ShareConfig) => {
-  const tweetText = encodeURIComponent(`${text}\n\n${url}`);
+  const tweetText = encodeURIComponent(`${text}\nCheck it out at:${url}`);
   window.open(`https://x.com/intent/post?text=${tweetText}`, "_blank");
 };
 
@@ -19,3 +19,12 @@ export const createShareConfig = (
   )}% APY! #JustMirrorIt`,
   url: `http://app.mirrorfi.xyz/strategy-dashboard?id=${id}`,
 });
+
+export const shareAPYConfig = (
+  name: string,
+  profit: string,
+  apy:string,
+):any =>({
+  text: `I've just earned $${profit} from ${name} strategy with ${apy}% APY! #JustMirrorIt`,
+  url: `http://app.mirrorfi.xyz`,
+})
