@@ -16,12 +16,12 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import InteractiveFlow from "@/components/interactive-flow";
-import type { Node, Edge } from "reactflow";
+import type { Node } from "reactflow";
 import { useToast } from "@/components/ui/use-toast";
 import { generateTree, executeTree } from "@/lib/txnUtils/treeUtils";
 import Moralis from "moralis";
 import {
-  StrategyCategory,
+  Strategy,
   getCategoryStyle,
 } from "@/components/strategy-dashboard/types";
 import {
@@ -48,19 +48,6 @@ interface TokenAccountData {
 interface TokenBalances {
   tokens: TokenAccountData[];
   sol: number;
-}
-
-interface Strategy {
-  name: string;
-  creator?: string;
-  description?: string;
-  nodes: Node[];
-  edges: Edge[];
-  apy?: number;
-  categories?: StrategyCategory[];
-  likes?: number;
-  mirrors?: number;
-  shares?: number;
 }
 
 interface StrategyModalProps {
@@ -112,15 +99,15 @@ const StrategyModal: FC<StrategyModalProps> = ({
           return {
             id: targetNode.id,
             label: targetNode.data.label,
-            nodeType: targetNode.data.nodeType,
+            nodeType: (targetNode.data.nodeType || "token") as
+              | "token"
+              | "lst"
+              | "protocol",
           };
         }
         return null;
       })
-      .filter(
-        (node): node is { id: string; label: string; nodeType: string } =>
-          node !== null
-      );
+      .filter((node): node is NonNullable<typeof node> => node !== null);
     return requiredTokenNodes;
   };
 
@@ -527,7 +514,24 @@ const StrategyModal: FC<StrategyModalProps> = ({
             <DocumentDuplicateIcon className="w-5 h-5 stroke-2" />
             <span className="text-sm font-medium">{strategy.mirrors || 0}</span>
           </div>
-          <div className="flex items-center gap-1.5 text-white hover:text-secondary transition-colors cursor-pointer">
+          <div
+            onClick={() => {
+              const tweetText = encodeURIComponent(
+                `I've just discovered an amazing strategy on MirrorFi "${
+                  strategy.name
+                }" with ${strategy.apy?.toFixed(
+                  2
+                )}% APY! #JustMirrorIt\n\nCheck out this strategy at https://app.mirrorfi.xyz/strategy-dashboard/${
+                  strategy._id
+                }`
+              );
+              window.open(
+                `https://x.com/intent/post?text=${tweetText}`,
+                "_blank"
+              );
+            }}
+            className="flex items-center gap-1.5 text-white hover:text-secondary transition-colors cursor-pointer"
+          >
             <ShareIcon className="w-5 h-5 stroke-2" />
             <span className="text-sm font-medium">{strategy.shares || 0}</span>
           </div>
