@@ -60,9 +60,9 @@ export default function CryptoPoolModal({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent
         onClick={handleDialogContentClick}
-        className="sm:max-w-[550px] md:max-w-[650px] bg-gray-900 border-gray-800 text-gray-100 p-0 overflow-hidden"
+        className="sm:max-w-[550px] md:max-w-[650px] bg-gray-900 border-gray-800 text-gray-100 p-6 overflow-hidden"
       >
-        <div className="p-6 space-y-6 w-full">
+        <div className="space-y-6 w-full">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
               <h2 className="text-2xl font-bold tracking-tight text-white">
