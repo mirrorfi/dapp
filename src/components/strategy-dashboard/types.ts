@@ -33,7 +33,7 @@ export interface Edge {
 }
 
 export interface Strategy {
-  _id?: string;
+  _id: string;
   name: string;
   creator?: string;
   description?: string;

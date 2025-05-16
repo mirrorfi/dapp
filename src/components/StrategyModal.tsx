@@ -47,7 +47,7 @@ interface TokenAccountData {
 
 interface TokenBalances {
   tokens: TokenAccountData[];
-  sol: number; // TODO: Handle SOL balance separately if needed
+  sol: number;
 }
 
 interface Strategy {

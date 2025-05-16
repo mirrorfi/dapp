@@ -6,7 +6,6 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { APYVals } from "@/lib/plugin/sanctum/tools/apyVals";
 import StrategyModal from "@/components/StrategyModal";
-import Moralis from "moralis";
 import { StrategyDashboardHeader } from "@/components/strategy-dashboard/StrategyDashboardHeader";
 import { StrategyGridView } from "@/components/strategy-dashboard/StrategyGridView";
 import { StrategyListView } from "@/components/strategy-dashboard/StrategyListView";
@@ -16,8 +15,8 @@ import { allAddresses } from "@/constants/nodeOptions";
 import { getMeteoraPoolAPY } from "@/lib/meteora";
 
 type Props = {
-  searchParams: { id?: string }
-}
+  searchParams: { id?: string };
+};
 
 const StrategyDashboardPage = ({ searchParams }: Props) => {
   const [strategies, setStrategies] = useState<Strategy[]>([]);
@@ -46,13 +45,6 @@ const StrategyDashboardPage = ({ searchParams }: Props) => {
   }, []);
 
   // Fetch strategies and calculate total APY
-  useEffect(() => {
-    // Initialize Moralis
-    Moralis.start({
-      apiKey: process.env.NEXT_PUBLIC_MORALIS_API_KEY,
-    });
-  }, []);
-
   useEffect(() => {
     const fetchStrategies = async () => {
       try {
@@ -109,7 +101,6 @@ const StrategyDashboardPage = ({ searchParams }: Props) => {
                   return sum + nodeAPY;
                 }, 0) + meteoraAPYs.reduce((sum, apy) => sum + apy, 0);
 
-            console.log("Total APY:", totalAPY);
             return {
               ...strategy,
               categories: strategy.categories || ["LST"],
@@ -117,17 +108,16 @@ const StrategyDashboardPage = ({ searchParams }: Props) => {
             };
           })
         );
-        console.log("Fuck is this??", dataWithCategories);
+
         setStrategies(dataWithCategories);
         const id = searchParams.id;
-        if(id){
-          dataWithCategories.forEach((strategy:Strategy)=>{
-            if(strategy._id.toString() === id){
-              console.log("Matching Strategy Found")
-              setSelectedStrategy(strategy)
-              setModalOpen(true)
+        if (id) {
+          dataWithCategories.forEach((strategy: Strategy) => {
+            if (strategy._id.toString() === id) {
+              setSelectedStrategy(strategy);
+              setModalOpen(true);
             }
-          })
+          });
         }
       } catch (err) {
         setError(
