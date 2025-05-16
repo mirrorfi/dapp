@@ -9,24 +9,13 @@ export const shareToTwitter = ({ text, url }: ShareConfig) => {
 };
 
 // Predefined share configurations
-export const createStrategyShareConfig = (
-  strategyName: string,
-  strategyId: string,
+export const createShareConfig = (
+  id: string,
+  name: string,
   apy: number
 ): ShareConfig => ({
-  text: `I've just discovered an amazing strategy on MirrorFi "${strategyName}" with ${apy.toFixed(
+  text: `I've just discovered an amazing strategy on MirrorFi "${name}" with ${apy.toFixed(
     2
   )}% APY! #JustMirrorIt`,
-  url: `https://app.mirrorfi.xyz/strategy-dashboard/${strategyId}`,
-});
-
-export const createPoolShareConfig = (
-  pairAddress: string,
-  yieldUSD: number,
-  apy: number
-): ShareConfig => ({
-  text: `I've just earned $${yieldUSD.toFixed(
-    2
-  )} yield from ${pairAddress} pool with ${apy.toFixed(2)}% APY! #JustMirrorIt`,
-  url: `https://www.meteora.ag/dlmm/${pairAddress}`,
+  url: `http://app.mirrorfi.xyz/strategy-dashboard?id=${id}`,
 });

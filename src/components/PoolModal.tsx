@@ -6,7 +6,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChevronRight, Share } from "lucide-react";
-import { shareToTwitter, createPoolShareConfig } from "@/lib/shareUtils";
+import { shareToTwitter, createShareConfig } from "@/lib/shareUtils";
 
 interface positionData {
   apy: number;
@@ -298,11 +298,9 @@ export default function CryptoPoolModal({
             <Button
               className="bg-blue-600 hover:bg-blue-700 text-white"
               onClick={() => {
-                const totalYieldUSD =
-                  positionInfo.profitXUSD + positionInfo.profitYUSD;
-                const shareConfig = createPoolShareConfig(
-                  positionInfo.pairName,
-                  totalYieldUSD,
+                const shareConfig = createShareConfig(
+                  positionInfo.pairAddress,
+                  `${positionInfo.pairName} Pool (${positionInfo.tokenXSymbol}-${positionInfo.tokenYSymbol})`,
                   positionInfo.apy
                 );
                 shareToTwitter(shareConfig);

@@ -31,7 +31,7 @@ import {
   tokenMintAddresses,
 } from "@/constants/nodeOptions";
 import { useAgent } from "@/lib/AgentProvider";
-import { shareToTwitter, createStrategyShareConfig } from "@/lib/shareUtils";
+import { shareToTwitter, createShareConfig } from "@/lib/shareUtils";
 
 interface TokenAccountData {
   isNative: boolean;
@@ -517,9 +517,9 @@ const StrategyModal: FC<StrategyModalProps> = ({
           </div>
           <div
             onClick={() => {
-              const shareConfig = createStrategyShareConfig(
-                strategy.name,
+              const shareConfig = createShareConfig(
                 strategy._id,
+                strategy.name,
                 strategy.apy || 0
               );
               shareToTwitter(shareConfig);
